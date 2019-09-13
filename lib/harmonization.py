@@ -263,7 +263,7 @@ class pipeline(cli.Application):
 
     def harmonizeData(self):
 
-        from cleanOutliers import reconst
+        from reconstSignal import reconst
         from preprocess import read_caselist, dti_harm
 
         # check the templatePath

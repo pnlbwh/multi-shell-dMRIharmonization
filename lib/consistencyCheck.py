@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+# ===============================================================================
+# dMRIharmonization (2018) pipeline is written by-
+#
+# TASHRIF BILLAH
+# Brigham and Women's Hospital/Harvard Medical School
+# tbillah@bwh.harvard.edu, tashrifbillah@gmail.com
+#
+# ===============================================================================
+# See details at https://github.com/pnlbwh/dMRIharmonization
+# Submit issues at https://github.com/pnlbwh/dMRIharmonization/issues
+# View LICENSE at https://github.com/pnlbwh/dMRIharmonization/blob/master/LICENSE
+# ===============================================================================
+
 from conversion import read_bvals, write_bvals, read_imgs
 import numpy as np
 from plumbum import cli, local

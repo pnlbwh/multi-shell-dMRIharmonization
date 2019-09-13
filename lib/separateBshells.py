@@ -1,14 +1,33 @@
 #!/usr/bin/env python
 
-from dMRIharmonization.lib.normalize import find_b0
+# ===============================================================================
+# dMRIharmonization (2018) pipeline is written by-
+#
+# TASHRIF BILLAH
+# Brigham and Women's Hospital/Harvard Medical School
+# tbillah@bwh.harvard.edu, tashrifbillah@gmail.com
+#
+# ===============================================================================
+# See details at https://github.com/pnlbwh/dMRIharmonization
+# Submit issues at https://github.com/pnlbwh/dMRIharmonization/issues
+# View LICENSE at https://github.com/pnlbwh/dMRIharmonization/blob/master/LICENSE
+# ===============================================================================
+
+from normalize import find_b0
 from plumbum import cli, local
-from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs
+from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs, read_imgs_masks
 from nibabel import load
 from util import abspath, pjoin, save_nifti, RAISE
 import numpy as np
 from multiprocessing import Pool
+from findBshells import BSHELL_MIN_DIST
 
-def divideShells(imgPath, ref_bvals):
+def divideShells(imgPath, ref_bvals_file=None, ref_bvals=None):
+
+    if ref_bvals_file:
+        print('Reading reference b-shell file ...')
+        ref_bvals= read_bvals(ref_bvals_file)
+
 
     print('Separating b-shells for', imgPath)
         
@@ -23,7 +42,8 @@ def divideShells(imgPath, ref_bvals):
 
     for bval in ref_bvals:
 
-        ind= np.where(bval==bvals)[0]
+        # ind= np.where(bval==bvals)[0]
+        ind= np.where(abs(bval-bvals)<=BSHELL_MIN_DIST)[0]
         N_b= len(ind)
 
         bPrefix = inPrefix + f'_b{int(bval)}'
@@ -51,14 +71,10 @@ def divideShells(imgPath, ref_bvals):
 class separateShells(cli.Application):
 
     ref_csv = cli.SwitchAttr(
-        ['--ref_list'],
+        ['--img_list'],
         cli.ExistingFile,
-        help='reference csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...')
-
-    tar_csv = cli.SwitchAttr(
-        ['--tar_list'],
-        cli.ExistingFile,
-        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...')
+        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...'
+             'or just one column for dwi1\n/dwi2\n...')
 
     ref_bvals_file = cli.SwitchAttr(
         ['--ref_bshell_file'],
@@ -74,18 +90,22 @@ class separateShells(cli.Application):
 
         ref_bvals= read_bvals(self.ref_bvals_file)
         if self.ref_csv:
-            imgs= read_imgs(self.ref_csv)
+
+            try:
+                imgs,_=read_imgs_masks(self.ref_csv)
+            except:
+                imgs= read_imgs(self.ref_csv)
 
             pool= Pool(int(self.ncpu))
             for imgPath in imgs:
-                pool.apply_async(divideShells, (imgPath, ref_bvals), error_callback=RAISE)
+                pool.apply_async(divideShells, kwds={'imgPath':imgPath, 'ref_bvals':ref_bvals}, error_callback=RAISE)
 
             pool.close()
             pool.join()
 
             # loop for debugging
             # for imgPath in imgs:
-            #     divideShells(imgPath, ref_bvals)
+            #     divideShells(imgPath, ref_bvals=ref_bvals)
 
 if __name__== '__main__':
     separateShells.run()

@@ -1,14 +1,31 @@
 #!/usr/bin/env python
 
+# ===============================================================================
+# dMRIharmonization (2018) pipeline is written by-
+#
+# TASHRIF BILLAH
+# Brigham and Women's Hospital/Harvard Medical School
+# tbillah@bwh.harvard.edu, tashrifbillah@gmail.com
+#
+# ===============================================================================
+# See details at https://github.com/pnlbwh/dMRIharmonization
+# Submit issues at https://github.com/pnlbwh/dMRIharmonization/issues
+# View LICENSE at https://github.com/pnlbwh/dMRIharmonization/blob/master/LICENSE
+# ===============================================================================
+
 from plumbum import cli, local
-from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs
+from conversion import read_bvals, read_imgs, read_imgs_masks
 from nibabel import load
 from util import abspath, pjoin, save_nifti, copyfile, RAISE, basename, dirname, isfile
 import numpy as np
 from multiprocessing import Pool
+from findBshells import BSHELL_MIN_DIST
 
+def joinShells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
 
-def joinShells(imgPath, ref_bvals, sep_prefix):
+    if ref_bvals_file:
+        print('Reading reference b-shell file ...')
+        ref_bvals= read_bvals(ref_bvals_file)
 
     print('Joining b-shells for', imgPath)
 
@@ -40,7 +57,8 @@ def joinShells(imgPath, ref_bvals, sep_prefix):
 
     for bval in ref_bvals:
 
-        ind= np.where(bval==bvals)[0]
+        # ind= np.where(bval==bvals)[0]
+        ind= np.where(abs(bval-bvals)<=BSHELL_MIN_DIST)[0]
 
         if bval==0.:
             b0Img = load(inPrefix+'_b0.nii.gz')
@@ -62,9 +80,10 @@ class joinDividedShells(cli.Application):
 
 
     tar_csv = cli.SwitchAttr(
-        ['--tar_list'],
+        ['--img_list'],
         cli.ExistingFile,
-        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...')
+        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...'
+             'or just one column for dwi1\n/dwi2\n...')
 
     ref_bvals_file = cli.SwitchAttr(
         ['--ref_bshell_file'],
@@ -86,18 +105,23 @@ class joinDividedShells(cli.Application):
 
         ref_bvals= read_bvals(self.ref_bvals_file)
         if self.tar_csv:
-            imgs = read_imgs(self.tar_csv)
+
+            try:
+                imgs,_=read_imgs_masks(self.tar_csv)
+            except:
+                imgs= read_imgs(self.tar_csv)
 
             pool = Pool(int(self.ncpu))
             for imgPath in imgs:
-                pool.apply_async(joinShells, (imgPath, ref_bvals, self.separatedPrefix), error_callback=RAISE)
+                pool.apply_async(joinShells, kwds=({'imgPath':imgPath, 'ref_bvals':ref_bvals, 'sep_prefix':self.separatedPrefix}),
+                                 error_callback=RAISE)
 
             pool.close()
             pool.join()
 
             # loop for debugging
             # for imgPath in imgs:
-            #     joinShells(imgPath, ref_bvals, self.separatedPrefix)
+            #     joinShells(imgPath, ref_bvals=ref_bvals, self.separatedPrefix)
 
 
 if __name__== '__main__':
