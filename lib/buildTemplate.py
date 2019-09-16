@@ -18,6 +18,7 @@ from glob import glob
 from scipy.ndimage import binary_opening, generate_binary_structure
 from scipy.ndimage.filters import gaussian_filter
 from util import *
+import sys
 
 eps= 2.2204e-16
 SCRIPTDIR= dirname(__file__)
@@ -28,6 +29,7 @@ N_proc = int(config['DEFAULT']['N_proc'])
 bshell_b = int(config['DEFAULT']['bshell_b'])
 diffusionMeasures= [x for x in config['DEFAULT']['diffusionMeasures'].split(',')]
 travelHeads= bool(config['DEFAULT']['travelHeads'])
+verbose = int(config['DEFAULT']['verbose'])
 
 def applyXform(inImg, refImg, warp, trans, outImg):
 
@@ -52,7 +54,7 @@ def warp_bands(imgPath, maskPath, templatePath):
     applyXform(maskPath,
                pjoin(templatePath, 'template0.nii.gz'),
                warp, trans,
-               maskPath.split('.')[0]+ 'Warped.nii.gz')
+               pjoin(templatePath, abspath(maskPath).split('.')[0] + 'Warped.nii.gz'))
 
 
     # warping the rish features
@@ -85,6 +87,14 @@ def createAntsCaselist(imgs, file):
 
 def antsMult(caselist, outPrefix):
 
+    if verbose:
+        f= sys.stdout
+    else:
+        logFile= pjoin(dirname(outPrefix)+ 'template_construct.log')
+        f= open(logFile, 'w')
+        print(f'See {logFile} for details of template construction')
+
+
     check_call((' ').join([pjoin(SCRIPTDIR, 'antsMultivariateTemplateConstruction2_fixed_random_seed.sh'),
                            '-d', '3',
                            '-g', '0.2',
@@ -95,8 +105,10 @@ def antsMult(caselist, outPrefix):
                            '-j', str(N_proc),
                            '-f', '8x4x2x1',
                            '-o', outPrefix,
-                           caselist]), shell= True)
+                           caselist]), shell= True, stdout= f, stderr= sys.stdout)
 
+    if f.name!='<sys.stdout>':
+        f.close()
 
 def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
 
@@ -106,7 +118,7 @@ def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
     if not isfile(morphed_mask_name):
         maskData = []
         for maskPath in masks:
-            maskData.append(load_nifti(maskPath.split('.')[0]+ 'Warped.nii.gz')[0])
+            maskData.append(load_nifti(pjoin(templatePath, abspath(maskPath).split('.')[0] + 'Warped.nii.gz'))[0])
 
         morphed_mask= binary_opening(np.mean(maskData, axis= 0)>0.5, structure= generate_binary_structure(3,1))*1
         save_nifti(morphed_mask_name, morphed_mask.astype('uint8'), templateAffine, templateHdr)
