@@ -17,7 +17,7 @@ from conversion import read_bvals, write_bvals
 import numpy as np
 from os.path import abspath
 
-BO_THRESH= 50.
+B0_THRESH= 50.
 BSHELL_MIN_DIST= 100.
 
 def usage():
@@ -26,7 +26,7 @@ Usage:
 findBShells /path/to/input/bval/file /output/file/to/write/bshells
 ''')
 
-def findBShells(bvalFile, outputBshellFile):
+def findBShells(bvalFile, outputBshellFile= None):
 
     given_bvals= read_bvals(abspath(bvalFile))
 
@@ -35,7 +35,7 @@ def findBShells(bvalFile, outputBshellFile):
 
     # identify b0s
     quantized_bvals= unique_bvals.copy()
-    quantized_bvals[unique_bvals<=BO_THRESH]= 0.
+    quantized_bvals[unique_bvals<=B0_THRESH]= 0.
 
     # round to multiple of 100
     quantized_bvals= np.unique(np.round(quantized_bvals/100.)*100.)
@@ -47,9 +47,11 @@ def findBShells(bvalFile, outputBshellFile):
         print(np.where(abs(bval-given_bvals)<=BSHELL_MIN_DIST)[0],'\n')
 
 
-    print('Saving the b-shell bvalues in', outputBshellFile)
-    write_bvals(outputBshellFile, quantized_bvals)
+    if outputBshellFile:
+        print('Saving the b-shell bvalues in', outputBshellFile)
+        write_bvals(outputBshellFile, quantized_bvals)
 
+    return quantized_bvals
 
 if __name__== '__main__':
     import sys
