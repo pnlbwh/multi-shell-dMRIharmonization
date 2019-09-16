@@ -17,11 +17,21 @@ from plumbum import cli
 from distutils.spawn import find_executable
 import multiprocessing, psutil
 import os
-
+from determineNshm import verifyNshm, verifySingleShellNess, determineNshm
 from util import *
+from conversion import read_imgs_masks
 
 N_CPU= psutil.cpu_count()
 SCRIPTDIR= dirname(__file__)
+
+def verifyNshmForAll(csvFile, N_shm):
+
+    for imgPath in read_imgs_masks(csvFile)[0]:
+        directory = dirname(imgPath)
+        prefix = basename(imgPath).split('.')[0]
+        bvalFile = pjoin(directory, prefix + '.bval')
+        verifyNshm(N_shm, bvalFile)
+
 
 def check_csv(file, force):
 
@@ -104,8 +114,8 @@ class pipeline(cli.Application):
 
     N_shm = cli.SwitchAttr(
         ['--nshm'],
-        help='spherical harmonic order',
-        default= 6)
+        help='spherical harmonic order, by default maximum possible is used',
+        default= '-1')
 
     N_proc = cli.SwitchAttr(
         '--nproc',
@@ -171,6 +181,11 @@ class pipeline(cli.Application):
         '--tar_name',
         help= 'target site name',
         mandatory= True)
+    
+    verbose= cli.Flag(
+        '--verbose',
+        help='print everything to STDOUT',
+        default= False)
 
 
     diffusionMeasures = ['MD', 'FA', 'GFA']
@@ -214,6 +229,7 @@ class pipeline(cli.Application):
         # run ANTS multivariate template construction
 
         # ATTN: antsMultivariateTemplateConstruction2.sh requires '/' at the end of templatePath
+        self.templatePath= abspath(self.templatePath)
         if not self.templatePath.endswith('/'):
             self.templatePath= self.templatePath+ '/'
         # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
@@ -289,7 +305,7 @@ class pipeline(cli.Application):
             pool.close()
             pool.join()
 
-        # cleanOutliers steps ------------------------------------------------------------------------------------------
+        # reconstSignal steps ------------------------------------------------------------------------------------------
 
         # read target image list
         moving= pjoin(self.templatePath, f'Mean_{self.target}_FA_b{self.bshell_b}.nii.gz')
@@ -382,10 +398,6 @@ class pipeline(cli.Application):
                 raise EnvironmentError(f'{cmd} not found')
 
 
-        # go through each file listed in csv, check their existence, create dti and harm directories
-        # if self.ref_csv:
-        #     check_csv(self.ref_csv, self.force)
-        # check_csv(self.target_csv, self.force)
 
 
     def main(self):
@@ -400,7 +412,42 @@ class pipeline(cli.Application):
         else:
             self.tar_unproc_csv= str(self.target_csv)
 
-        # copy provided config file to temporary directory
+
+        # check appropriateness of N_shm
+        if self.N_shm!=-1 and (self.N_shm<2 or self.N_shm>8):
+            raise ValueError('2<= --nshm <=8')
+
+
+        # determine N_shm in default mode during template creation
+        if self.N_shm==-1 and self.create:
+            if self.ref_csv:
+                ref_nshm_img = read_imgs_masks(self.ref_csv)[0][0]
+            elif self.target_csv:
+                ref_nshm_img = read_imgs_masks(self.target_csv)[0][0]
+
+            directory= dirname(ref_nshm_img)
+            prefix= basename(ref_nshm_img).split('.')[0]
+            bvalFile= pjoin(directory, prefix+'.bval')
+            self.N_shm, _= determineNshm(bvalFile)
+
+        # automatic determination of N_shm during data harmonization is limited by N_shm used during template creation
+        # Scale_L{i}.nii.gz of <= {N_shm during template creation} are present only
+        elif self.N_shm==-1 and self.process:
+            for i in range(0,8,2):
+                if isfile(pjoin(self.templatePath, f'Scale_L{i}_b{self.bshell_b}.nii.gz')):
+                    self.N_shm= i
+                else:
+                    break
+
+
+        # verify validity of provided/determined N_shm for all subjects
+        if self.ref_csv:
+            verifyNshmForAll(self.ref_csv, self.N_shm)
+        if self.target_csv:
+            verifyNshmForAll(self.target_csv, self.N_shm)
+
+
+        # write config file to temporary directory
         configFile= f'/tmp/harm_config_{os.getpid()}.ini'
         with open(configFile,'w') as f:
             f.write('[DEFAULT]\n')
@@ -413,6 +460,7 @@ class pipeline(cli.Application):
             f.write(f'denoise = {1 if self.denoise else 0}\n')
             f.write(f'travelHeads = {1 if self.travelHeads else 0}\n')
             f.write(f'debug = {1 if self.debug else 0}\n')
+            f.write(f'verbose = {1 if self.verbose else 0}\n')
             f.write('diffusionMeasures = {}\n'.format((',').join(self.diffusionMeasures)))
 
 
