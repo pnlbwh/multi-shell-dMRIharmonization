@@ -67,7 +67,6 @@ def divideShells(imgPath, ref_bvals_file=None, ref_bvals=None):
             write_bvecs(bPrefix+'.bvec', b0_bvecs)
 
 
-
 class separateShells(cli.Application):
 
     ref_csv = cli.SwitchAttr(
@@ -86,31 +85,50 @@ class separateShells(cli.Application):
         help='number of processes/threads to use (-1 for all available, may slow down your system)',
         default=4)
 
+    outPrefix= cli.SwitchAttr(
+        ['-outPrefix'],
+        help='outPrefix for list of generated single shell images(,masks)')
+
+
     def main(self):
 
+        self.outPrefix= abspath(self.outPrefix)
         ref_bvals= read_bvals(self.ref_bvals_file)
         if self.ref_csv:
 
             try:
-                imgs,_=read_imgs_masks(self.ref_csv)
+                imgs, masks=read_imgs_masks(self.ref_csv)
             except:
                 imgs= read_imgs(self.ref_csv)
 
             pool= Pool(int(self.ncpu))
             for imgPath in imgs:
-                pool.apply_async(divideShells, kwds={'imgPath':imgPath, 'ref_bvals':ref_bvals}, error_callback=RAISE)
+                pool.apply_async(divideShells,
+                    kwds={'imgPath':imgPath, 'ref_bvals':ref_bvals, 'outCsv':self.output}, error_callback=RAISE)
 
             pool.close()
             pool.join()
 
-            # loop for debugging
-            # for imgPath in imgs:
-            #     divideShells(imgPath, ref_bvals=ref_bvals)
+
+            for bval in ref_bvals:
+
+                if self.outPrefix:
+                    f = open(f'{self.outPrefix}_b{bval}.csv', 'w')
+
+                if masks:
+                    for imgPath, maskPath in zip(imgs,masks):
+                        inPrefix= abspath(imgPath).split('.')[0]
+                        bPrefix = inPrefix + f'_b{int(bval)}'
+                        f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
+
+                else:
+                    for imgPath in imgs:
+                        inPrefix = abspath(imgPath).split('.')[0]
+                        bPrefix = inPrefix + f'_b{int(bval)}'
+                        f.write(f'{bPrefix}.nii.gz\n')
+
+                f.close()
+
 
 if __name__== '__main__':
     separateShells.run()
-
-
-
-
-
