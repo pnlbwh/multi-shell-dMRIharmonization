@@ -14,8 +14,9 @@
 # ===============================================================================
 
 import numpy as np
-from conversion import read_bvals
+from conversion import read_bvals, read_imgs_masks
 from findBshells import B0_THRESH, findBShells
+from util import dirname, basename, pjoin
 
 def determineNshm(bvalFile):
 
@@ -47,6 +48,15 @@ def verifySingleShellNess(bvalFile):
 
     if len(quantized_bvals)>2:
         raise ValueError(f'{bvalFile} is not single shell. Use https://github.com/pnlbwh/multi-shell-dMRIharmonization')
+
+
+def verifyNshmForAll(csvFile, N_shm):
+
+    for imgPath in read_imgs_masks(csvFile)[0]:
+        directory = dirname(imgPath)
+        prefix = basename(imgPath).split('.')[0]
+        bvalFile = pjoin(directory, prefix + '.bval')
+        verifyNshm(N_shm, bvalFile)
 
 
 def verifyNshm(nshm, bvalFile):

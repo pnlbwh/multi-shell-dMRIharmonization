@@ -46,7 +46,8 @@ def save_nifti(fname, data, affine, hdr=None):
     result_img.to_filename(fname)
 
 
-# target data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
+
+# multi-shell-dMRIharmonization takes NIFTI input only
 # this block may be uncommented in a future design
 # def convertedPath(imgPath):
 #

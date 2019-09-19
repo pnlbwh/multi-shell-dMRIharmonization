@@ -16,58 +16,14 @@
 from plumbum import cli
 from distutils.spawn import find_executable
 import multiprocessing, psutil
-import os
-from determineNshm import verifyNshm, verifySingleShellNess, determineNshm
+
+from determineNshm import verifyNshmForAll, determineNshm
 from util import *
+from fileUtil import read_caselist, check_dir, check_csv
 from conversion import read_imgs_masks
 
 N_CPU= psutil.cpu_count()
 SCRIPTDIR= dirname(__file__)
-
-def verifyNshmForAll(csvFile, N_shm):
-
-    for imgPath in read_imgs_masks(csvFile)[0]:
-        directory = dirname(imgPath)
-        prefix = basename(imgPath).split('.')[0]
-        bvalFile = pjoin(directory, prefix + '.bval')
-        verifyNshm(N_shm, bvalFile)
-
-
-def check_csv(file, force):
-
-    with open(file) as f:
-        content= f.read()
-
-        for line, row in enumerate(content.split()):
-            dwi_mask= [element for element in row.split(',') if element] # handling w/space
-            if len(dwi_mask) != 2:
-                raise FileNotFoundError(f'Columns don\'t have same number of entries: check line {line} in {file}')
-
-            dirCheckFlag= 1
-            for img in dwi_mask:
-                if not exists(img):
-                    raise FileNotFoundError(f'{img} does not exist: check line {line} in {file}')
-
-                elif dirCheckFlag:
-                    # create DTI and harmonization directory
-                    dtiPath= pjoin(dirname(img),'dti')
-                    check_dir(dtiPath, force)
-
-                    harmPath= pjoin(dirname(img),'harm')
-                    check_dir(harmPath, force)
-
-                    dirCheckFlag= 0
-
-
-def check_dir(path, force):
-    if exists(path) and force:
-        warnings.warn(f'{path} exists and will be overwritten')
-        rmtree(path)
-        makedirs(path)
-    elif not exists(path):
-        makedirs(path)
-    else:
-        warnings.warn(f'{path} exists, --force not specified, continuing with existing directory')
 
 
 class pipeline(cli.Application):
@@ -195,7 +151,7 @@ class pipeline(cli.Application):
 
         from buildTemplate import difference_calc, antsMult, warp_bands, \
             dti_stat, rish_stat, template_masking, createAntsCaselist
-        from preprocess import read_caselist, common_processing
+        from preprocess import common_processing
 
         # check directory existence
         check_dir(self.templatePath, self.force)
@@ -230,12 +186,19 @@ class pipeline(cli.Application):
 
         # ATTN: antsMultivariateTemplateConstruction2.sh requires '/' at the end of templatePath
         if not self.templatePath.endswith('/'):
-            self.templatePath= self.templatePath+ '/'
-        # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
-        antsMult(abspath(antsMultCaselist), self.templatePath)
+            self.templatePath += '/'
+
+        # check if bmax template was created earlier
+        bmaxTemplateFile= pjoin(self.templatePath, 'bmaxTemplateCompletion')
+        template0= pjoin(self.templatePath, 'template0.nii.gz')
+        if not isfile(bmaxTemplateFile):
+            # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
+            antsMult(abspath(antsMultCaselist), self.templatePath)
+        else:
+            warnings.warn(f'Using {template0} created with bmax shell')
 
         # # load templateHdr
-        templateHdr= load(pjoin(self.templatePath, 'template0.nii.gz')).header
+        templateHdr= load(template0).header
 
 
         # warp mask, dti, and rish bands
@@ -278,10 +241,14 @@ class pipeline(cli.Application):
         print('\n\nTemplate creation completed \n\n')
 
 
+        # write a flag in templatePath that can be used to see if bmax template was created earlier
+        if not isfile(bmaxTemplateFile):
+            with open(pjoin(bmaxTemplateFile), 'w'):
+                pass
+
     def harmonizeData(self):
 
         from reconstSignal import reconst
-        from preprocess import read_caselist, dti_harm
 
         # check the templatePath
         if not exists(self.templatePath):
@@ -296,6 +263,7 @@ class pipeline(cli.Application):
 
         # target data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
         # this block may be uncommented in a future design
+        # from preprocess import dti_harm
         # if self.debug:
         #     # calcuate diffusion measures of target site before any processing so we are able to compare
         #     # with the ones after harmonization

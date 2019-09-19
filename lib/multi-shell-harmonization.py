@@ -16,7 +16,7 @@
 from plumbum import cli
 import psutil
 N_CPU= str(psutil.cpu_count())
-from conversion import read_imgs_masks, read_bvals
+from conversion import read_bvals
 from util import dirname, basename, pjoin, SCRIPTDIR, remove, isfile
 from subprocess import check_call
 
@@ -25,6 +25,8 @@ from consistencyCheck import consistencyCheck
 from separateBshells import separateAllBshells
 
 from joinBshells import joinAllBshells
+
+from fileUtil import check_dir
 
 
 def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
@@ -134,6 +136,8 @@ class multi_shell_pipeline(cli.Application):
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
+        # check directory existence
+        check_dir(self.templatePath, self.force)
 
         ## check consistency of b-shells and spatial resolution
         ref_bvals_file= pjoin(self.templatePath, 'ref_bshell_bvalues.txt')
@@ -190,8 +194,9 @@ class multi_shell_pipeline(cli.Application):
 
             if not self.debug:
 
-                ## template creation
+
                 if self.create:
+                    print('## template creation ##')
 
                     check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
                     '--tar_list', tarListOutPrefix+f'_b{int(bval)}.csv',
@@ -200,8 +205,9 @@ class multi_shell_pipeline(cli.Application):
                     '--create'] + pipeline_vars), shell= True)
 
 
-                ## data harmonization
+
                 if self.process:
+                    print('## data harmonization ##')
 
                     check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
                     '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',
@@ -212,6 +218,7 @@ class multi_shell_pipeline(cli.Application):
 
                 ## debugging mode
                 print('\n In --debug mode, both --create and --process are enabled\n')
+                print('## template creation and data harmonization ##')
 
                 check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
                 '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',

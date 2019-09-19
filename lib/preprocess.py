@@ -12,8 +12,7 @@
 # ===============================================================================
 
 import multiprocessing
-from conversion import nifti_write
-
+from conversion import write_bvals
 from util import *
 from denoising import denoising
 from bvalMap import remapBval
@@ -35,24 +34,6 @@ if resample=='0':
     resample = 0
 debug = int(config['DEFAULT']['debug'])
 
-def write_bvals(bval_file, bvals):
-    with open(bval_file, 'w') as f:
-        f.write(('\n').join(str(b) for b in bvals))
-
-def read_caselist(file):
-
-    with open(file) as f:
-
-        imgs = []
-        masks = []
-        content= f.read()
-        for line, row in enumerate(content.split()):
-            temp= [element for element in row.split(',') if element] # handling w/space
-            imgs.append(temp[0])
-            masks.append(temp[1])
-
-
-    return (imgs, masks)
 
 
 def dti_harm(imgPath, maskPath):
@@ -79,27 +60,17 @@ def pre_dti_harm(itr):
     dti_harm(imgPath, maskPath)
     return (imgPath, maskPath)
 
-# convert NRRD to NIFTI on the fly
-def nrrd2nifti(imgPath):
-
-    if imgPath.endswith('.nrrd') or imgPath.endswith('.nhdr'):
-        niftiImgPrefix= imgPath.split('.')[0]
-        nifti_write(imgPath, niftiImgPrefix)
-
-        return niftiImgPrefix+'.nii.gz'
-    else:
-        return imgPath
 
 
 def preprocessing(imgPath, maskPath):
 
     # load signal attributes for pre-processing ----------------------------------------------------------------
-    imgPath= nrrd2nifti(imgPath)
+    # imgPath= nrrd2nifti(imgPath)
     lowRes = load(imgPath)
     lowResImg = lowRes.get_data().astype('float')
     lowResImgHdr = lowRes.header
 
-    maskPath= nrrd2nifti(maskPath)
+    # maskPath= nrrd2nifti(maskPath)
     lowRes = load(maskPath)
     lowResMask = lowRes.get_data()
     lowResMaskHdr = lowRes.header
@@ -181,3 +152,4 @@ def common_processing(caselist):
     f.close()
 
     return (imgs, masks)
+
