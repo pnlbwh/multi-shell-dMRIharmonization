@@ -64,12 +64,6 @@ def verifyNshm(nshm, bvalFile):
 
 
 if __name__=='__main__':
-    # # bvalFile='/data/pnl/HarmonizationProject/Cidar-Post/Cidar-Post_controls/case01193/01193-dwi-Ed-centered.bval'
-    # bvalFile='/data/pnl/HarmonizationProject/BSNIP_Baltimore/BSNIP_Balt_trainingHC/GT_2007/GT_2007_dwi_xc_Ed.bval'
-    # print(determineNshm(bvalFile))
-    # verifySingleShellNess(bvalFile)
-    # nshm= 4
-    # verifyNshm(nshm,bvalFile)
     pass
 
 
