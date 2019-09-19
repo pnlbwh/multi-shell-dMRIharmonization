@@ -22,7 +22,7 @@ import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
 
-def divideShells(imgPath, ref_bvals_file=None, ref_bvals=None):
+def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
 
     if ref_bvals_file:
         print('Reading reference b-shell file ...')
@@ -62,9 +62,49 @@ def divideShells(imgPath, ref_bvals_file=None, ref_bvals=None):
             b0_bvecs= np.zeros((N_b+1,3), dtype='float32')
             b0_bvecs[1:,]= bvecs[ind,: ]
 
-            save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
+            # save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
             write_bvals(bPrefix+'.bval', b0_bvals)
             write_bvecs(bPrefix+'.bvec', b0_bvecs)
+
+
+
+def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
+
+    outPrefix = abspath(outPrefix)
+    ref_bvals = read_bvals(ref_bvals_file)
+
+    try:
+        imgs, masks = read_imgs_masks(ref_csv)
+    except:
+        imgs = read_imgs(ref_csv)
+        masks = None
+
+    pool = Pool(int(ncpu))
+    for imgPath in imgs:
+        pool.apply_async(separateBshells,
+                         kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}, error_callback=RAISE)
+
+    pool.close()
+    pool.join()
+
+    for bval in ref_bvals:
+
+        if outPrefix:
+            f = open(f'{outPrefix}_b{int(bval)}.csv', 'w')
+
+        if masks:
+            for imgPath, maskPath in zip(imgs, masks):
+                inPrefix = abspath(imgPath).split('.')[0]
+                bPrefix = inPrefix + f'_b{int(bval)}'
+                f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
+
+        else:
+            for imgPath in imgs:
+                inPrefix = abspath(imgPath).split('.')[0]
+                bPrefix = inPrefix + f'_b{int(bval)}'
+                f.write(f'{bPrefix}.nii.gz\n')
+
+        f.close()
 
 
 class separateShells(cli.Application):
@@ -72,62 +112,29 @@ class separateShells(cli.Application):
     ref_csv = cli.SwitchAttr(
         ['--img_list'],
         cli.ExistingFile,
-        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...'
-             'or just one column for dwi1\n/dwi2\n...')
+        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n...'
+             'or just one column for dwi1\\ndwi2\\n...',
+        mandatory= True)
 
     ref_bvals_file = cli.SwitchAttr(
         ['--ref_bshell_file'],
         cli.ExistingFile,
-        help='reference bshell file')
+        help='reference bshell file',
+        mandatory= True)
+
+    outPrefix= cli.SwitchAttr(
+        ['-outPrefix'],
+        help='outPrefix for list of generated single shell images(,masks)')
 
     ncpu = cli.SwitchAttr(
         '--ncpu',
         help='number of processes/threads to use (-1 for all available, may slow down your system)',
         default=4)
 
-    outPrefix= cli.SwitchAttr(
-        ['-outPrefix'],
-        help='outPrefix for list of generated single shell images(,masks)')
-
 
     def main(self):
 
-        self.outPrefix= abspath(self.outPrefix)
-        ref_bvals= read_bvals(self.ref_bvals_file)
-        if self.ref_csv:
-
-            try:
-                imgs, masks=read_imgs_masks(self.ref_csv)
-            except:
-                imgs= read_imgs(self.ref_csv)
-
-            pool= Pool(int(self.ncpu))
-            for imgPath in imgs:
-                pool.apply_async(divideShells,
-                    kwds={'imgPath':imgPath, 'ref_bvals':ref_bvals, 'outCsv':self.output}, error_callback=RAISE)
-
-            pool.close()
-            pool.join()
-
-
-            for bval in ref_bvals:
-
-                if self.outPrefix:
-                    f = open(f'{self.outPrefix}_b{bval}.csv', 'w')
-
-                if masks:
-                    for imgPath, maskPath in zip(imgs,masks):
-                        inPrefix= abspath(imgPath).split('.')[0]
-                        bPrefix = inPrefix + f'_b{int(bval)}'
-                        f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
-
-                else:
-                    for imgPath in imgs:
-                        inPrefix = abspath(imgPath).split('.')[0]
-                        bPrefix = inPrefix + f'_b{int(bval)}'
-                        f.write(f'{bPrefix}.nii.gz\n')
-
-                f.close()
+        separateAllBshells(self.ref_csv, self.ref_bvals_file, self.ncpu, self.outPrefix)
 
 
 if __name__== '__main__':

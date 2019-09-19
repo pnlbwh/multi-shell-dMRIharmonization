@@ -229,26 +229,27 @@ class pipeline(cli.Application):
         # run ANTS multivariate template construction
 
         # ATTN: antsMultivariateTemplateConstruction2.sh requires '/' at the end of templatePath
-        self.templatePath= abspath(self.templatePath)
         if not self.templatePath.endswith('/'):
             self.templatePath= self.templatePath+ '/'
         # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
-        # antsMult(abspath(antsMultCaselist), self.templatePath)
+        antsMult(abspath(antsMultCaselist), self.templatePath)
 
         # # load templateHdr
         templateHdr= load(pjoin(self.templatePath, 'template0.nii.gz')).header
 
 
         # warp mask, dti, and rish bands
-        # pool = multiprocessing.Pool(self.N_proc)
-        # for imgPath, maskPath in zip(imgs, masks):
-        #     pool.apply_async(func= warp_bands, args= (imgPath, maskPath, self.templatePath, ))
-        #
-        # pool.close()
-        # pool.join()
-
+        pool = multiprocessing.Pool(self.N_proc)
         for imgPath, maskPath in zip(imgs, masks):
-            warp_bands(imgPath, maskPath, self.templatePath)
+            pool.apply_async(func= warp_bands, args= (imgPath, maskPath, self.templatePath, ))
+        
+        pool.close()
+        pool.join()
+
+        
+        # loop for debugging
+        # for imgPath, maskPath in zip(imgs, masks):
+        #     warp_bands(imgPath, maskPath, self.templatePath)
 
         print('dti statistics: mean, std(FA, MD) calculation of reference site')
         refMaskPath= dti_stat(self.reference, refImgs, refMasks, self.templatePath, templateHdr)
@@ -292,18 +293,21 @@ class pipeline(cli.Application):
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.target_csv, self.force)
 
-        if self.debug:
-            # calcuate diffusion measures of target site before any processing so we are able to compare
-            # with the ones after harmonization
-            imgs, masks= read_caselist(self.tar_unproc_csv)
-            pool = multiprocessing.Pool(self.N_proc)
-            for imgPath, maskPath in zip(imgs, masks):
-                imgPath= convertedPath(imgPath)
-                maskPath= convertedPath(maskPath)
-                pool.apply_async(func= dti_harm, args= ((imgPath, maskPath, )))
 
-            pool.close()
-            pool.join()
+        # target data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
+        # this block may be uncommented in a future design
+        # if self.debug:
+        #     # calcuate diffusion measures of target site before any processing so we are able to compare
+        #     # with the ones after harmonization
+        #     imgs, masks= read_caselist(self.tar_unproc_csv)
+        #     pool = multiprocessing.Pool(self.N_proc)
+        #     for imgPath, maskPath in zip(imgs, masks):
+        #         imgPath= convertedPath(imgPath)
+        #         maskPath= convertedPath(maskPath)
+        #         pool.apply_async(func= dti_harm, args= ((imgPath, maskPath, )))
+        #
+        #     pool.close()
+        #     pool.join()
 
         # reconstSignal steps ------------------------------------------------------------------------------------------
 
@@ -338,7 +342,8 @@ class pipeline(cli.Application):
         pool.close()
         pool.join()
 
-
+        
+        # loop for debugging
         # res= []
         # for imgPath, maskPath in zip(imgs, masks):
         #     res.append(reconst(imgPath, maskPath, moving, self.templatePath, preFlag))
@@ -402,6 +407,7 @@ class pipeline(cli.Application):
 
     def main(self):
 
+        self.templatePath= abspath(self.templatePath)
         self.N_shm= int(self.N_shm)
         self.N_proc= int(self.N_proc)
         if self.N_proc==-1:
@@ -418,6 +424,7 @@ class pipeline(cli.Application):
             raise ValueError('2<= --nshm <=8')
 
 
+
         # determine N_shm in default mode during template creation
         if self.N_shm==-1 and self.create:
             if self.ref_csv:
@@ -429,6 +436,7 @@ class pipeline(cli.Application):
             prefix= basename(ref_nshm_img).split('.')[0]
             bvalFile= pjoin(directory, prefix+'.bval')
             self.N_shm, _= determineNshm(bvalFile)
+
 
         # automatic determination of N_shm during data harmonization is limited by N_shm used during template creation
         # Scale_L{i}.nii.gz of <= {N_shm during template creation} are present only

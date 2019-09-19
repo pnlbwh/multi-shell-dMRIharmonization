@@ -61,8 +61,7 @@ def register_target(imgPath, templatePath):
     prefix = os.path.split(inPrefix)[-1]
 
     dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
-
-    outPrefix = os.path.join(templatePath, prefix + '_FA_ToMNI_')
+    outPrefix = os.path.join(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
     warp2mni = outPrefix + '1Warp.nii.gz'
     trans2mni = outPrefix + '0GenericAffine.mat'
     # unprocessed target data is given, so in case multiple debug is needed, pass the registration
@@ -93,12 +92,13 @@ def register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName):
     dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
     dmTmp = os.path.join(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
     maskTmp = os.path.join(templatePath, f'{siteName}_Mask.nii.gz')
-    outPrefix = os.path.join(directory, 'dti', prefix + '_FA')
+    outPrefix = os.path.join(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA')
     warp2tmp = outPrefix + '1Warp.nii.gz'
     trans2tmp = outPrefix + '0GenericAffine.mat'
-    # signal reconstruction might change with zero padding size, median filtering kernel size, and harmonized mask
-    # so in case multiple debug is needed, redo the registration
-    antsReg(dmTmp, maskTmp, dmImg, outPrefix)
+
+    # check existence of transforms created with _b{bmax}
+    if not os.path.exists(warp2tmp):
+        antsReg(dmTmp, maskTmp, dmImg, outPrefix)
 
     for dm in diffusionMeasures:
         output = os.path.join(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
@@ -122,8 +122,8 @@ def sub2tmp2mni(templatePath, siteName, caselist, ref= False, tar_unproc= False,
     outPrefix= os.path.join(templatePath, f'TemplateToMNI_{siteName}')
     warp2mni= outPrefix+'1Warp.nii.gz'
     trans2mni= outPrefix+'0GenericAffine.mat'
-    # template is created once, it is expected that the user wants to keep the template same during debugging
-    # so in case multiple debug is needed, pass the registration
+
+    # check existence of transforms created with _b{bmax}
     if not os.path.exists(warp2mni):
         antsReg(mniTmp, None, moving, outPrefix)
 
@@ -141,6 +141,17 @@ def sub2tmp2mni(templatePath, siteName, caselist, ref= False, tar_unproc= False,
 
     pool.close()
     pool.join()
+
+
+    # loop for debugging
+    # for imgPath in imgs:
+    #
+    #     if ref:
+    #         register_reference(imgPath, warp2mni, trans2mni, templatePath)
+    #     elif tar_unproc:
+    #         register_target(imgPath, templatePath)
+    #     elif tar_harm:
+    #         register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName)
 
 
 def analyzeStat(file, templatePath):

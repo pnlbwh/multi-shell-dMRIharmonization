@@ -51,13 +51,14 @@ def verifySingleShellNess(bvalFile):
 
 def verifyNshm(nshm, bvalFile):
 
-    print(f'Verifying suitability of spherical harmonics order {nshm} for {bvalFile}\n')
+    if nshm>=2:
+        print(f'Verifying suitability of spherical harmonics order {nshm} for {bvalFile}\n')
 
     N_shm, N_b= determineNshm(bvalFile)
-    if nshm>N_shm:
+    if nshm>=2 and nshm>N_shm:
         raise ValueError(f'Order of spherical harmonics {nshm} is higher than possible with {N_b} gradients for {bvalFile}. '
                          'See README.md and reduce --nshm')
-    else:
+    elif nshm>=2:
         print(f'Spherical harmonics order {nshm} is suitable, continuing\n')
 
 

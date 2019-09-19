@@ -21,7 +21,8 @@ import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
 
-def joinShells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
+
+def joinBshells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
 
     if ref_bvals_file:
         print('Reading reference b-shell file ...')
@@ -76,19 +77,42 @@ def joinShells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
     else:
         print(harmPrefix + '.nii.gz', 'already exists, not overwritten.')
 
-class joinDividedShells(cli.Application):
 
+
+def joinAllBshells(tar_csv, ref_bvals_file, separatedPrefix=None, ncpu=4):
+
+    ref_bvals = read_bvals(ref_bvals_file)
+    if tar_csv:
+
+        try:
+            imgs, _ = read_imgs_masks(tar_csv)
+        except:
+            imgs = read_imgs(tar_csv)
+
+        pool = Pool(int(ncpu))
+        for imgPath in imgs:
+            pool.apply_async(joinBshells, kwds=({'imgPath': imgPath, 'ref_bvals': ref_bvals, 'sep_prefix': separatedPrefix}),
+                             error_callback=RAISE)
+
+        pool.close()
+        pool.join()
+
+
+
+class joinDividedShells(cli.Application):
 
     tar_csv = cli.SwitchAttr(
         ['--img_list'],
         cli.ExistingFile,
-        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...'
-             'or just one column for dwi1\n/dwi2\n...')
+        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n...'
+             'or just one column for dwi1\\ndwi2\\n...',
+        mandatory= True)
 
     ref_bvals_file = cli.SwitchAttr(
         ['--ref_bshell_file'],
         cli.ExistingFile,
-        help='reference bshell file')
+        help='reference bshell file',
+        mandatory= True)
     
     separatedPrefix= cli.SwitchAttr(
         ['--sep_prefix'],
@@ -102,32 +126,10 @@ class joinDividedShells(cli.Application):
         default=4)
 
     def main(self):
+        joinAllBshells(self.tar_csv, self.ref_bvals_file, self.separatedPrefix, self.ncpu)
 
-        ref_bvals= read_bvals(self.ref_bvals_file)
-        if self.tar_csv:
-
-            try:
-                imgs,_=read_imgs_masks(self.tar_csv)
-            except:
-                imgs= read_imgs(self.tar_csv)
-
-            pool = Pool(int(self.ncpu))
-            for imgPath in imgs:
-                pool.apply_async(joinShells, kwds=({'imgPath':imgPath, 'ref_bvals':ref_bvals, 'sep_prefix':self.separatedPrefix}),
-                                 error_callback=RAISE)
-
-            pool.close()
-            pool.join()
-
-            # loop for debugging
-            # for imgPath in imgs:
-            #     joinShells(imgPath, ref_bvals=ref_bvals, self.separatedPrefix)
 
 
 if __name__== '__main__':
     joinDividedShells.run()
-
-
-
-
 

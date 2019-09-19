@@ -18,13 +18,16 @@ import numpy as np
 from os.path import abspath
 
 B0_THRESH= 50.
+B_QUANT= 50.
 BSHELL_MIN_DIST= 100.
 
+
 def usage():
-    print('''Find b-shells in a DWI: 
+    print('''Find b-shells in a DWI 
 Usage:
 findBShells /path/to/input/bval/file /output/file/to/write/bshells
 ''')
+
 
 def findBShells(bvalFile, outputBshellFile= None):
 
@@ -37,8 +40,8 @@ def findBShells(bvalFile, outputBshellFile= None):
     quantized_bvals= unique_bvals.copy()
     quantized_bvals[unique_bvals<=B0_THRESH]= 0.
 
-    # round to multiple of 100
-    quantized_bvals= np.unique(np.round(quantized_bvals/100.)*100.)
+    # round to multiple of B_QUANT (50 or 100)
+    quantized_bvals= np.unique(np.round(quantized_bvals/B_QUANT)*B_QUANT)
 
     print('b-shell bvalues', quantized_bvals)
 
@@ -58,3 +61,4 @@ if __name__== '__main__':
     if len(sys.argv)==1 or sys.argv[1]=='-h' or sys.argv[1]=='--help':
         usage()
     findBShells(sys.argv[1],sys.argv[2])
+

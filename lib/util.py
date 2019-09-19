@@ -14,12 +14,14 @@
 from configparser import ConfigParser
 import configparser
 from os.path import join as pjoin, split as psplit, abspath, basename, dirname, isfile, exists
-from os import getpid, makedirs
+from os import getpid, makedirs, remove
 from subprocess import check_call
 from shutil import copyfile, rmtree
 import numpy as np
 import os
 import shutil
+
+SCRIPTDIR= abspath(dirname(__file__))
 
 import warnings
 with warnings.catch_warnings():
@@ -44,12 +46,15 @@ def save_nifti(fname, data, affine, hdr=None):
     result_img.to_filename(fname)
 
 
-def convertedPath(imgPath):
-
-    if imgPath.endswith('.nhdr') or imgPath.endswith('.nrrd'):
-        imgPath = imgPath.split('.')[0] + '.nii.gz'
-
-    return imgPath
+# target data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
+# this block may be uncommented in a future design
+# def convertedPath(imgPath):
+#
+#     if imgPath.endswith('.nhdr') or imgPath.endswith('.nrrd'):
+#         imgPath = imgPath.split('.')[0] + '.nii.gz'
+#
+#     return imgPath
 
 def RAISE(ERR):
     raise ERR
+
