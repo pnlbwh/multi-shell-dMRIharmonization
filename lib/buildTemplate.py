@@ -90,7 +90,7 @@ def antsMult(caselist, outPrefix):
     if verbose:
         f= sys.stdout
     else:
-        logFile= pjoin(dirname(outPrefix)+ 'template_construct.log')
+        logFile= pjoin(dirname(outPrefix), 'template_construct.log')
         f= open(logFile, 'w')
         print(f'See {logFile} for details of template construction')
 
