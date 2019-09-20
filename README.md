@@ -8,6 +8,49 @@
 *multi-shell-dMRIharmonization* is an extension of [dMRIharmonization](https://github.com/pnlbwh/dMRIharmonization) for single-shell dMRI.
 
 
+Table of Contents
+=================
+
+   * [Algorithm](#algorithm)
+   * [Citation](#citation)
+   * [Dependencies](#dependencies)
+   * [Installation](#installation)
+      * [1. Install prerequisites](#1-install-prerequisites)
+         * [Check system architecture](#check-system-architecture)
+         * [Python 3](#python-3)
+         * [MATLAB Runtime Compiler](#matlab-runtime-compiler)
+         * [unringing](#unringing)
+      * [2. Install pipeline](#2-install-pipeline)
+      * [3. Download IIT templates](#3-download-iit-templates)
+      * [4. Configure your environment](#4-configure-your-environment)
+   * [Running](#running)
+   * [Consistency checks](#consistency-checks)
+   * [Varying number of gradients](#varying-number-of-gradients)
+   * [Sample commands](#sample-commands)
+      * [Create template](#create-template)
+      * [Harmonize data](#harmonize-data)
+      * [Debug](#debug)
+   * [Tests](#tests)
+      * [1. pipeline](#1-pipeline)
+      * [2. unittest](#2-unittest)
+   * [Preprocessing](#preprocessing)
+      * [1. Denoising](#1-denoising)
+      * [2. Bvalue mapping](#2-bvalue-mapping)
+      * [3. Resampling](#3-resampling)
+   * [Debugging](#debugging)
+      * [1. With the pipeline](#1-with-the-pipeline)
+      * [2. Use separately](#2-use-separately)
+   * [Caveats/Issues](#caveatsissues)
+      * [1. Template path](#1-template-path)
+      * [2. Multi-processing](#2-multi-processing)
+      * [3. X forwarding error](#3-x-forwarding-error)
+      * [4. Tracker](#4-tracker)
+   * [Reference](#reference)
+
+Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
+
+
 # Algorithm
 
 1. Extract b-shells from given data
@@ -25,35 +68,6 @@ https://github.com/pnlbwh/dMRIharmonization#template-creation
 https://github.com/pnlbwh/dMRIharmonization#data-harmonization
 
 
-# Consistency checks
-
-A few consistency checks are run to make sure provided data is eligible for harmonization.
-
-1. First image from the reference site is used as reference for all images in reference and target sites. B-shells and 
-spatial resolution are extracted from the reference image. The b-shells and spatial resolution are compared against all 
-images in reference and target sites. As long as all bvalues of each image falls within +-100 of a b-shell bvalue, the 
-image is considered good for harmonization.
-
-2. Spatial resolution should match exactly. If reference image has 2x2x2 resolution, all other images should also have 
-this resolution.
-
-3. The program can automatically determine [maximum possible spherical harmonic order](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) (`--nshm`) for each b-shell.
-However, if a value is provided with `--nshm`, it is compared against the maximum possible spherical harmonic order to 
-continue.
-
-
-In the event of inconsistency, the program will raise and error and user should remove the case from provided lists 
-and try again. 
-
-
-# Varying number of gradients
-
-A particular strength of the algorithm is its compatiblity with varying number of gradients present in images.
-As long as [the number of gradients satisfies minimum required](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) for the spherical harmonic order, determined (`--nshm -1`) 
-or provided(--nshm 4), data can be harmonized.
-
-
-
 # Citation
 
 If this repository is useful in your research, please cite all of the following: 
@@ -63,7 +77,7 @@ https://github.com/pnlbwh/multi-shell-dMRIharmoniziation, 2019, doi: 10.5281/zen
 
 
 * Billah T*, Cetin Karayumak S*, Bouix S, Rathi Y. Multi-site Diffusion MRI Harmonization, 
-https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.2584275
+https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.3451427
 
     \* *denotes equal first authroship*
 
@@ -77,7 +91,6 @@ doi: 10.1016/j.neuroimage.2018.08.073. Epub 2018 Sep 8. PubMed PMID: 30205206; P
 McAllister TW, Andaluz N, Shutter L, Coimbra R, Zafonte RD, Coleman MJ, Kubicki M, Westin CF, Stein MB, Shenton ME, Rathi Y. 
 Multi-site harmonization of diffusion MRI data in a registration framework. Brain Imaging Behav. 2018 Feb;12(1):284-295. 
 doi:10.1007/s11682-016-9670-y. PubMed PMID: 28176263.
-
 
 
 # Dependencies
@@ -117,6 +130,9 @@ Activate the conda environment:
 
     source ~/miniconda3/bin/activate # should introduce '(base)' in front of each line
 
+
+
+**NOTE** With the current design, *MATLAB Runtime Compiler* and *unringing* are not used. So, you may pass them.
     
 ### MATLAB Runtime Compiler
 
@@ -141,6 +157,8 @@ You should save the suggestion in a file `env.sh`.
 
 Then, every time you run dMRIharmonization, you can just source the `env.sh` for your LD_LIBRARY_PATH to be updated.
 
+**NOTE** If you have MATLAB already installed in your system, replace `/path/to/v92` with `/path/to/Matlab/`
+
 
 ### unringing
 
@@ -160,7 +178,7 @@ You should be able to see the help message now:
 
 Now that you have installed the prerequisite software, you are ready to install the pipeline:
 
-    git clone https://github.com/pnlbwh/dMRIharmonization.git && cd dMRIharmonization
+    git clone https://github.com/pnlbwh/multi-shell-dMRIharmonization.git && cd multi-shell-dMRIharmonization
     conda env create -f environment.yml    # you may comment out any existing package from environment.yml
     conda activate harmonization           # should introduce '(harmonization)' in front of each line
 
@@ -177,7 +195,7 @@ the prerequisite libraries:
 
 dMRIharmonization toolbox is provided with a debugging capability to test how good has been the 
 harmonization. For debug to work and **tests** to run, download the following data from [IIT HUMAN BRAIN ATLAS](http://www.iit.edu/~mri/IITHumanBrainAtlas.html) 
-and place them in `dMRIharmonization/IITAtlas/` directory:
+and place them in `multi-shell-dMRIharmonization/IITAtlas/` directory:
 
 * [IITmean_FA.nii.gz](https://www.nitrc.org/frs/download.php/6898/IITmean_FA.nii.gz) 
 * [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz)
@@ -204,51 +222,45 @@ If any of them does not exist, add that to your path:
     
     export ANTSPATH=~/miniconda3/envs/harmonization/bin/
 
-However, if you choose to use pre-installed ANTs scripts, you can define ANTSPATH according to [this](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS#set-path-and-antspath) instruction.
+However, if you choose to use pre-installed ANTs scripts, you can define `ANTSPATH` according to [this](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS#set-path-and-antspath) instruction.
 
 
 
-### TODO ###
 
 # Running
 
-Upon successful installation, you should be able to see the help message
+Upon successful installation, you should be able to see the help message:
 
-`$ lib/harmonization.py --help`
+> lib/multi-shell-harmonization.py --help
 
-    Template creation, harmonization, and debugging
-    
+
     Usage:
-        harmonization.py [SWITCHES] 
+        multi-shell-harmonization.py [SWITCHES] 
     
     Meta-switches:
-        -h, --help                          Prints this help message and quits
-        --help-all                          Prints help messages of all sub-commands and quits
-        -v, --version                       Prints the program's version and quits
+        -h, --help                         Prints this help message and quits
+        --help-all                         Prints help messages of all sub-commands and quits
+        -v, --version                      Prints the program's version and quits
     
     Switches:
-        --bvalMap VALUE:str                 specify a bmax to scale bvalues into
-        --create                            turn on this flag to create template
-        --debug                             turn on this flag to debug harmonized data (valid only with --process)
-        --denoise                           turn on this flag to denoise voxel data
-        --force                             turn on this flag to overwrite existing data
-        --harm_list VALUE:ExistingFile      harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1
-                                            dwi2,mask2 ...
-        --nproc VALUE:str                   number of processes/threads to use (-1 for all available, may slow down your system);
-                                            the default is 8
-        --nshm VALUE:str                    spherical harmonic order; the default is 6
-        --nzero VALUE:str                   number of zero padding for denoising skull region during signal reconstruction; the default is 10
-        --process                           turn on this flag to harmonize
-        --ref_list VALUE:ExistingFile       reference csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1
-                                            dwi2,mask2 ...
-        --ref_name VALUE:str                reference site name; required
-        --resample VALUE:str                voxel size MxNxO to resample into
-        --tar_list VALUE:ExistingFile       target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1
-                                            dwi2,mask2 ...
-        --tar_name VALUE:str                target site name; required
-        --template VALUE:str                template directory; required
-        --travelHeads                       travelling heads
-
+        --create                           turn on this flag to create template
+        --debug                            turn on this flag to debug harmonized data (valid only with --process)
+        --force                            turn on this flag to overwrite existing data
+        --nproc VALUE:str                  number of processes/threads to use (-1 for all available, may slow down your system);
+                                           the default is 4
+        --nshm VALUE:str                   spherical harmonic order, by default maximum possible is used; the default is -1
+        --nzero VALUE:str                  number of zero padding for denoising skull region during signal reconstruction; the
+                                           default is 10
+        --process                          turn on this flag to harmonize
+        --ref_list VALUE:ExistingFile      reference csv/txt file with first column for dwi and 2nd column for mask:
+                                           dwi1,mask1\ndwi2,mask2\n...
+        --ref_name VALUE:str               reference site name; required
+        --tar_list VALUE:ExistingFile      target csv/txt file with first column for dwi and 2nd column for mask:
+                                           dwi1,mask1\ndwi2,mask2\n...
+        --tar_name VALUE:str               target site name; required
+        --template VALUE:str               template directory; required
+        --travelHeads                      travelling heads
+        --verbose                          print everything to STDOUT
 
 
 
@@ -256,41 +268,92 @@ For details about the above arguments, see https://github.com/pnlbwh/dMRIharmoni
 
 
 
-### TODO ###
+# Consistency checks
+
+A few consistency checks are run to make sure provided data is eligible for harmonization.
+
+1. First image from the reference site is used as reference for all images in reference and target sites. B-shells and 
+spatial resolution are extracted from the reference image. The b-shells and spatial resolution are compared against all 
+images in reference and target sites. As long as all bvalues of each image falls within +-100 of a b-shell bvalue, the 
+image is considered good for harmonization.
+
+2. Spatial resolution should match exactly. If reference image has 2x2x2 resolution, all other images should also have 
+this resolution.
+
+3. The program can automatically determine [maximum possible spherical harmonic order](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) (`--nshm`) for each b-shell.
+However, if a value is provided with `--nshm`, it is compared against the maximum possible spherical harmonic order to 
+continue.
+
+
+In the event of inconsistency, the program will raise and error and user should remove the case from provided lists 
+and try again. 
+
+
+# Varying number of gradients
+
+A particular strength of the algorithm is its compatiblity with varying number of gradients present in images.
+As long as [the number of gradients satisfies minimum required](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) for the spherical harmonic order, determined (`--nshm -1`) 
+or provided(--nshm 4), data can be harmonized.
+
+
+# Sample commands
+
+## Create template
+
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_list.txt 
+    --ref_name REF --tar_name TAR --template template
+    --create
+
+
+## Harmonize data
+
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
+    --ref_name REF --tar_name TAR --template template
+    --process
+    
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
+    --ref_name REF --tar_name TAR --template template
+    --process --debug
+
+
+## Debug
+
+Runs together with `--create` and `--process`
+
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_list.txt 
+    --ref_name REF --tar_name TAR --template template
+    --create --process --debug
+
+
 
 # Tests
 
-A small test data is provided with each [release](https://github.com/pnlbwh/Harmonization-Python/releases). 
+A small test data is provided with each [release](https://github.com/pnlbwh/multi-shell-dMRIharmonization/releases). 
+
 
 ## 1. pipeline
-You may test the whole pipeline as follows*:
+You may test the whole pipeline as follows:
     
-    cd lib/tests
+    cd multi-shell-dMRIharmonization/lib/tests
     ./multi_pipeline_test.sh
     
-NOTE: running the above test should take roughly an hour.
-
-`./multi_pipeline_test.sh` will download test data*, and run the whole processing pipeline on them. 
-If the test is successful and complete, you should see the following output on the command line. 
-    
-    CONNECTOM mean FA:  0.675917931134666
-    PRISMA mean FA before harmonization:  0.8008729791383536
-    PRISMA mean FA after harmonization:  0.6366103024088171
+**NOTE** Running the above tests might take six hours.
 
 
 \* If there is any problem downloading test data, try manually downloading and unzipping it to `lib/tests/` folder.
 
+
 ## 2. unittest
 You may run smaller and faster unittest as follows:
     
-    python -m unittest discover -v lib/tests/    
+    python -m unittest discover -v lib/tests/
     
-
+**TBD** This section will be expanded in future.
 
 
 # Preprocessing
 
-Unlike single-shell dMRIharmonization, multi-shell-dMRIharmonization does NOT support data preprocessing as of now. 
+Unlike single-shell dMRIharmonization, multi-shell-dMRIharmonization does **NOT** support data preprocessing as of now. 
 This is likely to change in a future release. Hence, the following arguments are present for legacy purpose but you 
 should not use them.
 
@@ -312,60 +375,65 @@ and used for further processing.
  
 
 
-### TODO ###
 
 # Debugging
 
-dMRIharmonization toolbox is provided with a debugging capability to test how good has been the 
-harmonization. `--debug` can be run with any (or all) of `--create` and `--process` options or separately. 
+multi-shell-dMRIharmonization debugging is an extension of [dMRIharmonization debugging](https://github.com/pnlbwh/dMRIharmonization#debugging). In the former case, debugging is 
+run at each shell separately. So, at each shell you should see nearly matching mean FA over IITmean_FA_skeleton.nii.gz 
+between reference site and target site after harmonization:
 
-Once harmonization is done, there are three types of data:
-
-* reference site 
-* target site
-* harmonized target
-
-If the three data sets are brought into a common space, then looking at the mean FA over the whole brain, 
-we can comment on the goodness of harmonization. If data is properly harmonized, then mean FA of the harmonized target 
-should be almost equal to the mean FA of that of reference site.
-
-In details:
-
-* reference data is proprocessed, and registered to reference template space and then to MNI space ([IITmean_FA.nii.gz](https://www.nitrc.org/frs/download.php/6898/IITmean_FA.nii.gz))
-* unprocessed target data is directly registered to MNI space
-* harmonized target data is registered to target template space and then to MNI space
-* once the data are in MNI space, we calculate mean FA over the [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz)
- 
-NOTE: Download the above data from [IIT HUMAN BRAIN ATLAS](http://www.iit.edu/~mri/IITHumanBrainAtlas.html) and place them in `IITAtlas/` directory.
-
-The numbers should like like below:
-
-    Printing statistics :
-    CIDAR mean FA:  0.5217237675408243
-    BSNIP mean FA before harmonization:  0.5072286796848892
-    BSNIP mean FA after harmonization:  0.5321998242139347
-
-As we see above, BSNIP (target) mean FA over [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz) 
-for all the site images after harmonization increased to be almost equal to that of CIDAR (reference) mean FA.
-
-Now there are two ways to debug:
-
-## 1. With the pipeline 
-Use `--debug` flag with any (or all) of `--create` and `--process`
-
-## 2. Use seperately 
-If you would like to debug at a later time, you need to specify three images lists:
-
-* `--ref_list`: use the reference list with `.modified` extension
-* `--tar_list`: use the unprocessed target list **without** the `.modified` extension
-* `--harm_list`: use the harmonized target list that has `.harmonized` extension
-
-    `lib/harmonization.py --ref_list ref.txt.modified --tar_list target.csv --harm_list target.csv.modified.harmonized`
-
-NOTE: You should run the pipeline first before debugging separately because `--debug` makes use of files created 
-in the pipeline.
+    REF mean FA:  0.5217237675408243
+    TAR mean FA before harmonization:  0.5072286796848892
+    REF mean FA after harmonization:  0.5321998242139347
 
 
+## 1. With the pipeline
+
+`--debug` should run together with `--create` and `--process` since information from reference and target sites are used 
+to obtain the above summary. 
+
+
+## 2. Use separately
+
+However, if you would like to debug separately or if your target site has more cases than the ones used in template creation, 
+we provide you a way to debug manually. `lib/test/fa_skeleton_test.py` script registers each subject FA (reference, 
+target before harmonization, and after harmonization), to template space and then to MNI space.
+
+
+    usage: fa_skeleton_test.py [-h] -i INPUT -s SITE -t TEMPLATE --bshell_b
+                               BSHELL_B [--ncpu NCPU]
+    
+    Warps diffusion measures (FA, MD, GFA) to template space and then to MNI
+    space. Finally, calculates mean FA over IITmean_FA_skeleton.nii.gz
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -i INPUT, --input INPUT
+                            input list of FA images
+      -s SITE, --site SITE  site name for locating template FA and mask in
+                            tempalte directory
+      -t TEMPLATE, --template TEMPLATE
+                            template directory where Mean_{site}_FA.nii.gz and
+                            {site}_Mask.nii.gz is located
+      --bshell_b BSHELL_B   bvalue of the bshell
+      --ncpu NCPU           number of cpus to use
+  
+  
+Finally, it should print mean FA statistics like above.
+
+`lib/test/fa_skeleton_test.py` performs two registrations:
+
+(i) Subject to site template space
+
+(ii) Site template to MNI space
+
+Thus, subject data is brought to MNI space for comparison. For reference site, it is a straightforward process.
+However, for target site, there are two kinds of data: given and harmonized. Since given data and harmonized data reside 
+in the same space, registration is performed only once. The script is intelligent enough to exploit relevant registration 
+files if registration was performed before.
+
+In multi-shell-dMRIharmonization approach, registration is performed with highest b-shell. Obtained transform files 
+are used to warp rest of the b-shells.
 
 
 # Caveats/Issues
@@ -405,7 +473,7 @@ in that particular terminal to malfunction.
 
 ## 4. Tracker
 
-In any case, feel free to submit an issue [here](https://github.com/pnlbwh/dMRIharmonization/issues). We shall get back to you as soon as possible.
+In any case, feel free to submit an issue [here](https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues). We shall get back to you as soon as possible.
 
 # Reference
 
