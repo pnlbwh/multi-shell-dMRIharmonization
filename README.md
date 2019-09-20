@@ -326,6 +326,8 @@ Runs together with `--create` and `--process`
 
 
 
+**TBD** Tests are incomplete as of now but will be completed soon.
+
 # Tests
 
 A small test data is provided with each [release](https://github.com/pnlbwh/multi-shell-dMRIharmonization/releases). 
@@ -346,9 +348,8 @@ You may test the whole pipeline as follows:
 ## 2. unittest
 You may run smaller and faster unittest as follows:
     
-    python -m unittest discover -v lib/tests/
-    
-**TBD** This section will be expanded in future.
+    python -m unittest discover -v lib/tests/    
+
 
 
 # Preprocessing
