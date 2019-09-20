@@ -1,5 +1,4 @@
 ![](doc/pnl-bwh-hms.png)
-10.5281/zenodo.3451427
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.3451427.svg)](https://doi.org/10.5281/zenodo.3451427) [![Python](https://img.shields.io/badge/Python-3.6-green.svg)]() [![Platform](https://img.shields.io/badge/Platform-linux--64%20%7C%20osx--64-orange.svg)]()
 
@@ -77,7 +76,7 @@ https://github.com/pnlbwh/multi-shell-dMRIharmoniziation, 2019, doi: 10.5281/zen
 
 
 * Billah T*, Cetin Karayumak S*, Bouix S, Rathi Y. Multi-site Diffusion MRI Harmonization, 
-https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.3451427
+https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.2584275
 
     \* *denotes equal first authroship*
 
@@ -132,6 +131,7 @@ Activate the conda environment:
 
 
 
+
 **NOTE** With the current design, *MATLAB Runtime Compiler* and *unringing* are not used. So, you may pass them.
     
 ### MATLAB Runtime Compiler
@@ -174,6 +174,7 @@ You should be able to see the help message now:
 **NOTE** FSL unringing executable requires Centos7 operating system.
     
     
+
 ## 2. Install pipeline
 
 Now that you have installed the prerequisite software, you are ready to install the pipeline:
