@@ -103,15 +103,15 @@ class pipeline(cli.Application):
         help='specify a bmax to scale bvalues into',
         default= False)
 
-    bshell_b = cli.SwitchAttr(
-        '--bshell_b',
-        help='bvalue of the bshell',
-        mandatory= True)
-
     denoise = cli.Flag(
         '--denoise',
         help='turn on this flag to denoise voxel data',
         default= False)
+
+    bshell_b = cli.SwitchAttr(
+        '--bshell_b',
+        help='bvalue of the bshell',
+        mandatory= True)
 
     create = cli.Flag(
         '--create',
@@ -448,7 +448,7 @@ class pipeline(cli.Application):
         if self.process:
             self.harmonizeData()
 
-        if self.debug:
+        if self.create and self.process and self.debug:
             self.post_debug()
 
 
