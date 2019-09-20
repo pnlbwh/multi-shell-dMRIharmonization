@@ -396,8 +396,9 @@ to obtain the above summary.
 ## 2. Use separately
 
 However, if you would like to debug separately or if your target site has more cases than the ones used in template creation, 
-we provide you a way to debug manually. `lib/test/fa_skeleton_test.py` script registers each subject FA (reference, 
-target before harmonization, and after harmonization), to template space and then to MNI space.
+we provide you a way to debug manually. Firstly, make sure to harmonize data with `--debug` flag enabled. The flag will 
+create diffusion measures that are used in debugging later. Then, `lib/test/fa_skeleton_test.py` script can register 
+each subject FA (reference, target before harmonization, and after harmonization), to template space and then to MNI space.
 
 
     usage: fa_skeleton_test.py [-h] -i INPUT -s SITE -t TEMPLATE --bshell_b
