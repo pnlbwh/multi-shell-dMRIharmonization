@@ -42,6 +42,8 @@ def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
 
 class multi_shell_pipeline(cli.Application):
 
+    VERSION = 1.0
+
     ref_csv = cli.SwitchAttr(
         ['--ref_list'],
         cli.ExistingFile,
@@ -85,20 +87,9 @@ class multi_shell_pipeline(cli.Application):
         help='travelling heads',
         default= False)
 
-    resample = cli.SwitchAttr(
-        '--resample',
-        help='voxel size MxNxO to resample into',
-        default= False)
-
-    bvalMap = cli.SwitchAttr(
-        '--bvalMap',
-        help='specify a bmax to scale bvalues into',
-        default= False)
-
-    denoise = cli.Flag(
-        '--denoise',
-        help='turn on this flag to denoise voxel data',
-        default= False)
+    denoise= None
+    bvalMap= None
+    resample= None
 
     create = cli.Flag(
         '--create',
@@ -183,6 +174,8 @@ class multi_shell_pipeline(cli.Application):
             pipeline_vars.append('--travelHeads')
         if self.force:
             pipeline_vars.append('--force')
+        if self.debug:
+            pipeline_vars.append('--debug')
         if self.verbose:
             pipeline_vars.append('--verbose')
 
@@ -191,40 +184,33 @@ class multi_shell_pipeline(cli.Application):
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
         for bval in ref_bvals[ :-1]: # pass the last bval which is 0.
 
+            if self.create and not self.process:
+                print('## template creation ##')
 
-            if not self.debug:
-
-
-                if self.create:
-                    print('## template creation ##')
-
-                    check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
-                    '--tar_list', tarListOutPrefix+f'_b{int(bval)}.csv',
-                    '--bshell_b', str(int(bval)),
-                    '--ref_list', refListOutPrefix+f'_b{int(bval)}.csv',
-                    '--create'] + pipeline_vars), shell= True)
+                check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
+                '--tar_list', tarListOutPrefix+f'_b{int(bval)}.csv',
+                '--bshell_b', str(int(bval)),
+                '--ref_list', refListOutPrefix+f'_b{int(bval)}.csv',
+                '--create'] + pipeline_vars), shell= True)
 
 
 
-                if self.process:
-                    print('## data harmonization ##')
-
-                    check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
-                    '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',
-                    '--bshell_b', str(int(bval)),
-                    '--process'] + pipeline_vars), shell=True)
-
-            else:
-
-                ## debugging mode
-                print('\n In --debug mode, both --create and --process are enabled\n')
-                print('## template creation and data harmonization ##')
+            elif not self.create and self.process:
+                print('## data harmonization ##')
 
                 check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
                 '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',
                 '--bshell_b', str(int(bval)),
+                '--process'] + pipeline_vars), shell=True)
+
+
+
+            elif self.create and self.process:
+                check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
+                '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',
+                '--bshell_b', str(int(bval)),
                 '--ref_list', refListOutPrefix+f'_b{int(bval)}.csv',
-                '--create', '--process', '--debug'] + pipeline_vars), shell=True)
+                '--create', '--process'] + pipeline_vars), shell=True)
 
 
         ## join harmonized data
