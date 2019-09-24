@@ -78,3 +78,4 @@ def read_caselist(file):
 #         return niftiImgPrefix+'.nii.gz'
 #     else:
 #         return imgPath
+

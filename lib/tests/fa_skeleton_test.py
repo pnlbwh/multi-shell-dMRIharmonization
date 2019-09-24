@@ -16,7 +16,7 @@
 from plumbum.cmd import antsApplyTransforms
 from plumbum import FG
 import multiprocessing
-from numpy import mean
+import numpy as np
 from test_util import *
 import argparse
 
@@ -24,6 +24,19 @@ ROOTDIR= abspath(pjoin(LIBDIR, '..'))
 mniTmp = pjoin(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
 
 diffusionMeasures = ['MD', 'FA', 'GFA']
+
+
+def printStat(ref_mean, imgs):
+
+    print('mean FA over IIT_mean_FA_skeleton.nii.gz for all cases: ')
+    for i, imgPath in enumerate(imgs):
+        print(basename(imgPath), ref_mean[i])
+
+    print('')
+    print('mean meanFA: ', np.mean(ref_mean))
+    print('std meanFA: ', np.std(ref_mean))
+    print('')
+
 
 def read_caselist(file):
 
@@ -162,25 +175,25 @@ def main():
     parser.add_argument('-t', '--template', type=str, required=True,
                         help='template directory where Mean_{site}_FA.nii.gz and {site}_Mask.nii.gz is located')
     parser.add_argument('--bshell_b', required=True, help='bvalue of the bshell')
-    parser.add_argument('--ncpu', help='number of cpus to use')
+    parser.add_argument('--ncpu', help='number of cpus to use', default= '4')
 
     args = parser.parse_args()
-    caselist=args.input
+    imgList=args.input
     siteName=args.site
     templatePath=args.template
     bshell_b= int(args.bshell_b)
     N_proc= int(args.ncpu)
 
     # read FA image list
-    faImgs= read_caselist(caselist)
+    faImgs= read_caselist(imgList)
 
     # register and obtain *_InMNI_FA.nii.gz
     mniFAimgs= sub2tmp2mni(templatePath, siteName, faImgs, bshell_b, N_proc)
 
     # pass *_InMNI_FA.nii.gz list to analyzeStat
     site_means= analyzeStat(mniFAimgs)
-    print(f'{siteName} mean FA: ', mean(site_means))
-
+    print(f'{siteName} site: ')
+    printStat(site_means, mniFAimgs)
 
 if __name__ == '__main__':
     main()

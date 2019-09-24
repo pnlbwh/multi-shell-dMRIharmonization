@@ -26,6 +26,20 @@ N_CPU= psutil.cpu_count()
 SCRIPTDIR= dirname(__file__)
 
 
+def printStat(ref_mean, csvFile):
+
+    print('mean FA over IIT_mean_FA_skeleton.nii.gz for all cases: ')
+    imgs, _ = read_imgs_masks(csvFile)
+    for i, imgPath in enumerate(imgs):
+        print(basename(imgPath), ref_mean[i])
+
+    print('')
+    print('mean meanFA: ', np.mean(ref_mean))
+    print('std meanFA: ', np.std(ref_mean))
+    print('')
+
+
+
 class pipeline(cli.Application):
 
     """
@@ -347,9 +361,13 @@ class pipeline(cli.Application):
         target_mean_after = analyzeStat(self.harm_csv, self.templatePath)
 
         print('\n\nPrinting statistics :')
-        print(f'{self.reference} mean FA: ', np.mean(ref_mean))
-        print(f'{self.target} mean FA before harmonization: ', np.mean(target_mean_before))
-        print(f'{self.target} mean FA after harmonization: ', np.mean(target_mean_after))
+
+        print(f'{self.reference} site: ')
+        printStat(ref_mean, self.ref_csv)
+        print(f'{self.target} site before harmonization: ')
+        printStat(target_mean_before, self.tar_unproc_csv)
+        print(f'{self.target} site after harmonization: ')
+        printStat(target_mean_after, self.harm_csv)
 
 
     def sanityCheck(self):
