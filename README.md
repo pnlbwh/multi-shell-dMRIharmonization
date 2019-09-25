@@ -71,7 +71,7 @@ https://github.com/pnlbwh/dMRIharmonization#data-harmonization
 
 If this repository is useful in your research, please cite all of the following: 
 
-* Billah T, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
+* Billah T, Bouix S, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
 https://github.com/pnlbwh/multi-shell-dMRIharmoniziation, 2019, doi: 10.5281/zenodo.3451427
 
 
@@ -90,6 +90,36 @@ doi: 10.1016/j.neuroimage.2018.08.073. Epub 2018 Sep 8. PubMed PMID: 30205206; P
 McAllister TW, Andaluz N, Shutter L, Coimbra R, Zafonte RD, Coleman MJ, Kubicki M, Westin CF, Stein MB, Shenton ME, Rathi Y. 
 Multi-site harmonization of diffusion MRI data in a registration framework. Brain Imaging Behav. 2018 Feb;12(1):284-295. 
 doi:10.1007/s11682-016-9670-y. PubMed PMID: 28176263.
+
+
+# Requirements for data
+
+1. Two groups of data from- *reference* and *target* sites are required. Control (healthy) subjects should be present 
+in each site.
+
+2. The groups between the sites should be very well matched for age, sex, socio-economic status, IQ and any other 
+demographic variable.
+
+3. A minimum of 16 subjects is required from each site for proper harmonization (so a minimum of 32 subjects in total).
+
+4. The data should be curated with the following steps prior to harmonization: 
+    
+    (i) axis alignment and centering
+    
+    (ii) signal dropped gradient removal
+    
+    (iii) eddy current and head motion correction
+    
+5. b-values in each b-shell should have similar b-values (i.e, if one site has b-value 1000, 
+the other one should have in the range [900,1100]).
+
+
+If your data does not satisfy these requirements, please open an issue [here](https://github.com/pnlbwh/dMRIharmonization/issues) or contact -
+
+*skarayumak@bwh.harvard.edu*
+
+*tbillah@bwh.harvard.edu*
+
 
 
 # Dependencies
