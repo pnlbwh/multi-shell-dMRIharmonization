@@ -114,7 +114,7 @@ demographic variable.
 the other one should have in the range [900,1100]).
 
 
-If your data does not satisfy these requirements, please open an issue [here](https://github.com/pnlbwh/dMRIharmonization/issues) or contact -
+If your data does not satisfy these requirements, please open an issue [here](https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues) or contact -
 
 *skarayumak@bwh.harvard.edu*
 
