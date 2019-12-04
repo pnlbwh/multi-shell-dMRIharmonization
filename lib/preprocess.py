@@ -22,7 +22,7 @@ from dti import dti
 from rish import rish
 
 SCRIPTDIR= os.path.dirname(__file__)
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read(f'/tmp/harm_config_{os.getpid()}.ini')
 
 N_shm = int(config['DEFAULT']['N_shm'])

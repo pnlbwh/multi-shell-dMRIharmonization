@@ -22,7 +22,7 @@ SCRIPTDIR= os.path.dirname(__file__)
 ROOTDIR= os.path.abspath(os.path.join(SCRIPTDIR, '..'))
 mniTmp = os.path.join(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
 
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read(f'/tmp/harm_config_{os.getpid()}.ini')
 N_proc = int(config['DEFAULT']['N_proc'])
 diffusionMeasures = [x for x in config['DEFAULT']['diffusionMeasures'].split(',')]

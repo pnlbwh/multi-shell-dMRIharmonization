@@ -346,28 +346,61 @@ class pipeline(cli.Application):
 
     def post_debug(self):
 
-        from debug_fa import sub2tmp2mni, analyzeStat
+        from debug_fa import sub2tmp2mni
 
         print('\n\n Reference site')
         sub2tmp2mni(self.templatePath, self.reference, self.ref_csv, ref= True)
-        ref_mean = analyzeStat(self.ref_csv, self.templatePath)
 
         print('\n\n Target site before harmonization')
         sub2tmp2mni(self.templatePath, self.target, self.tar_unproc_csv, tar_unproc= True)
-        target_mean_before = analyzeStat(self.tar_unproc_csv, self.templatePath)
 
         print('\n\n Target site after harmonization')
         sub2tmp2mni(self.templatePath, self.target, self.harm_csv, tar_harm= True)
-        target_mean_after = analyzeStat(self.harm_csv, self.templatePath)
 
-        print('\n\nPrinting statistics :')
 
+        self.showStat()
+
+    
+    def showStat(self):
+
+        from debug_fa import analyzeStat
+        from datetime import datetime
+
+        print('Printing statistics :\n\n')
+        
+        # save statistics for future
+        statFile= pjoin(self.templatePath, 'meanFAstat.txt') 
+        f= open(statFile,'a')
+        stdout= sys.stdout
+        sys.stdout= f
+        
+        print(datetime.now().strftime('%c'),'\n')
+        
+        print('b-shell', self.bshell_b, '\n')
+        
         print(f'{self.reference} site: ')
+        ref_mean = analyzeStat(self.ref_csv, self.templatePath)
         printStat(ref_mean, self.ref_csv)
+
         print(f'{self.target} site before harmonization: ')
+        target_mean_before = analyzeStat(self.tar_unproc_csv, self.templatePath)        
         printStat(target_mean_before, self.tar_unproc_csv)
+
         print(f'{self.target} site after harmonization: ')
+        target_mean_after = analyzeStat(self.harm_csv, self.templatePath) 
         printStat(target_mean_after, self.harm_csv)
+        
+        print('\n\n')
+
+        f.close()
+        sys.stdout= stdout
+
+        # print statistics on console        
+        with open(statFile) as f:
+            print(f.read())
+        
+        print('\nThe statistics are also saved in ', statFile)
+    
 
 
     def sanityCheck(self):

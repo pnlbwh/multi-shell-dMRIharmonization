@@ -12,14 +12,12 @@
 # ===============================================================================
 
 from configparser import ConfigParser
-import configparser
 from os.path import join as pjoin, split as psplit, abspath, basename, dirname, isfile, exists
 from os import getpid, makedirs, remove
 from subprocess import check_call
 from shutil import copyfile, rmtree
 import numpy as np
-import os
-import shutil
+import os, shutil, sys
 
 SCRIPTDIR= abspath(dirname(__file__))
 
