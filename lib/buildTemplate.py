@@ -28,7 +28,7 @@ N_shm = int(config['DEFAULT']['N_shm'])
 N_proc = int(config['DEFAULT']['N_proc'])
 bshell_b = int(config['DEFAULT']['bshell_b'])
 diffusionMeasures= [x for x in config['DEFAULT']['diffusionMeasures'].split(',')]
-travelHeads= bool(config['DEFAULT']['travelHeads'])
+travelHeads= int(config['DEFAULT']['travelHeads'])
 verbose = int(config['DEFAULT']['verbose'])
 
 def applyXform(inImg, refImg, warp, trans, outImg):
@@ -123,8 +123,9 @@ def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
         morphed_mask= binary_opening(np.mean(maskData, axis= 0)>0.5, structure= generate_binary_structure(3,1))*1
         save_nifti(morphed_mask_name, morphed_mask.astype('uint8'), templateAffine, templateHdr)
 
-    imgData= []
+
     for dm in diffusionMeasures:
+        imgData= []
         for imgPath in imgs:
             prefix = basename(imgPath).split('.')[0]
             imgData.append(load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0])
@@ -197,7 +198,9 @@ def stat_calc(ref, target, mask):
     np.nan_to_num(per_diff).clip(max=100., min=-100., out= per_diff)
     per_diff_smooth= smooth(per_diff)
     scale= ref/(target+eps)
-    scale.clip(max=10., min= 0., out= scale)
+    scale.clip(min=0., out=scale)
+    # scale.clip(max=10., min= 0., out= scale)
+
 
     return (delta, per_diff, per_diff_smooth, scale)
 
@@ -225,6 +228,7 @@ def difference_calc(refSite, targetSite, refImgs, targetImgs,
         per_diff_smooth= []
         scale= []
         if travelHeads:
+            print('Using travelHeads for computing scale maps of',dm)
             for refImg, targetImg in zip(refImgs, targetImgs):
                 prefix = basename(refImg).split('.')[0]
                 ref= load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0]
