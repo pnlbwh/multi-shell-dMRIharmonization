@@ -95,6 +95,7 @@ def antsMult(caselist, outPrefix):
         print(f'See {logFile} for details of template construction')
 
 
+    N_core=os.getenv('TEMPLATE_CONSTRUCT_CORE')
     check_call((' ').join([pjoin(SCRIPTDIR, 'antsMultivariateTemplateConstruction2_fixed_random_seed.sh'),
                            '-d', '3',
                            '-g', '0.2',
@@ -102,7 +103,7 @@ def antsMult(caselist, outPrefix):
                            '-t', "BSplineSyN[0.1,26,0]",
                            '-r', '1',
                            '-c', '2',
-                           '-j', str(N_proc),
+                           '-j', str(N_core) if N_core else str(N_proc),
                            '-f', '8x4x2x1',
                            '-o', outPrefix,
                            caselist]), shell= True, stdout= f, stderr= sys.stdout)

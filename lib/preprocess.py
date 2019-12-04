@@ -37,7 +37,7 @@ debug = int(config['DEFAULT']['debug'])
 
 
 
-def dti_harm(imgPath, maskPath):
+def dti_harm(imgPath, maskPath, nargout=0):
 
     directory = os.path.dirname(imgPath)
     inPrefix = imgPath.split('.')[0]
@@ -52,15 +52,8 @@ def dti_harm(imgPath, maskPath):
     outPrefix = os.path.join(directory, 'harm', prefix)
     b0, shm_coeff, qb_model= rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
-    return (b0, shm_coeff, qb_model)
-
-
-# def pre_dti_harm(imgPath, maskPath):
-def pre_dti_harm(itr):
-    imgPath, maskPath = preprocessing(itr[0], itr[1])
-    dti_harm(imgPath, maskPath)
-    return (imgPath, maskPath)
-
+    if nargout==3:
+        return (b0, shm_coeff, qb_model)
 
 
 def preprocessing(imgPath, maskPath):
@@ -136,21 +129,38 @@ def preprocessing(imgPath, maskPath):
 
 def common_processing(caselist):
     imgs, masks = read_caselist(caselist)
+    
+    res=[]
+    pool = multiprocessing.Pool(N_proc)
+    for imgPath,maskPath in zip(imgs,masks):
+        res.append(pool.apply_async(func= preprocessing, args= (imgPath,maskPath)))
+
+    attributes= [r.get() for r in res]
+
+
+    pool.close()
+    pool.join()
+    
+
     f = open(caselist + '.modified', 'w')
-
-    pool = multiprocessing.Pool(N_proc)  # Use all available cores, otherwise specify the number you want as an argument
-
-    res = pool.map_async(pre_dti_harm, np.hstack((np.reshape(imgs, (len(imgs), 1)), np.reshape(masks, (len(masks), 1)))))
-    attributes = res.get()
     for i in range(len(imgs)):
         imgs[i] = attributes[i][0]
         masks[i] = attributes[i][1]
         f.write(f'{imgs[i]},{masks[i]}\n')
+    f.close()
+
+
+    # the following imgs, masks is for diagnosing MemoryError i.e. computing rish w/o preprocessing
+    # to diagnose, comment all the above and uncomment the following
+    # imgs, masks = read_caselist(caselist+'.modified')
+
+    # experimentally found ncpu=4 to be memroy optimal
+    pool = multiprocessing.Pool(4)
+    for imgPath,maskPath in zip(imgs,masks):
+        pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
 
     pool.close()
     pool.join()
-
-    f.close()
 
     return (imgs, masks)
 
