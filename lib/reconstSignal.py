@@ -41,20 +41,22 @@ def antsReg(img, mask, mov, outPrefix):
         print(f'See {logFile} for details of registration')
 
     if mask:
-        check_call((' ').join(['antsRegistrationSyNQuick.sh',
+        p= Popen((' ').join(['antsRegistrationSyNQuick.sh',
                                '-d', '3',
                                '-f', img,
                                '-x', mask,
                                '-m', mov,
                                '-o', outPrefix,
                                '-e', '123456']), shell= True, stdout= f, stderr= sys.stdout)
+        p.wait()
     else:
-        check_call((' ').join(['antsRegistrationSyNQuick.sh',
+        p= Popen((' ').join(['antsRegistrationSyNQuick.sh',
                                '-d', '3',
                                '-f', img,
                                '-m', mov,
                                '-o', outPrefix,
                                '-e', '123456']), shell= True, stdout= f, stderr= sys.stdout)
+        p.wait()
 
     if f.name!='<sys.stdout>':
         f.close()
