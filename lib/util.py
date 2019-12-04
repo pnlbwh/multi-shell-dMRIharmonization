@@ -59,3 +59,6 @@ def save_nifti(fname, data, affine, hdr=None):
 def RAISE(ERR):
     raise ERR
 
+B0_THRESH= 50.
+B_QUANT= 50.
+BSHELL_MIN_DIST= 100.
