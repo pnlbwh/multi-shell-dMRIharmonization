@@ -211,7 +211,7 @@ class pipeline(cli.Application):
         else:
             warnings.warn(f'Using {template0} created with bmax shell')
 
-        # # load templateHdr
+        # load templateHdr
         templateHdr= load(template0).header
 
 
@@ -228,9 +228,9 @@ class pipeline(cli.Application):
         # for imgPath, maskPath in zip(imgs, masks):
         #     warp_bands(imgPath, maskPath, self.templatePath)
 
-        print('dti statistics: mean, std(FA, MD) calculation of reference site')
+        print('dti statistics: mean, std calculation of reference site')
         refMaskPath= dti_stat(self.reference, refImgs, refMasks, self.templatePath, templateHdr)
-        print('dti statistics: mean, std(FA, MD) calculation of target site')
+        print('dti statistics: mean, std calculation of target site')
         targetMaskPath= dti_stat(self.target, targetImgs, targetMasks, self.templatePath, templateHdr)
 
         print('masking dti statistics of reference site')
@@ -239,9 +239,9 @@ class pipeline(cli.Application):
         templateMask= template_masking(refMaskPath, targetMaskPath, self.templatePath, self.target)
 
         print('rish_statistics mean, std(L{i}) calculation of reference site')
-        rish_stat(self.reference, imgs, self.templatePath, templateHdr)
+        rish_stat(self.reference, refImgs, self.templatePath, templateHdr)
         print('rish_statistics mean, std(L{i}) calculation of target site')
-        rish_stat(self.target, imgs, self.templatePath, templateHdr)
+        rish_stat(self.target, targetImgs, self.templatePath, templateHdr)
 
         print('calculating scale map for diffusionMeasures')
         difference_calc(self.reference, self.target, refImgs, targetImgs, self.templatePath, templateHdr,
