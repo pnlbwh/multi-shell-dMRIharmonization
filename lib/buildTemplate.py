@@ -199,9 +199,6 @@ def stat_calc(ref, target, mask):
     np.nan_to_num(per_diff).clip(max=100., min=-100., out= per_diff)
     per_diff_smooth= smooth(per_diff)
     scale= ref/(target+eps)
-    scale.clip(min=0., out=scale)
-    # scale.clip(max=10., min= 0., out= scale)
-
 
     return (delta, per_diff, per_diff_smooth, scale)
 
@@ -229,7 +226,7 @@ def difference_calc(refSite, targetSite, refImgs, targetImgs,
         per_diff_smooth= []
         scale= []
         if travelHeads:
-            print('Using travelHeads for computing scale maps of',dm)
+            print('Using travelHeads for computing templates of',dm)
             for refImg, targetImg in zip(refImgs, targetImgs):
                 prefix = basename(refImg).split('.')[0]
                 ref= load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0]
@@ -265,8 +262,9 @@ def difference_calc(refSite, targetSite, refImgs, targetImgs,
         save_nifti(pjoin(templatePath, f'PercentageDiff_{dm}smooth_b{bshell_b}.nii.gz'),
                    np.mean(per_diff_smooth, axis= 0), templateAffine, templateHdr)
 
-        save_nifti(pjoin(templatePath, f'Scale_{dm}_b{bshell_b}.nii.gz'),
-                   np.sqrt(np.mean(scale, axis= 0)), templateAffine, templateHdr)
+        if 'L' in dm:
+            save_nifti(pjoin(templatePath, f'Scale_{dm}_b{bshell_b}.nii.gz'),
+                       np.sqrt(np.mean(scale, axis= 0)), templateAffine, templateHdr)
 
 
 
