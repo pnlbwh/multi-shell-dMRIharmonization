@@ -37,23 +37,18 @@ debug = int(config['DEFAULT']['debug'])
 
 
 
-def dti_harm(imgPath, maskPath, nargout=0):
+def dti_harm(imgPath, maskPath):
 
     directory = os.path.dirname(imgPath)
     inPrefix = imgPath.split('.')[0]
     prefix = os.path.split(inPrefix)[-1]
 
     outPrefix = os.path.join(directory, 'dti', prefix)
-
-    # if the dti output exists with the same prefix, don't dtifit again
-    if not os.path.exists(outPrefix+'_FA.nii.gz'):
-        dti(imgPath, maskPath, inPrefix, outPrefix)
+    dti(imgPath, maskPath, inPrefix, outPrefix)
 
     outPrefix = os.path.join(directory, 'harm', prefix)
-    b0, shm_coeff, qb_model= rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
+    rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
-    if nargout==3:
-        return (b0, shm_coeff, qb_model)
 
 
 def preprocessing(imgPath, maskPath):
