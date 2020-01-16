@@ -92,19 +92,19 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
         if outPrefix:
             f = open(f'{outPrefix}_b{int(bval)}.csv', 'w')
 
-        if masks:
-            for imgPath, maskPath in zip(imgs, masks):
-                inPrefix = abspath(imgPath).split('.')[0]
-                bPrefix = inPrefix + f'_b{int(bval)}'
-                f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
+            if masks:
+                for imgPath, maskPath in zip(imgs, masks):
+                    inPrefix = abspath(imgPath).split('.')[0]
+                    bPrefix = inPrefix + f'_b{int(bval)}'
+                    f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
 
-        else:
-            for imgPath in imgs:
-                inPrefix = abspath(imgPath).split('.')[0]
-                bPrefix = inPrefix + f'_b{int(bval)}'
-                f.write(f'{bPrefix}.nii.gz\n')
+            else:
+                for imgPath in imgs:
+                    inPrefix = abspath(imgPath).split('.')[0]
+                    bPrefix = inPrefix + f'_b{int(bval)}'
+                    f.write(f'{bPrefix}.nii.gz\n')
 
-        f.close()
+            f.close()
 
 
 class separateShells(cli.Application):
