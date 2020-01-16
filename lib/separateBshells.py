@@ -62,7 +62,7 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
             b0_bvecs= np.zeros((N_b+1,3), dtype='float32')
             b0_bvecs[1:,]= bvecs[ind,: ]
 
-            # save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
+            save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
             write_bvals(bPrefix+'.bval', b0_bvals)
             write_bvecs(bPrefix+'.bvec', b0_bvecs)
 
