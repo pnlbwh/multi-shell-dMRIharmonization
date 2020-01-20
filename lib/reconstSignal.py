@@ -184,8 +184,8 @@ def reconst(imgPath, maskPath, moving, templatePath, preFlag):
     img = load(imgPath)
 
     directory = dirname(imgPath)
-    inPrefix = imgPath.split('.')[0]
-    prefix = psplit(inPrefix)[-1]
+    inPrefix = imgPath.split('.nii')[0]
+    prefix = basename(inPrefix)
     outPrefix = os.path.join(directory, 'harm', prefix)
     b0, shm_coeff, qb_model = rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
@@ -204,8 +204,8 @@ def reconst(imgPath, maskPath, moving, templatePath, preFlag):
 
     print(f'Reconstructing signal from {imgPath} rish features ...')
     harmImg, harmMask = ring_masking(directory, prefix, maskPath, shm_coeff, b0, qb_model, img.header)
-    copyfile(inPrefix + '.bvec', harmImg.split('.')[0] + '.bvec')
-    copyfile(inPrefix + '.bval', harmImg.split('.')[0] + '.bval')
+    copyfile(inPrefix + '.bvec', harmImg.split('.nii')[0] + '.bvec')
+    copyfile(inPrefix + '.bval', harmImg.split('.nii')[0] + '.bval')
 
     if debug:
         dti_harm(harmImg, harmMask)

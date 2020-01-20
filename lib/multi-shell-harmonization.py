@@ -30,11 +30,9 @@ from fileUtil import check_dir
 
 
 def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
-
-    csvDirectory= dirname(csvFile)
-    csvPrefix= basename(csvFile).split('.')[0]
-    outPrefix= pjoin(csvDirectory, csvPrefix)
-
+    
+    outPrefix= csvFile.with_suffix('')._path
+    
     separateAllBshells(csvFile, ref_bshell_file, N_proc, outPrefix)
 
     return outPrefix

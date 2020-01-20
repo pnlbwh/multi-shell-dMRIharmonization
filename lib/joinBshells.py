@@ -34,7 +34,7 @@ def joinBshells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
     img= load(imgPath._path)
     dim= img.header['dim'][1:5]
 
-    inPrefix= abspath(imgPath).split('.')[0]
+    inPrefix= abspath(imgPath).split('.nii')[0]
     directory= dirname(inPrefix)
     prefix = basename(inPrefix)
 

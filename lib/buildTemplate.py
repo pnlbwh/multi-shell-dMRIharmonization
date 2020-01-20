@@ -44,7 +44,7 @@ def applyXform(inImg, refImg, warp, trans, outImg):
 
 def warp_bands(imgPath, maskPath, templatePath):
 
-    prefix= basename(imgPath).split('.')[0]
+    prefix= basename(imgPath).split('.nii')[0]
     transPrefix= prefix.replace(f'_b{bshell_b}','')
     directory= dirname(imgPath)
     warp = glob(pjoin(templatePath, transPrefix + f'*_FA*[!Inverse]Warp.nii.gz'))
@@ -54,7 +54,7 @@ def warp_bands(imgPath, maskPath, templatePath):
     applyXform(maskPath,
                pjoin(templatePath, 'template0.nii.gz'),
                warp, trans,
-               pjoin(templatePath, abspath(maskPath).split('.')[0] + 'Warped.nii.gz'))
+               pjoin(templatePath, abspath(maskPath).split('.nii')[0] + 'Warped.nii.gz'))
 
 
     # warping the rish features
@@ -77,7 +77,7 @@ def createAntsCaselist(imgs, file):
 
     with open(file,'w') as f:
         for imgPath in imgs:
-            prefix= basename(imgPath).split('.')[0]
+            prefix= basename(imgPath).split('.nii')[0]
             directory= dirname(imgPath)
 
             FA= pjoin(directory,'dti', f'{prefix}_FA.nii.gz')
@@ -119,7 +119,7 @@ def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
     if not isfile(morphed_mask_name):
         maskData = []
         for maskPath in masks:
-            maskData.append(load_nifti(pjoin(templatePath, abspath(maskPath).split('.')[0] + 'Warped.nii.gz'))[0])
+            maskData.append(load_nifti(pjoin(templatePath, abspath(maskPath).split('.nii')[0] + 'Warped.nii.gz'))[0])
 
         morphed_mask= binary_opening(np.mean(maskData, axis= 0)>0.5, structure= generate_binary_structure(3,1))*1
         save_nifti(morphed_mask_name, morphed_mask.astype('uint8'), templateAffine, templateHdr)
@@ -128,7 +128,7 @@ def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
     for dm in diffusionMeasures:
         imgData= []
         for imgPath in imgs:
-            prefix = basename(imgPath).split('.')[0]
+            prefix = basename(imgPath).split('.nii')[0]
             imgData.append(load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0])
 
         save_nifti(pjoin(templatePath, f'Mean_{siteName}_{dm}_b{bshell_b}.nii.gz'),
@@ -145,7 +145,7 @@ def rish_stat(siteName, imgs, templatePath, templateHdr):
     for i in range(0, N_shm+1, 2):
         imgData= []
         for imgPath in imgs:
-            prefix = basename(imgPath).split('.')[0]
+            prefix = basename(imgPath).split('.nii')[0]
             imgData.append(load_nifti(pjoin(templatePath, f'{prefix}_WarpedL{i}.nii.gz'))[0])
 
         templateAffine= templateHdr.get_best_affine()
@@ -228,10 +228,10 @@ def difference_calc(refSite, targetSite, refImgs, targetImgs,
         if travelHeads:
             print('Using travelHeads for computing templates of',dm)
             for refImg, targetImg in zip(refImgs, targetImgs):
-                prefix = basename(refImg).split('.')[0]
+                prefix = basename(refImg).split('.nii')[0]
                 ref= load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0]
 
-                prefix = basename(targetImg).split('.')[0]
+                prefix = basename(targetImg).split('.nii')[0]
                 target= load_nifti(pjoin(templatePath, f'{prefix}_Warped{dm}.nii.gz'))[0]
 
                 temp= stat_calc(ref, target, mask)

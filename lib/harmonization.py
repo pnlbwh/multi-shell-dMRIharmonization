@@ -209,7 +209,7 @@ class pipeline(cli.Application):
             # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
             antsMult(abspath(antsMultCaselist), self.templatePath)
         else:
-            warnings.warn(f'Using {template0} created with bmax shell')
+            warnings.warn(f'Using {template0} which was created before with bmax shell')
 
         # load templateHdr
         templateHdr= load(template0).header
@@ -452,7 +452,7 @@ class pipeline(cli.Application):
                 ref_nshm_img = read_imgs_masks(self.target_csv)[0][0]
 
             directory= dirname(ref_nshm_img)
-            prefix= basename(ref_nshm_img).split('.')[0]
+            prefix= basename(ref_nshm_img).split('.nii')[0]
             bvalFile= pjoin(directory, prefix+'.bval')
             self.N_shm, _= determineNshm(bvalFile)
 

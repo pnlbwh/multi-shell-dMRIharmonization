@@ -35,7 +35,7 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
 
     img= load(imgPath._path)
     dwi= img.get_data()
-    inPrefix= abspath(imgPath).split('.')[0]
+    inPrefix= abspath(imgPath).split('.nii')[0]
     bvals= np.array(read_bvals(inPrefix+'.bval'))
     bvecs= np.array(read_bvecs(inPrefix+'.bvec'))
 
@@ -94,13 +94,13 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
 
             if masks:
                 for imgPath, maskPath in zip(imgs, masks):
-                    inPrefix = abspath(imgPath).split('.')[0]
+                    inPrefix = abspath(imgPath).split('.nii')[0]
                     bPrefix = inPrefix + f'_b{int(bval)}'
                     f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
 
             else:
                 for imgPath in imgs:
-                    inPrefix = abspath(imgPath).split('.')[0]
+                    inPrefix = abspath(imgPath).split('.nii')[0]
                     bPrefix = inPrefix + f'_b{int(bval)}'
                     f.write(f'{bPrefix}.nii.gz\n')
 
