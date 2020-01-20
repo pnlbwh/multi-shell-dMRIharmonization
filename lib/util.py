@@ -49,9 +49,10 @@ def save_nifti(fname, data, affine, hdr=None):
 # this block may be uncommented in a future design
 # def convertedPath(imgPath):
 #
-#     if imgPath.endswith('.nhdr') or imgPath.endswith('.nrrd'):
-#         imgPath = imgPath.split('.')[0] + '.nii.gz'
-#
+#     if imgPath.endswith('.nhdr'):
+#         imgPath = imgPath.split('.nhdr')[0] + '.nii.gz'
+#     elif imgPath.endswith('.nrrd'):
+#         imgPath = imgPath.split('.nrrd')[0] + '.nii.gz'         
 #     return imgPath
 
 def RAISE(ERR):

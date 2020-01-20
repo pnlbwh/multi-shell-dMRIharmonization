@@ -71,11 +71,13 @@ def read_caselist(file):
 # from conversion import nifti_write
 # def nrrd2nifti(imgPath):
 #
-#     if imgPath.endswith('.nrrd') or imgPath.endswith('.nhdr'):
-#         niftiImgPrefix= imgPath.split('.')[0]
-#         nifti_write(imgPath, niftiImgPrefix)
-#
-#         return niftiImgPrefix+'.nii.gz'
+#     if imgPath.endswith('.nrrd'):
+#         niftiImgPrefix= imgPath.split('.nrrd')[0]
+#     elif imgPath.endswith('.nhdr'):
+#         niftiImgPrefix= imgPath.split('.nhdr')[0]
 #     else:
 #         return imgPath
+#
+#     nifti_write(imgPath, niftiImgPrefix)
+#     return niftiImgPrefix+'.nii.gz'
 

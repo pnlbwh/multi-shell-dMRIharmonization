@@ -32,8 +32,8 @@ def register_reference(imgPath, warp2mni, trans2mni, templatePath):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
     directory = os.path.dirname(imgPath)
-    inPrefix = imgPath.split('.')[0]
-    prefix = os.path.split(inPrefix)[-1]
+    inPrefix = imgPath.split('.nii')[0]
+    prefix = basename(inPrefix)
 
     for dm in diffusionMeasures:
 
@@ -57,8 +57,8 @@ def register_target(imgPath, templatePath):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
     directory = os.path.dirname(imgPath)
-    inPrefix = imgPath.split('.')[0]
-    prefix = os.path.split(inPrefix)[-1]
+    inPrefix = imgPath.split('.nii')[0]
+    prefix = basename(inPrefix)
 
     dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
     outPrefix = os.path.join(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
@@ -86,8 +86,8 @@ def register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
     directory = os.path.dirname(imgPath)
-    inPrefix = imgPath.split('.')[0]
-    prefix = os.path.split(inPrefix)[-1]
+    inPrefix = imgPath.split('.nii')[0]
+    prefix = basename(inPrefix)
 
     dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
     dmTmp = os.path.join(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
@@ -167,8 +167,8 @@ def analyzeStat(file, templatePath):
 
     meanAttr=[]
     for imgPath in imgs:
-        inPrefix = imgPath.split('.')[0]
-        prefix = os.path.split(inPrefix)[-1]
+        inPrefix = imgPath.split('.nii')[0]
+        prefix = basename(inPrefix)
 
         faImg= os.path.join(templatePath, prefix + f'_InMNI_FA.nii.gz')
         data= load(faImg).get_data()

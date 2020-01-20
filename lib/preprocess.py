@@ -40,8 +40,8 @@ debug = int(config['DEFAULT']['debug'])
 def dti_harm(imgPath, maskPath):
 
     directory = os.path.dirname(imgPath)
-    inPrefix = imgPath.split('.')[0]
-    prefix = os.path.split(inPrefix)[-1]
+    inPrefix = imgPath.split('.nii')[0]
+    prefix = basename(inPrefix)
 
     outPrefix = os.path.join(directory, 'dti', prefix)
     dti(imgPath, maskPath, inPrefix, outPrefix)
@@ -66,7 +66,7 @@ def preprocessing(imgPath, maskPath):
 
     lowResImg = applymask(lowResImg, lowResMask)
 
-    inPrefix = imgPath.split('.')[0]
+    inPrefix = imgPath.split('.nii')[0]
 
     bvals, _ = read_bvals_bvecs(inPrefix + '.bval', None)
 
@@ -78,7 +78,7 @@ def preprocessing(imgPath, maskPath):
         lowResImg, _ = denoising(lowResImg, lowResMask)
         suffix = '_denoised'
         if debug:
-            outPrefix= imgPath.split('.')[0]+suffix
+            outPrefix= imgPath.split('.nii')[0]+suffix
             save_nifti(outPrefix+'.nii.gz', lowResImg, lowRes.affine, lowResImgHdr)
             shutil.copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
             shutil.copyfile(inPrefix + '.bval', inPrefix + '.bval')
@@ -90,9 +90,9 @@ def preprocessing(imgPath, maskPath):
         lowResImg, bvals = remapBval(lowResImg, lowResMask, bvals, bvalMap)
         suffix = '_bmapped'
         if debug:
-            outPrefix= imgPath.split('.')[0]+suffix
+            outPrefix= imgPath.split('.nii')[0]+suffix
             save_nifti(outPrefix+'.nii.gz', lowResImg, lowRes.affine, lowResImgHdr)
-            shutil.copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
+            shutil.copyfile(niiinPrefix + '.bvec', outPrefix + '.bvec')
             write_bvals(outPrefix + '.bval', bvals)
             dti_harm(outPrefix+'.nii.gz', maskPath)
 

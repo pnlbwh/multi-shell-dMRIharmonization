@@ -83,7 +83,7 @@ def register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshel
     directory = dirname(imgPath)
 
     # should have _FA a the end already
-    basePrefix= psplit(imgPath)[-1].split('.')[0]
+    basePrefix= psplit(imgPath)[-1].split('.nii')[0]
     prefix = basePrefix.replace('_FA', '')
 
     # given data and harmonized data are in the same space, so need to register again
@@ -199,7 +199,7 @@ def main():
 
         for imgPath in imgs:
             directory = dirname(imgPath)
-            prefix = basename(imgPath).split('.')[0]
+            prefix = basename(imgPath).split('.nii')[0]
             faImg= pjoin(directory, 'dti', prefix+ '_FA.nii.gz')
             if not isfile(faImg):
                 raise FileNotFoundError(f'{faImg} not found. Did you run \"--create --debug\" and \"--process --debug\" before?')
