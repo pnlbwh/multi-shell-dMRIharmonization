@@ -92,7 +92,7 @@ def preprocessing(imgPath, maskPath):
         if debug:
             outPrefix= imgPath.split('.nii')[0]+suffix
             save_nifti(outPrefix+'.nii.gz', lowResImg, lowRes.affine, lowResImgHdr)
-            shutil.copyfile(niiinPrefix + '.bvec', outPrefix + '.bvec')
+            shutil.copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
             write_bvals(outPrefix + '.bval', bvals)
             dti_harm(outPrefix+'.nii.gz', maskPath)
 
