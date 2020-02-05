@@ -47,8 +47,8 @@ def warp_bands(imgPath, maskPath, templatePath):
     prefix= basename(imgPath).split('.nii')[0]
     transPrefix= prefix.replace(f'_b{bshell_b}','')
     directory= dirname(imgPath)
-    warp = glob(pjoin(templatePath, transPrefix + f'*_FA*[!Inverse]Warp.nii.gz'))
-    trans = glob(pjoin(templatePath, transPrefix + f'*_FA*GenericAffine.mat'))
+    warp = glob(pjoin(templatePath, transPrefix + f'*_FA*[!ToMNI]1Warp.nii.gz'))
+    trans = glob(pjoin(templatePath, transPrefix + f'*_FA*[!ToMNI]0GenericAffine.mat'))
 
     # warping the mask
     applyXform(maskPath,
