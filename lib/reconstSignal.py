@@ -207,8 +207,6 @@ def reconst(imgPath, maskPath, moving, templatePath, preFlag):
     copyfile(inPrefix + '.bvec', harmImg.split('.nii')[0] + '.bvec')
     copyfile(inPrefix + '.bval', harmImg.split('.nii')[0] + '.bval')
 
-    if debug:
-        dti_harm(harmImg, harmMask)
 
     return (imgPath, maskPath, harmImg, harmMask)
 

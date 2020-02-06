@@ -263,6 +263,7 @@ class pipeline(cli.Application):
     def harmonizeData(self):
 
         from reconstSignal import reconst
+        from preprocess import dti_harm
 
         # check the templatePath
         if not exists(self.templatePath):
@@ -324,7 +325,7 @@ class pipeline(cli.Application):
         pool.close()
         pool.join()
 
-        
+       
         # loop for debugging
         # res= []
         # for imgPath, maskPath in zip(imgs, masks):
@@ -341,6 +342,17 @@ class pipeline(cli.Application):
         if preFlag:
             fm.close()
         fh.close()
+
+        
+        if self.debug:
+            harmImgs, harmMasks= read_caselist(self.harm_csv)
+            pool = multiprocessing.Pool(self.N_proc)
+            for imgPath,maskPath in zip(harmImgs,harmMasks):
+                pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
+            pool.close()
+            pool.join()
+
+
         print('\n\nHarmonization completed\n\n')
 
 
