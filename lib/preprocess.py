@@ -20,6 +20,7 @@ from bvalMap import remapBval
 from resampling import resampling
 from dti import dti
 from rish import rish
+from glob import glob
 
 SCRIPTDIR= os.path.dirname(__file__)
 config = ConfigParser()
@@ -44,10 +45,12 @@ def dti_harm(imgPath, maskPath):
     prefix = basename(inPrefix)
 
     outPrefix = os.path.join(directory, 'dti', prefix)
-    dti(imgPath, maskPath, inPrefix, outPrefix)
+    if not glob(outPrefix+'_FA.nii.gz'):
+       dti(imgPath, maskPath, inPrefix, outPrefix)
 
     outPrefix = os.path.join(directory, 'harm', prefix)
-    rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
+    if not glob(outPrefix+'_L0.nii.gz'):
+       rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
 
 
