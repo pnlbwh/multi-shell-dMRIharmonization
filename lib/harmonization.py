@@ -504,10 +504,10 @@ class pipeline(cli.Application):
 
         self.sanityCheck()
 
-      if self.create:
+        if self.create:
           self.createTemplate()
-
-      if self.process:
+    
+        if self.process:
           self.harmonizeData()
 
         if self.create and self.process and self.debug:
