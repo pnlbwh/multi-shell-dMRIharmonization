@@ -29,6 +29,8 @@ Table of Contents
       * [Create template](#create-template)
       * [Harmonize data](#harmonize-data)
       * [Debug](#debug)
+         * [1. Same target list](#1-same-target-list)
+         * [2. Different target list](#2-different-target-list)
    * [Tests](#tests)
       * [1. pipeline](#1-pipeline)
       * [2. unittest](#2-unittest)
@@ -516,7 +518,10 @@ each subject FA (reference, target before harmonization, and after harmonization
     optional arguments:
       -h, --help            show this help message and exit
       -i INPUT, --input INPUT
-                            input list of FA images
+                            a .txt/.csv file that you used in/obtained from
+                            harmonization.py having two columns for (img,mask)
+                            pair. See pnlbwh/dMRIharmonization documentation for
+                            more details
       -s SITE, --site SITE  site name for locating template FA and mask in
                             tempalte directory
       -t TEMPLATE, --template TEMPLATE
@@ -540,7 +545,7 @@ in the same space, registration is performed only once. The script is intelligen
 files if registration was performed before.
 
 In multi-shell-dMRIharmonization approach, registration is performed with highest b-shell. Obtained transform files 
-are used to warp rest of the b-shells.
+are used to warp rest of the b-shells. See [Different target list](#2-different-target-list) for details.
 
 
 # Caveats/Issues
