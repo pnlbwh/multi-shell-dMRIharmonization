@@ -506,7 +506,7 @@ class pipeline(cli.Application):
 
         if self.create:
           self.createTemplate()
-    
+
         if self.process:
           self.harmonizeData()
 
