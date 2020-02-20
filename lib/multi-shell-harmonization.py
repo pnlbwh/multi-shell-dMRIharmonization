@@ -122,6 +122,9 @@ class multi_shell_pipeline(cli.Application):
 
     def main(self):
 
+        # FIXME https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues/12
+        self.force=False
+
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
