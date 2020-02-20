@@ -47,19 +47,19 @@ class pipeline(cli.Application):
     ref_csv = cli.SwitchAttr(
         ['--ref_list'],
         cli.ExistingFile,
-        help='reference csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...',
+        help='reference csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\\n...',
         mandatory=False)
 
     target_csv = cli.SwitchAttr(
         ['--tar_list'],
         cli.ExistingFile,
-        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...',
+        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\n...',
         mandatory=False)
 
     harm_csv = cli.SwitchAttr(
         ['--harm_list'],
         cli.ExistingFile,
-        help='harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\ndwi2,mask2\n...',
+        help='harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\n...',
         mandatory=False)
 
     templatePath = cli.SwitchAttr(
@@ -130,7 +130,7 @@ class pipeline(cli.Application):
     reference = cli.SwitchAttr(
         '--ref_name',
         help= 'reference site name',
-        mandatory= True)
+        mandatory= False)
 
     target = cli.SwitchAttr(
         '--tar_name',
