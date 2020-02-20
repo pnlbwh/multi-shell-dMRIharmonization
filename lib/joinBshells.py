@@ -72,11 +72,7 @@ def joinBshells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
 
             joinedDwi[:,:,:,ind] = b0_bshell[:,:,:,1:]
 
-    if not isfile(harmPrefix + '.nii.gz'):
-        save_nifti(harmPrefix + '.nii.gz', joinedDwi, b0Img.affine, b0Img.header)
-    else:
-        print(harmPrefix + '.nii.gz', 'already exists, not overwritten.')
-
+    save_nifti(harmPrefix + '.nii.gz', joinedDwi, b0Img.affine, b0Img.header)
 
 
 def joinAllBshells(tar_csv, ref_bvals_file, separatedPrefix=None, ncpu=4):

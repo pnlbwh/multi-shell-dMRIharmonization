@@ -20,24 +20,14 @@ import numpy as np
 from test_util import *
 import argparse
 from conversion import read_imgs, read_imgs_masks
+import pandas as pd
+from harm_plot import harm_plot, generate_csv
+from datetime import datetime
 
 ROOTDIR= abspath(pjoin(LIBDIR, '..'))
 mniTmp = pjoin(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
 
 diffusionMeasures = ['MD', 'FA', 'GFA']
-
-
-def printStat(ref_mean, imgs):
-
-    print('mean FA over IIT_mean_FA_skeleton.nii.gz for all cases: ')
-    for i, imgPath in enumerate(imgs):
-        print(basename(imgPath), ref_mean[i])
-
-    print('')
-    print('mean meanFA: ', np.mean(ref_mean))
-    print('std meanFA: ', np.std(ref_mean))
-    print('')
-
 
 def read_caselist(file):
 
@@ -82,13 +72,13 @@ def register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshel
     print(f'Warping {imgPath} diffusion measures to standard space')
     directory = dirname(imgPath)
 
-    # should have _FA a the end already
+    # should have _FA at the end already
     basePrefix= psplit(imgPath)[-1].split('.nii')[0]
     prefix = basePrefix.replace('_FA', '')
 
-    # given data and harmonized data are in the same space, so need to register again
+    # given data and harmonized data are in the same space
     basePrefix= basePrefix.replace('harmonized_','')
-    outPrefix = pjoin(templatePath, basePrefix.replace(f'_b{bshell_b}', '_FA_ToTemplate'))  # should have _FA a the end
+    outPrefix = pjoin(templatePath, basePrefix.replace(f'_b{bshell_b}', '_FA_ToTemplate')) # should have _FA at the end
 
     dmTmp = pjoin(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
     maskTmp = pjoin(templatePath, f'{siteName}_Mask.nii.gz')
@@ -174,8 +164,7 @@ def main():
     parser = argparse.ArgumentParser(description='''Warps diffusion measures (FA, MD, GFA) to template space 
     and then to MNI space. Finally, calculates mean FA over IITmean_FA_skeleton.nii.gz''')
     parser.add_argument('-i', '--input', type=str, required=True, 
-        help='a .txt/.csv file having one column for FA imgs, '
-             'or two columns for (img,mask) pair, the latter list is what you used in/obtained from harmonization.py. '
+        help='a .txt/.csv file that you used in/obtained from harmonization.py having two columns for (img,mask) pair. '
              'See pnlbwh/dMRIharmonization documentation for more details')
     parser.add_argument('-s', '--site', type= str, required=True,
                         help='site name for locating template FA and mask in tempalte directory')
@@ -194,7 +183,7 @@ def main():
     # read FA image list
     try:
         imgs, _ = read_imgs_masks(imgList)
-        print('imgs,masks list is provided. FA images are assumed to be directoryOfImg/dti/ImgPrefix_FA.nii.gz, make sure they are there')
+        print('(Img,Mask) list is provided. FA images are assumed to be directoryOfImg/dti/ImgPrefix_FA.nii.gz, make sure they are there\n')
         faImgs= []
 
         for imgPath in imgs:
@@ -215,30 +204,53 @@ def main():
     # register and obtain *_InMNI_FA.nii.gz
     mniFAimgs= sub2tmp2mni(templatePath, siteName, faImgs, bshell_b, N_proc)
     
-    # save statistics for future
-    statFile= os.path.join(self.templatePath, 'meanFAstat.txt')
-    f= open(statFile,'a')
-    stdout= sys.stdout
-    sys.stdout= f
-
-    print(datetime.now().strftime('%c'),'\n')
-
-    print('b-shell', bshell_b, '\n')
-
-    # pass *_InMNI_FA.nii.gz list to analyzeStat
-    site_means= analyzeStat(mniFAimgs)
+    
+    # target harmonized
+    if imgList.endswith('.modified.harmonized'):
+        header= siteName+ '_after'
+    # reference
+    elif imgList.endswith('.modified'):
+        header= siteName
+    # target unprocessed
+    else:
+        header= siteName+ '_before'
+        
+    # FIXME user FA image list will use the header {siteName+'_before'}, which is not correct all the time
+    # as shown in the above block:
+    # reference should use {siteName} while harmonized target should use {siteName+'_after'}
+    # impact of this discrepancy is minor since we deprecated use of FA image list
+    
+    outPrefix= pjoin(templatePath, header) # siteName+ f'_b{bshell_b}'+ header.split(siteName)[-1])
+    
+    print('\n\nComputing statistics\n\n')    
     print(f'{siteName} site: ')
-    printStat(site_means, mniFAimgs)
+    site_means= analyzeStat(mniFAimgs)
+    generate_csv(faImgs, site_means, outPrefix, bshell_b)
 
-    f.close()
-    sys.stdout= stdout
-
+    # save statistics for future
+    statFile= pjoin(templatePath, header+'_meanFAstat.csv')
+    if isfile(statFile):
+        df= pd.read_csv(statFile)
+    else:
+        timestamp= datetime.now().strftime('%m/%d/%y %H:%M')
+        sites= [header]
+        df= pd.DataFrame({timestamp:sites})
+    
+    header= f'mean meanFA b{bshell_b}'
+    value= np.mean(site_means)
+    df= df.assign(**{header:value})
+    
+    df.to_csv(statFile, index=False)
+    
     # print statistics on console
-    print('')
     with open(statFile) as f:
         print(f.read())
+        
+    # generate demonstrative plots
+    ebar = harm_plot([site_means], [header], outPrefix, bshell_b)
 
-    print('\nThe statistics are also saved in ', statFile)
+    print(f'\nDetailed statistics, summary results, and demonstrative plots are saved in:\n\n{outPrefix}_stat.csv'
+          f'\n{statFile}\n{ebar}\n')
 
 
 

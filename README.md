@@ -29,6 +29,8 @@ Table of Contents
       * [Create template](#create-template)
       * [Harmonize data](#harmonize-data)
       * [Debug](#debug)
+         * [1. Same target list](#1-same-target-list)
+         * [2. Different target list](#2-different-target-list)
    * [Tests](#tests)
       * [1. pipeline](#1-pipeline)
       * [2. unittest](#2-unittest)
@@ -339,29 +341,103 @@ or provided(--nshm 4), data can be harmonized.
 ## Harmonize data
 
     multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
-    --ref_name REF --tar_name TAR --template template
+    --tar_name TAR --template template
     --process
     
     multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
-    --ref_name REF --tar_name TAR --template template
+    --tar_name TAR --template template
     --process --debug
 
 
 ## Debug
 
-Runs together with `--create` and `--process`
+### 1. Same target list
+
+Run together with `--create` and `--process`:
 
     multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_list.txt 
     --ref_name REF --tar_name TAR --template template
     --create --process --debug
 
 
+### 2. Different target list
 
-**TBD** Tests are incomplete as of now but will be completed soon.
+In theory, you want to create a template with small number of data from each sites and then use the template to 
+harmonize all of your data in the target site. Since the data for template creation and harmonization are not same, 
+we don't have luxury of using `--create --process --debug` altogether. Instead, you would use `--debug` with each of 
+`--create` and `--process`. The `--debug` flag creates some files that are used to obtain statistics later.
+The steps are described below:
+
+(i) Create template with `--debug` enabled:
+    
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_small_list.txt 
+    --ref_name REF --tar_name TAR --template template
+    --create --debug
+
+(ii) Harmonize data with `--debug` enabled:
+
+    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
+    --tar_name TAR --template template
+    --process --debug
+
+(iii) Obtain statistics
+    
+    ## reference site ##
+    
+    # start with highest bvalue shell
+    
+    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
+    -i ref_list_b3000.csv.modified -s REF 
+    -t template/ --bshell_b 3000    
+    
+    # repeat for other non-zero bvalues
+    
+    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
+    -i ref_list_b2000.csv.modified -s REF 
+    -t template/ --bshell_b 2000
+    
+    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
+    -i ref_list_b1000.csv.modified -s REF 
+    -t template/ --bshell_b 1000
+
+    ...
+    ...
+    
+    
+    
+    ## target site before harmonization ##
+    
+    # again, start with highest bvalue shell, notice the absence of ".modified" at the end of -i
+    
+    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
+    -i tar_list_b3000.csv -s TAR 
+    -t template/ --bshell_b 3000
+    
+    # repeat for other non-zero bvalues
+    
+    ...
+    ...
+    
+    
+    
+    ## target site after harmonization ##
+    
+    # once again, start with highest bvalue shell, notice the presence of ".modified.harmonized" at the end of -i
+    
+    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
+    -i tar_list_b3000.csv.modified.harmonized -s TAR 
+    -t template/ --bshell_b 3000
+    
+    # repeat for other non-zero bvalues
+    ...
+    ...
+
+
 
 # Tests
 
 A small test data is provided with each [release](https://github.com/pnlbwh/multi-shell-dMRIharmonization/releases). 
+**TBD** Tests are incomplete as of now but will be completed soon.
 
 
 ## 1. pipeline
@@ -442,7 +518,10 @@ each subject FA (reference, target before harmonization, and after harmonization
     optional arguments:
       -h, --help            show this help message and exit
       -i INPUT, --input INPUT
-                            input list of FA images
+                            a .txt/.csv file that you used in/obtained from
+                            harmonization.py having two columns for (img,mask)
+                            pair. See pnlbwh/dMRIharmonization documentation for
+                            more details
       -s SITE, --site SITE  site name for locating template FA and mask in
                             tempalte directory
       -t TEMPLATE, --template TEMPLATE
@@ -466,7 +545,7 @@ in the same space, registration is performed only once. The script is intelligen
 files if registration was performed before.
 
 In multi-shell-dMRIharmonization approach, registration is performed with highest b-shell. Obtained transform files 
-are used to warp rest of the b-shells.
+are used to warp rest of the b-shells. See [Different target list](#2-different-target-list) for details.
 
 
 # Caveats/Issues

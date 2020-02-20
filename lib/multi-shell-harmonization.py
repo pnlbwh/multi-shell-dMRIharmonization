@@ -54,7 +54,6 @@ class multi_shell_pipeline(cli.Application):
         help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n...',
         mandatory=False)
 
-
     templatePath = cli.SwitchAttr(
         ['--template'],
         help='template directory',
@@ -107,7 +106,7 @@ class multi_shell_pipeline(cli.Application):
     reference = cli.SwitchAttr(
         '--ref_name',
         help= 'reference site name',
-        mandatory= True)
+        mandatory= False)
 
     target = cli.SwitchAttr(
         '--tar_name',
@@ -121,6 +120,9 @@ class multi_shell_pipeline(cli.Application):
 
 
     def main(self):
+
+        # FIXME https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues/12
+        self.force=False
 
         if self.N_proc=='-1':
             self.N_proc= N_CPU
