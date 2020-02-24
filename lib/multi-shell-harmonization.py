@@ -121,9 +121,6 @@ class multi_shell_pipeline(cli.Application):
 
     def main(self):
 
-        # FIXME https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues/12
-        self.force=False
-
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
@@ -211,6 +208,9 @@ class multi_shell_pipeline(cli.Application):
                 '--bshell_b', str(int(bval)),
                 '--ref_list', refListOutPrefix+f'_b{int(bval)}.csv',
                 '--create', '--process'] + pipeline_vars), shell=True)
+
+                
+            pipeline_vars.remove('--force')
 
 
         ## join harmonized data
