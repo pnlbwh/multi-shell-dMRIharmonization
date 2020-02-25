@@ -17,7 +17,7 @@ from normalize import find_b0
 from plumbum import cli, local
 from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs, read_imgs_masks
 from nibabel import load
-from util import abspath, pjoin, save_nifti, RAISE
+from util import abspath, pjoin, save_nifti, RAISE, isfile
 import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
@@ -47,6 +47,9 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
         N_b= len(ind)
 
         bPrefix = inPrefix + f'_b{int(bval)}'
+        
+        if isfile(bPrefix + '.nii.gz'):
+            continue
 
         if bval==0.:
             b0 = find_b0(dwi, ind)
