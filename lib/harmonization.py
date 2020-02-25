@@ -16,6 +16,7 @@
 from plumbum import cli
 from distutils.spawn import find_executable
 import multiprocessing, psutil
+import io
 
 from determineNshm import verifyNshmForAll, determineNshm
 from util import *
@@ -254,12 +255,11 @@ class pipeline(cli.Application):
         if not exists(self.templatePath):
             raise NotADirectoryError(f'{self.templatePath} does not exist')
         else:
-            if not os.listdir(self.templatePath):
+            if not listdir(self.templatePath):
                 raise ValueError(f'{self.templatePath} is empty')
 
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.target_csv, self.force)
-
 
         # target data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
         # this block may be uncommented in a future design
@@ -281,13 +281,10 @@ class pipeline(cli.Application):
 
         # read target image list
         moving= pjoin(self.templatePath, f'Mean_{self.target}_FA_b{self.bshell_b}.nii.gz')
-        imgs, masks= read_caselist(self.target_csv)
+        imgs, masks= read_caselist(self.tar_unproc_csv)
 
-        preFlag= 1 # omit preprocessing of target data again
-        if self.target_csv.endswith('.modified'):
-            preFlag= 0
-        else:
-            # this file will be used later for debugging
+        fm= None
+        if not self.target_csv.endswith('.modified'):
             self.target_csv += '.modified'
             fm = open(self.target_csv, 'w')
 
@@ -297,12 +294,12 @@ class pipeline(cli.Application):
         pool = multiprocessing.Pool(self.N_proc)
         res= []
         for imgPath, maskPath in zip(imgs, masks):
-            res.append(pool.apply_async(func= reconst, args= (imgPath, maskPath, moving, self.templatePath, preFlag, )))
+            res.append(pool.apply_async(func= reconst, args= (imgPath, maskPath, moving, self.templatePath,)))
 
         for r in res:
             imgPath, maskPath, harmImg, harmMask= r.get()
 
-            if preFlag:
+            if isinstance(fm, io.IOBase):
                 fm.write(imgPath + ',' + maskPath + '\n')
             fh.write(harmImg + ',' + harmMask + '\n')
 
@@ -314,17 +311,17 @@ class pipeline(cli.Application):
         # loop for debugging
         # res= []
         # for imgPath, maskPath in zip(imgs, masks):
-        #     res.append(reconst(imgPath, maskPath, moving, self.templatePath, preFlag))
+        #     res.append(reconst(imgPath, maskPath, moving, self.templatePath))
         #
         # for r in res:
         #     imgPath, maskPath, harmImg, harmMask= r
         #
-        #     if preFlag:
+        #     if isinstance(fm, io.IOBase):
         #         fm.write(imgPath + ',' + maskPath + '\n')
         #     fh.write(harmImg + ',' + harmMask + '\n')
 
 
-        if preFlag:
+        if isinstance(fm, io.IOBase):
             fm.close()
         fh.close()
 
@@ -486,7 +483,7 @@ class pipeline(cli.Application):
 
 
         # write config file to temporary directory
-        configFile= f'/tmp/harm_config_{os.getpid()}.ini'
+        configFile= f'/tmp/harm_config_{getpid()}.ini'
         with open(configFile,'w') as f:
             f.write('[DEFAULT]\n')
             f.write(f'N_shm = {self.N_shm}\n')
@@ -498,6 +495,7 @@ class pipeline(cli.Application):
             f.write(f'denoise = {1 if self.denoise else 0}\n')
             f.write(f'travelHeads = {1 if self.travelHeads else 0}\n')
             f.write(f'debug = {1 if self.debug else 0}\n')
+            f.write(f'force = {1 if self.force else 0}\n')
             f.write(f'verbose = {1 if self.verbose else 0}\n')
             f.write('diffusionMeasures = {}\n'.format((',').join(self.diffusionMeasures)))
 
@@ -506,6 +504,13 @@ class pipeline(cli.Application):
 
         if self.create:
             self.createTemplate()
+            import fileinput
+            for line in fileinput.input(configFile, inplace=True):
+                if 'force' in line:
+                    print('force = 0')
+                else:
+                    print(line)
+            self.force= False
 
         if self.process:
             self.harmonizeData()
@@ -514,7 +519,7 @@ class pipeline(cli.Application):
             self.post_debug()
 
 
-        os.remove(configFile)
+        remove(configFile)
 
 
 if __name__ == '__main__':

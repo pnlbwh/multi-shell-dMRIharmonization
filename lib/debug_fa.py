@@ -18,12 +18,12 @@ from reconstSignal import antsReg
 import multiprocessing
 from util import *
 
-SCRIPTDIR= os.path.dirname(__file__)
-ROOTDIR= os.path.abspath(os.path.join(SCRIPTDIR, '..'))
-mniTmp = os.path.join(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
+SCRIPTDIR= dirname(__file__)
+ROOTDIR= abspath(pjoin(SCRIPTDIR, '..'))
+mniTmp = pjoin(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
 
 config = ConfigParser()
-config.read(f'/tmp/harm_config_{os.getpid()}.ini')
+config.read(f'/tmp/harm_config_{getpid()}.ini')
 N_proc = int(config['DEFAULT']['N_proc'])
 diffusionMeasures = [x for x in config['DEFAULT']['diffusionMeasures'].split(',')]
 bshell_b = int(config['DEFAULT']['bshell_b'])
@@ -31,17 +31,17 @@ bshell_b = int(config['DEFAULT']['bshell_b'])
 def register_reference(imgPath, warp2mni, trans2mni, templatePath):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
-    directory = os.path.dirname(imgPath)
+    directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
     prefix = basename(inPrefix)
 
     for dm in diffusionMeasures:
 
-        output = os.path.join(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
+        output = pjoin(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
 
         # reference site have been already warped to reference template space in buildTemplate.py: warp_bands()
-        # warped data are os.path.join(templatePath, prefix, prefix + f'_WarpedFA.nii.gz')
-        moving = os.path.join(templatePath, prefix + f'_Warped{dm}.nii.gz')
+        # warped data are pjoin(templatePath, prefix, prefix + f'_WarpedFA.nii.gz')
+        moving = pjoin(templatePath, prefix + f'_Warped{dm}.nii.gz')
 
         # so warp diffusion measure to MNI space directly
         antsApplyTransforms[
@@ -56,22 +56,22 @@ def register_reference(imgPath, warp2mni, trans2mni, templatePath):
 def register_target(imgPath, templatePath):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
-    directory = os.path.dirname(imgPath)
+    directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
     prefix = basename(inPrefix)
 
-    dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
-    outPrefix = os.path.join(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
+    dmImg = pjoin(directory, 'dti', prefix + f'_FA.nii.gz')
+    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
     warp2mni = outPrefix + '1Warp.nii.gz'
     trans2mni = outPrefix + '0GenericAffine.mat'
     # unprocessed target data is given, so in case multiple debug is needed, pass the registration
-    if not os.path.exists(warp2mni):
+    if not exists(warp2mni):
         antsReg(mniTmp, None, dmImg, outPrefix)
 
     for dm in diffusionMeasures:
-        output = os.path.join(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
+        output = pjoin(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
 
-        moving = os.path.join(directory, 'dti', prefix + f'_{dm}.nii.gz')
+        moving = pjoin(directory, 'dti', prefix + f'_{dm}.nii.gz')
         # warp diffusion measure to template space first, then to MNI space
         antsApplyTransforms[
             '-d', '3',
@@ -85,25 +85,25 @@ def register_target(imgPath, templatePath):
 def register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName):
 
     print(f'Warping {imgPath} diffusion measures to standard space')
-    directory = os.path.dirname(imgPath)
+    directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
     prefix = basename(inPrefix)
 
-    dmImg = os.path.join(directory, 'dti', prefix + f'_FA.nii.gz')
-    dmTmp = os.path.join(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
-    maskTmp = os.path.join(templatePath, f'{siteName}_Mask.nii.gz')
-    outPrefix = os.path.join(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA')
+    dmImg = pjoin(directory, 'dti', prefix + f'_FA.nii.gz')
+    dmTmp = pjoin(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
+    maskTmp = pjoin(templatePath, f'{siteName}_Mask.nii.gz')
+    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA')
     warp2tmp = outPrefix + '1Warp.nii.gz'
     trans2tmp = outPrefix + '0GenericAffine.mat'
 
     # check existence of transforms created with _b{bmax}
-    if not os.path.exists(warp2tmp):
+    if not exists(warp2tmp):
         antsReg(dmTmp, maskTmp, dmImg, outPrefix)
 
     for dm in diffusionMeasures:
-        output = os.path.join(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
+        output = pjoin(templatePath, prefix + f'_InMNI_{dm}.nii.gz')
 
-        moving = os.path.join(directory, 'dti', prefix + f'_{dm}.nii.gz')
+        moving = pjoin(directory, 'dti', prefix + f'_{dm}.nii.gz')
         # warp diffusion measure to template space first, then to MNI space
         antsApplyTransforms[
             '-d', '3',
@@ -117,14 +117,14 @@ def register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName):
 def sub2tmp2mni(templatePath, siteName, caselist, ref= False, tar_unproc= False, tar_harm= False):
 
     # obtain the transform
-    moving = os.path.join(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
+    moving = pjoin(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
 
-    outPrefix= os.path.join(templatePath, f'TemplateToMNI_{siteName}')
+    outPrefix= pjoin(templatePath, f'TemplateToMNI_{siteName}')
     warp2mni= outPrefix+'1Warp.nii.gz'
     trans2mni= outPrefix+'0GenericAffine.mat'
 
     # check existence of transforms created with _b{bmax}
-    if not os.path.exists(warp2mni):
+    if not exists(warp2mni):
         antsReg(mniTmp, None, moving, outPrefix)
 
     imgs, _= read_caselist(caselist)
@@ -160,7 +160,7 @@ def analyzeStat(file, templatePath):
     :return: mean of the images
     '''
 
-    skel= load(os.path.join(ROOTDIR, 'IITAtlas', 'IITmean_FA_skeleton.nii.gz'))
+    skel= load(pjoin(ROOTDIR, 'IITAtlas', 'IITmean_FA_skeleton.nii.gz'))
     skel_mask= (skel.get_data()>0)*1.
 
     imgs, _ = read_caselist(file)
@@ -170,7 +170,7 @@ def analyzeStat(file, templatePath):
         inPrefix = imgPath.split('.nii')[0]
         prefix = basename(inPrefix)
 
-        faImg= os.path.join(templatePath, prefix + f'_InMNI_FA.nii.gz')
+        faImg= pjoin(templatePath, prefix + f'_InMNI_FA.nii.gz')
         data= load(faImg).get_data()
         temp= data*skel_mask
         meanAttr.append(temp[temp>0].mean())

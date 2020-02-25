@@ -38,7 +38,7 @@ def rish(imgPath, maskPath, inPrefix, outPrefix, N_shm, qb_model= None):
 
         # save baseline image
         b0 = find_b0(data, where_b0=np.where(qb_model.gtab.b0s_mask)[0])
-        if not os.path.exists(inPrefix+'_bse.nii.gz'):
+        if not exists(inPrefix+'_bse.nii.gz'):
             save_nifti(inPrefix+'_bse.nii.gz', applymask(b0, mask_data), affine, hdr)
     else:
         b0= None

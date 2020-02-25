@@ -95,7 +95,7 @@ def antsMult(caselist, outPrefix):
         print(f'See {logFile} for details of template construction')
 
 
-    N_core=os.getenv('TEMPLATE_CONSTRUCT_CORE')
+    N_core=getenv('TEMPLATE_CONSTRUCT_CORE')
     check_call((' ').join([pjoin(SCRIPTDIR, 'antsMultivariateTemplateConstruction2_fixed_random_seed.sh'),
                            '-d', '3',
                            '-g', '0.2',

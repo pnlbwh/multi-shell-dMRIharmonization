@@ -31,6 +31,7 @@ bshell_b = int(config['DEFAULT']['bshell_b'])
 debug = int(config['DEFAULT']['debug'])
 verbose = int(config['DEFAULT']['verbose'])
 n_zero = int(config['DEFAULT']['N_zero'])
+force = int(config['DEFAULT']['force'])
 
 def antsReg(img, mask, mov, outPrefix):
 
@@ -176,17 +177,16 @@ def ring_masking(directory, prefix, maskPath, shm_coeff, b0, qb_model, hdr):
     return (harmImg, harmMask)
 
 
-def reconst(imgPath, maskPath, moving, templatePath, preFlag):
+def reconst(imgPath, maskPath, moving, templatePath):
 
-    if preFlag:
-        imgPath, maskPath = preprocessing(imgPath, maskPath)
+    imgPath, maskPath = preprocessing(imgPath, maskPath)
 
     img = load(imgPath)
 
     directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
     prefix = basename(inPrefix)
-    outPrefix = os.path.join(directory, 'harm', prefix)
+    outPrefix = pjoin(directory, 'harm', prefix)
     b0, shm_coeff, qb_model = rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
 
@@ -196,7 +196,7 @@ def reconst(imgPath, maskPath, moving, templatePath, preFlag):
 
     # glob the directory for _b{bmax} transform files
     # if not glob(outPrefix.replace(f'_b{bshell_b}','*')+'1Warp.nii.gz'):
-    if not isfile(outPrefix+'1Warp.nii.gz'):
+    if force or not isfile(outPrefix+'1Warp.nii.gz'):
         fixed = pjoin(directory, 'dti', f'{prefix}_FA.nii.gz')
         antsReg(fixed, maskPath, moving, outPrefix)
 

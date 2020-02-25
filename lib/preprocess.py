@@ -20,11 +20,11 @@ from bvalMap import remapBval
 from resampling import resampling
 from dti import dti
 from rish import rish
-from glob import glob
 
-SCRIPTDIR= os.path.dirname(__file__)
+
+SCRIPTDIR= dirname(__file__)
 config = ConfigParser()
-config.read(f'/tmp/harm_config_{os.getpid()}.ini')
+config.read(f'/tmp/harm_config_{getpid()}.ini')
 
 N_shm = int(config['DEFAULT']['N_shm'])
 N_proc = int(config['DEFAULT']['N_proc'])
@@ -35,28 +35,28 @@ bshell_b= float(config['DEFAULT']['bshell_b'])
 if resample=='0':
     resample = 0
 debug = int(config['DEFAULT']['debug'])
+force = int(config['DEFAULT']['force'])
 
 
 
 def dti_harm(imgPath, maskPath):
 
-    directory = os.path.dirname(imgPath)
+    directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
     prefix = basename(inPrefix)
 
-    outPrefix = os.path.join(directory, 'dti', prefix)
-    if not glob(outPrefix+'_FA.nii.gz'):
+    outPrefix = pjoin(directory, 'dti', prefix)
+    if not isfile(outPrefix+'_FA.nii.gz'):
        dti(imgPath, maskPath, inPrefix, outPrefix)
 
-    outPrefix = os.path.join(directory, 'harm', prefix)
-    if not glob(outPrefix+'_L0.nii.gz'):
+    outPrefix = pjoin(directory, 'harm', prefix)
+    if not isfile(outPrefix+'_L0.nii.gz'):
        rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
-
 
 
 def preprocessing(imgPath, maskPath):
 
-    # load signal attributes for pre-processing ----------------------------------------------------------------
+    # load signal attributes for pre-processing
     # imgPath= nrrd2nifti(imgPath)
     lowRes = load(imgPath)
     lowResImg = lowRes.get_data().astype('float')
@@ -69,60 +69,75 @@ def preprocessing(imgPath, maskPath):
 
     lowResImg = applymask(lowResImg, lowResMask)
 
-    inPrefix = imgPath.split('.nii')[0]
+    # pre-processing
 
-    bvals, _ = read_bvals_bvecs(inPrefix + '.bval', None)
-
-    # pre-processing -------------------------------------------------------------------------------------------
-    suffix= None
     # modifies data only
     if denoise:
-        print('Denoising ', imgPath)
-        lowResImg, _ = denoising(lowResImg, lowResMask)
-        suffix = '_denoised'
-        if debug:
-            outPrefix= imgPath.split('.nii')[0]+suffix
+        inPrefix = imgPath.split('.nii')[0]
+        outPrefix = inPrefix + '_denoised'
+
+        if force or not isfile(outPrefix+'.nii.gz'):
+            print('Denoising ', imgPath)
+            lowResImg, _ = denoising(lowResImg, lowResMask)
             save_nifti(outPrefix+'.nii.gz', lowResImg, lowRes.affine, lowResImgHdr)
-            shutil.copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
-            shutil.copyfile(inPrefix + '.bval', inPrefix + '.bval')
+            copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
+            copyfile(inPrefix + '.bval', outPrefix + '.bval')
+
+        maskPath= maskPath
+
+        if debug:
             dti_harm(outPrefix+'.nii.gz', maskPath)
+
+        imgPath= outPrefix+'.nii.gz'
+
 
     # modifies data, and bvals
     if bvalMap:
-        print('B value mapping ', imgPath)
-        lowResImg, bvals = remapBval(lowResImg, lowResMask, bvals, bvalMap)
-        suffix = '_bmapped'
-        if debug:
-            outPrefix= imgPath.split('.nii')[0]+suffix
+        inPrefix = imgPath.split('.nii')[0]
+        outPrefix = inPrefix + '_bmapped'
+
+        if force or not isfile(outPrefix+'.nii.gz'):
+            print('B value mapping ', imgPath)
+            bvals, _ = read_bvals_bvecs(inPrefix + '.bval', None)
+            lowResImg, bvals = remapBval(lowResImg, lowResMask, bvals, bvalMap)
             save_nifti(outPrefix+'.nii.gz', lowResImg, lowRes.affine, lowResImgHdr)
-            shutil.copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
+            copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
             write_bvals(outPrefix + '.bval', bvals)
+
+        maskPath= maskPath
+
+        if debug:
             dti_harm(outPrefix+'.nii.gz', maskPath)
 
-    # modifies data, mask, and headers
-    if resample:
-        print('Resampling ', imgPath)
+        imgPath= outPrefix+'.nii.gz'
+
+    try:
         sp_high = np.array([float(i) for i in resample.split('x')])
-        if (abs(sp_high-lowResImgHdr['pixdim'][1:4])>10e-3).any():
-            imgPath, maskPath = \
-                resampling(imgPath, maskPath, lowResImg, lowResImgHdr, lowResMask, lowResMaskHdr, sp_high, bvals)
-            suffix = '_resampled'
+    except:
+        sp_high = lowResImgHdr['pixdim'][1:4]
 
+    # modifies data, mask, and headers
+    if resample and (abs(sp_high-lowResImgHdr['pixdim'][1:4])>10e-3).any():
+        inPrefix = imgPath.split('.nii')[0]
+        outPrefix = inPrefix + '_resampled'
 
-    # save pre-processed data; resampled data is saved inside resampling() -------------------------------------
-    if (denoise or bvalMap) and suffix!= '_resampled':
-        imgPath = inPrefix + suffix + '.nii.gz'
-        save_nifti(imgPath, lowResImg, lowRes.affine, lowResImgHdr)
+        if force or not isfile(outPrefix+'.nii.gz'):
+            print('Resampling ', imgPath)
+            bvals, _ = read_bvals_bvecs(inPrefix + '.bval', None)
+            imgPath, maskPath = resampling(imgPath, maskPath, lowResImg, lowResImgHdr, lowResMask, lowResMaskHdr, sp_high, bvals)
+            copyfile(inPrefix + '.bvec', outPrefix + '.bvec')
+            copyfile(inPrefix + '.bval', outPrefix + '.bval')
+        else:
+            maskPath= maskPath.split('.nii')[0]+ '_resampled.nii.gz'
 
-    if suffix:
-        shutil.copyfile(inPrefix + '.bvec', inPrefix + suffix + '.bvec')
-    if bvalMap:
-        write_bvals(inPrefix + suffix + '.bval', bvals)
-    elif denoise or suffix== '_resampled':
-        shutil.copyfile(inPrefix + '.bval', inPrefix + suffix + '.bval')
+        if debug:
+            dti_harm(outPrefix+'.nii.gz', maskPath)
+
+        imgPath= outPrefix+'.nii.gz'
 
 
     return (imgPath, maskPath)
+
 
 
 def common_processing(caselist):

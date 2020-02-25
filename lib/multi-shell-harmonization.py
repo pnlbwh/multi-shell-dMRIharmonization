@@ -121,14 +121,9 @@ class multi_shell_pipeline(cli.Application):
 
     def main(self):
 
-        # FIXME https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues/12
-        self.force=False
-
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
-        # check directory existence
-        check_dir(self.templatePath, self.force)
 
         ## check consistency of b-shells and spatial resolution
         ref_bvals_file= pjoin(self.templatePath, 'ref_bshell_bvalues.txt')
@@ -155,13 +150,14 @@ class multi_shell_pipeline(cli.Application):
 
         # variables common to all ref_bvals
         pipeline_vars=[
-            '--ref_name', self.reference,
             '--tar_name', self.target,
             '--nshm', self.N_shm,
             '--nproc', self.N_proc,
             '--template', self.templatePath,
             ]
-
+        
+        if self.reference:
+            pipeline_vars.append(f'--ref_name {self.reference}')
         if self.N_zero:
             pipeline_vars.append(f'--nzero {self.N_zero}')
         if self.bvalMap:
@@ -178,7 +174,7 @@ class multi_shell_pipeline(cli.Application):
             pipeline_vars.append('--debug')
         if self.verbose:
             pipeline_vars.append('--verbose')
-
+        
 
         # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
@@ -212,9 +208,14 @@ class multi_shell_pipeline(cli.Application):
                 '--ref_list', refListOutPrefix+f'_b{int(bval)}.csv',
                 '--create', '--process'] + pipeline_vars), shell=True)
 
+                
+            if '--force' in pipeline_vars:
+                pipeline_vars.remove('--force')
+
 
         ## join harmonized data
-        joinAllBshells(self.target_csv, ref_bvals_file, 'harmonized_', self.N_proc)
+        if self.process:
+            joinAllBshells(self.target_csv, ref_bvals_file, 'harmonized_', self.N_proc)
 
 
 if __name__== '__main__':
