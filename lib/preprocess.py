@@ -57,12 +57,12 @@ def dti_harm(imgPath, maskPath):
 def preprocessing(imgPath, maskPath):
 
     # load signal attributes for pre-processing
-    imgPath= nrrd2nifti(imgPath)
+    # imgPath= nrrd2nifti(imgPath)
     lowRes = load(imgPath)
     lowResImg = lowRes.get_data().astype('float')
     lowResImgHdr = lowRes.header
 
-    maskPath= nrrd2nifti(maskPath)
+    # maskPath= nrrd2nifti(maskPath)
     lowRes = load(maskPath)
     lowResMask = lowRes.get_data()
     lowResMaskHdr = lowRes.header
