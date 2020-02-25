@@ -13,7 +13,7 @@
 
 from configparser import ConfigParser
 from os.path import join as pjoin, split as psplit, abspath, basename, dirname, isfile, exists
-from os import getpid, makedirs, remove, listdir
+from os import getpid, makedirs, remove, listdir, getenv
 from subprocess import check_call, Popen
 from shutil import copyfile, rmtree
 import numpy as np
