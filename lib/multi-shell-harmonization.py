@@ -124,8 +124,6 @@ class multi_shell_pipeline(cli.Application):
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
-        # check directory existence
-        check_dir(self.templatePath, self.force)
 
         ## check consistency of b-shells and spatial resolution
         ref_bvals_file= pjoin(self.templatePath, 'ref_bshell_bvalues.txt')
@@ -210,11 +208,13 @@ class multi_shell_pipeline(cli.Application):
                 '--create', '--process'] + pipeline_vars), shell=True)
 
                 
-            pipeline_vars.remove('--force')
+            if '--force' in pipeline_vars:
+                pipeline_vars.remove('--force')
 
 
         ## join harmonized data
-        joinAllBshells(self.target_csv, ref_bvals_file, 'harmonized_', self.N_proc)
+        if self.process:
+            joinAllBshells(self.target_csv, ref_bvals_file, 'harmonized_', self.N_proc)
 
 
 if __name__== '__main__':
