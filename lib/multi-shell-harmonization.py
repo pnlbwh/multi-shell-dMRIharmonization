@@ -150,13 +150,14 @@ class multi_shell_pipeline(cli.Application):
 
         # variables common to all ref_bvals
         pipeline_vars=[
-            '--ref_name', self.reference,
             '--tar_name', self.target,
             '--nshm', self.N_shm,
             '--nproc', self.N_proc,
             '--template', self.templatePath,
             ]
-
+        
+        if self.reference:
+            pipeline_vars.append(f'--ref_name {self.reference}')
         if self.N_zero:
             pipeline_vars.append(f'--nzero {self.N_zero}')
         if self.bvalMap:
@@ -173,7 +174,7 @@ class multi_shell_pipeline(cli.Application):
             pipeline_vars.append('--debug')
         if self.verbose:
             pipeline_vars.append('--verbose')
-
+        
 
         # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
