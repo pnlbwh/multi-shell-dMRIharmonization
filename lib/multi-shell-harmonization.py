@@ -196,6 +196,7 @@ class multi_shell_pipeline(cli.Application):
 
                 check_call((' ').join([pjoin(SCRIPTDIR, 'harmonization.py'),
                 '--tar_list', tarListOutPrefix + f'_b{int(bval)}.csv',
+                f'--ref_list {refListOutPrefix}_b{int(bval)}.csv' if self.ref_csv else '',
                 '--bshell_b', str(int(bval)),
                 '--process'] + pipeline_vars), shell=True)
 
@@ -216,7 +217,9 @@ class multi_shell_pipeline(cli.Application):
         ## join harmonized data
         if self.process:
             joinAllBshells(self.target_csv, ref_bvals_file, 'harmonized_', self.N_proc)
-
+        
+            if self.debug and self.ref_csv:
+                joinAllBshells(self.ref_csv, ref_bvals_file, 'reconstructed_', self.N_proc)
 
 if __name__== '__main__':
     multi_shell_pipeline.run()
