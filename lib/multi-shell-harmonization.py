@@ -40,7 +40,7 @@ def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
 
 class multi_shell_pipeline(cli.Application):
 
-    VERSION = 1.0
+    VERSION = 1.5
 
     ref_csv = cli.SwitchAttr(
         ['--ref_list'],
