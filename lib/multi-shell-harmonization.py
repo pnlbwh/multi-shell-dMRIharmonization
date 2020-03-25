@@ -124,6 +124,8 @@ class multi_shell_pipeline(cli.Application):
         if self.N_proc=='-1':
             self.N_proc= N_CPU
 
+        # check directory existence 
+        check_dir(self.templatePath, self.force)
 
         ## check consistency of b-shells and spatial resolution
         ref_bvals_file= pjoin(self.templatePath, 'ref_bshell_bvalues.txt')

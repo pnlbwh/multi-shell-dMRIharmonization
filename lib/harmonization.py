@@ -152,9 +152,7 @@ class pipeline(cli.Application):
         from buildTemplate import difference_calc, antsMult, warp_bands, \
             dti_stat, rish_stat, template_masking, createAntsCaselist
         from preprocess import common_processing
-
-        # check directory existence
-        check_dir(self.templatePath, self.force)
+        
 
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.ref_csv, self.force)
