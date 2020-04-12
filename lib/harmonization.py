@@ -227,7 +227,7 @@ class pipeline(cli.Application):
         print('calculating rish_statistics i.e. mean, std calculation of target site')
         rish_stat(self.target, targetImgs, self.templatePath, templateHdr)
 
-        print('calculating templates map for diffusionMeasures')
+        print('calculating templates for diffusionMeasures')
         difference_calc(self.reference, self.target, refImgs, targetImgs, self.templatePath, templateHdr,
                         templateMask, self.diffusionMeasures)
 
