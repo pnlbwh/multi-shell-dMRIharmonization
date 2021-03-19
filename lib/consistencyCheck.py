@@ -38,14 +38,17 @@ def check_bshells(ref_imgs, ref_bvals):
             print('b-shells matched for', imgPath.name)
 
         else:
-            np.testing.assert_array_equal(bvals, ref_bvals, err_msg=f'Unmatched b-shells for {imgPath.name}')
+            print(f'\nUnmatched b-shells for {imgPath.name}')
+            print(bvals)
+            print(f'ref_bvals {ref_bvals}\n')
             unmatched.append(imgPath._path)
 
     print('')
     if len(unmatched):
-        warn('Leave out the unmatched cases or change the reference case for determining b-shell to run multi-shell-dMRIharmonization')
         print('Unmatched cases:')
         print(unmatched)
+        raise ValueError('Leave out the unmatched cases or change the reference case for determining b-shell to run multi-shell-dMRIharmonization')
+
     else:
         print('All cases have same b-shells. Data is good for running multi-shell-dMRIharmonization')
     print('')
@@ -63,18 +66,21 @@ def check_resolution(ref_imgs, ref_res):
 
         res= load(imgPath._path).header['pixdim'][1:4]
 
-        if (res == ref_res).all():
+        if (res-ref_res).sum()<=10e-6:
             print('spatial resolution matched for', imgPath.name)
 
         else:
-            np.testing.assert_array_equal(res, ref_res, err_msg=f'Unmatched spatial resolution for {imgPath.name}')
+            print(f'\nUnmatched spatial resolution for {imgPath.name}')
+            print(res)
+            print(f'ref_res {ref_res}\n')
             unmatched.append(imgPath._path)
 
     print('')
     if len(unmatched):
-        warn('Leave out the unmatched cases or change the reference case for determining spatial resolution to run multi-shell-dMRIharmonization')
         print('Unmatched cases:')
         print(unmatched)
+        raise ValueError('Leave out the unmatched cases or change the reference case for determining spatial resolution to run multi-shell-dMRIharmonization')
+
     else:
         print('All cases have same spatial resolution. Data is good for running multi-shell-dMRIharmonization')
     print('')
@@ -120,15 +126,18 @@ if __name__ == '__main__':
     if len(sys.argv)==1 or sys.argv[1]=='-h' or sys.argv[1]=='--help':
         print('''Check consistency of b-shells and spatial resolution among subjects
 Usage:
-consistencyCheck list.csv/txt
+consistencyCheck list.csv/txt ref_bshell_bvalues.txt ref_res_file.npy
 
 Provide a csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n...
-or just one column for dwi1\\ndwi2\\n...''')
+or just one column for dwi1\\ndwi2\\n...
+In addition, provide ref_bshell_bvalues and ref_res_file.''')
         exit()
 
     ref_csv= abspath(sys.argv[1])
-    if ref_csv:
-        consistencyCheck(ref_csv)
+    outputBshellFile= abspath(sys.argv[2])
+    outPutResolutionFile= abspath(sys.argv[3])
+    if isfile(ref_csv):
+        consistencyCheck(ref_csv, outputBshellFile, outPutResolutionFile)
     else:
         raise FileNotFoundError(f'{ref_csv} does not exists.')
 
