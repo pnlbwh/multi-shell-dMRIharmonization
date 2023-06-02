@@ -424,8 +424,7 @@ class pipeline(cli.Application):
         external_commands= [
             'antsMultivariateTemplateConstruction2.sh',
             'antsApplyTransforms',
-            'antsRegistrationSyNQuick.sh',
-            'unring.a64']
+            'antsRegistrationSyNQuick.sh']
 
         for cmd in external_commands:
             exe= find_executable(cmd)
