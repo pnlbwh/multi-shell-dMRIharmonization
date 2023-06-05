@@ -2,14 +2,15 @@
 
 This repository contains a Python script to download files from an AWS S3 bucket. The script utilizes multithreading to download multiple files concurrently, speeding up the process considerably. It is meant to be used with MRI data, but can be adapted to download any type of file.
 
-
 ## Table of Contents
 
 1. [Requirements](#requirements)
 2. [Usage](#usage)
 3. [Input File Format](#input-file-format)
-4. [Contributing](#contributing)
-5. [License](#license)
+4. [Creating a Local Paths Text File](#creating-a-local-paths-text-file)
+5. [Running the Template Script](#running-the-template-script)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ## Requirements
 
@@ -18,6 +19,7 @@ This repository contains a Python script to download files from an AWS S3 bucket
 - s3fs library
 
 You can install the required Python libraries using pip:
+
 ```sh
 pip install boto3 s3fs
 ```
@@ -39,6 +41,7 @@ Replace `<path-to-your-textfile>` with the path to your text file, and `<path-to
 The input text file should contain two S3 paths per line, separated by a comma. The first path should point to a .nii.gz file, and the second path should point to a .nii.gz mask file.
 
 Here's an example of what the input file format looks like:
+
 ```angular2html
 s3://mybucket/path/to/file1.nii.gz,s3://mybucket/path/to/file1_mask.nii.gz
 s3://mybucket/path/to/file2.nii.gz,s3://mybucket/path/to/file2_mask.nii.gz
@@ -46,6 +49,26 @@ s3://mybucket/path/to/file2.nii.gz,s3://mybucket/path/to/file2_mask.nii.gz
 ```
 
 For each line, the script will download the .nii.gz and .nii.gz mask file, as well as any .bval and .bvec files that are in the same directory.
+
+## Creating a Local Paths Text File
+
+Once the files are downloaded, you can use the following script to create a new text file that contains the local paths to the .nii.gz and .nii.gz mask files:
+
+```sh
+python write_local_paths.py --directory <path-to-root-directory> --output <path-to-output-textfile>
+```
+
+Replace `<path-to-root-directory>` with the path to the root directory that contains the downloaded files, and `<path-to-output-textfile>` with the path to the text file where you want the local paths to be written to.
+
+## Running the Template Script
+
+After downloading the necessary files and generating the local paths files, you can run the `run_template.sh` script to perform further analysis. This script accepts several command-line arguments to specify paths and processing options. Here's an example of how to run the script:
+
+```sh
+./run_template.sh -r /path/to/reference-list.txt -t /path/to/target-list.txt -n ReferenceName -T TargetName -p /path/to/template/directory -d 4
+```
+
+Please ensure to replace `/path/to/reference-list.txt`, `/path/to/target-list.txt`, `ReferenceName`, `TargetName`, and `/path/to/template/directory` with the actual paths and names on your local machine. The `-d` flag is used to specify the number of processes or threads to use (use -1 for all available), with the default being 4.
 
 ## Contributing
 

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Parse command line arguments
+while getopts r:t:n:T:p:d: option
+do
+case "${option}"
+in
+r) REF_LIST=${OPTARG};;
+t) TAR_LIST=${OPTARG};;
+n) REF_NAME=${OPTARG};;
+T) TAR_NAME=${OPTARG};;
+p) TEMPLATE=${OPTARG};;
+d) NPROC=${OPTARG};;
+*) echo "Invalid option: -${OPTARG}" >&2; exit 1;;
+esac
+done
+
+/home/ec2-user/multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py \
+--ref_list "${REF_LIST}" \
+--tar_list "${TAR_LIST}" \
+--ref_name "${REF_NAME}" \
+--tar_name "${TAR_NAME}" \
+--template "${TEMPLATE}" \
+--nproc "${NPROC}" \
+--create --process --debug
