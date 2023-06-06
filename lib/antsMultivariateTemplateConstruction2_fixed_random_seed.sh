@@ -19,7 +19,7 @@ ANTSPATH=/home/yourname/bin/ants/
 
 Or the correct location of the ANTS binaries.
 
-Alternatively, edit this script ( `basename $0` ) to set up this parameter correctly.
+Alternatively, edit this script ( $(basename "$0") ) to set up this parameter correctly.
 
 SETPATH
     exit 1
@@ -69,7 +69,7 @@ function Usage {
 
 Usage:
 
-`basename $0` -d ImageDimension -o OutputPrefix <other options> <images>
+$(basename "$0") -d ImageDimension -o OutputPrefix <other options> <images>
 
 Compulsory arguments (minimal command line requires SGE/PBS cluster, otherwise use -c and
   -j options):
@@ -189,11 +189,11 @@ Optional arguments:
 
 Example:
 
-`basename $0` -d 3 -i 3 -k 1 -f 4x2x1 -s 2x1x0vox -q 30x20x4 -t SyN  -m CC -c 0 -o MY sub*avg.nii.gz
+$(basename "$0") -d 3 -i 3 -k 1 -f 4x2x1 -s 2x1x0vox -q 30x20x4 -t SyN  -m CC -c 0 -o MY sub*avg.nii.gz
 
 Multimodal example:
 
-`basename $0` -d 3 -i 3 -k 2 -f 4x2x1 -s 2x1x0vox -q 30x20x4 -t SyN -z t1.nii.gz -z t2.nii.gz \
+$(basename "$0") -d 3 -i 3 -k 2 -f 4x2x1 -s 2x1x0vox -q 30x20x4 -t SyN -z t1.nii.gz -z t2.nii.gz \
  -m CC -c 0 -o MY templateInput.csv
 
 where templateInput.csv contains
@@ -269,21 +269,21 @@ function summarizeimageset() {
 
   case $method in
     0) #mean
-      ${ANTSPATH}/AverageImages $dim $output 0 ${images[*]}
-      ${ANTSPATH}/ImageMath $dim $output Sharpen $output
+      "${ANTSPATH}"/AverageImages "$dim" "$output" 0 "${images[*]}"
+      "${ANTSPATH}"/ImageMath "$dim" "$output" Sharpen "$output"
       ;;
     1) #mean of normalized images, sharpens automatically
-      ${ANTSPATH}/AverageImages $dim $output 1 ${images[*]}
+      "${ANTSPATH}"/AverageImages "$dim" "$output" 1 "${images[*]}"
       ;;
     2) #median
       local image
       for image in "${images[@]}";
         do
-          echo $image >> ${output}_list.txt
+          echo "$image" >> "${output}"_list.txt
         done
 
-      ${ANTSPATH}/ImageSetStatistics $dim ${output}_list.txt ${output} 0
-      ${ANTSPATH}/ImageMath $dim $output Sharpen $output
+      "${ANTSPATH}"/ImageSetStatistics "$dim" "${output}"_list.txt "${output}" 0
+      "${ANTSPATH}"/ImageMath "$dim" "$output" Sharpen "$output"
       rm ${output}_list.txt
       ;;
   esac
@@ -328,7 +328,7 @@ function shapeupdatetotemplate() {
       exit 1
     fi
 
-    summarizeimageset $dim $template $statsmethod ${imagelist[@]}
+    summarizeimageset "$dim" "$template" "$statsmethod" "${imagelist[@]}"
 
     WARPLIST=( `ls ${outputname}*[0-9]Warp.nii.gz 2> /dev/null` )
     NWARPS=${#WARPLIST[*]}
@@ -343,10 +343,10 @@ function shapeupdatetotemplate() {
           echo
           echo "--------------------------------------------------------------------------------------"
           echo " shapeupdatetotemplate---voxel-wise averaging of the inverse warp fields (from subject to template)"
-          echo "   ${ANTSPATH}/AverageImages $dim ${templatename}${whichtemplate}warp.nii.gz 0 `ls ${outputname}*Warp.nii.gz | grep -v "InverseWarp"`"
+          echo "   ${ANTSPATH}/AverageImages $dim ${templatename}${whichtemplate}warp.nii.gz 0 $(ls "${outputname}"*Warp.nii.gz | grep -v "InverseWarp")"
           date
           echo "--------------------------------------------------------------------------------------"
-          ${ANTSPATH}/AverageImages $dim ${templatename}${whichtemplate}warp.nii.gz 0 `ls ${outputname}*Warp.nii.gz | grep -v "InverseWarp"`
+          "${ANTSPATH}"/AverageImages "$dim" "${templatename}""${whichtemplate}"warp.nii.gz 0 "$(ls "${outputname}"*Warp.nii.gz | grep -v "InverseWarp")"
 
           echo
           echo "--------------------------------------------------------------------------------------"
@@ -390,31 +390,31 @@ function shapeupdatetotemplate() {
 
 function jobfnamepadding {
 
-    outdir=`dirname ${TEMPLATES[0]}`
+    outdir=$(dirname "${TEMPLATES[0]}")
     if [[ ${#outdir} -eq 0 ]]
         then
-        outdir=`pwd`
+        outdir=$(pwd)
     fi
 
-    files=`ls ${outdir}/job*.sh`
-    BASENAME1=`echo $files[1] | cut -d 'b' -f 1`
+    files=$(ls "${outdir}"/job*.sh)
+    BASENAME1=$(echo "$files"[1] | cut -d 'b' -f 1)
 
     for file in ${files}
       do
 
       if [[ "${#file}" -eq "9" ]];
        then
-         BASENAME2=`echo $file | cut -d 'b' -f 2 `
+         BASENAME2=$(echo "$file" | cut -d 'b' -f 2 )
          mv "$file" "${BASENAME1}b_000${BASENAME2}"
 
       elif [[ "${#file}" -eq "10" ]];
         then
-          BASENAME2=`echo $file | cut -d 'b' -f 2 `
+          BASENAME2=$(echo "$file" | cut -d 'b' -f 2 )
           mv "$file" "${BASENAME1}b_00${BASENAME2}"
 
       elif [[ "${#file}" -eq "11" ]];
         then
-          BASENAME2=`echo $file | cut -d 'b' -f 2 `
+          BASENAME2=$(echo "$file" | cut -d 'b' -f 2 )
           mv "$file" "${BASENAME1}b_0${BASENAME2}"
       fi
     done
@@ -961,32 +961,32 @@ for (( i = 0; i < $NUMBEROFMODALITIES; i++ ))
         echo " Initial template $i found.  This will be used for guiding the registration. use : ${REGTEMPLATES[$i]} and ${TEMPLATES[$i]} "
         echo "--------------------------------------------------------------------------------------"
      # now move the initial registration template to OUTPUTNAME, otherwise this input gets overwritten.
-        cp ${REGTEMPLATES[$i]} ${TEMPLATES[$i]}
+        cp "${REGTEMPLATES[$i]}" "${TEMPLATES[$i]}"
       else
         echo
         echo "--------------------------------------------------------------------------------------"
         echo " Creating template ${TEMPLATES[$i]} from a population average image from the inputs."
-        echo "   ${CURRENTIMAGESET[@]}"
+        echo "  " "${CURRENTIMAGESET[@]}"
         echo "--------------------------------------------------------------------------------------"
-        summarizeimageset $DIM ${TEMPLATES[$i]} $STATSMETHOD ${CURRENTIMAGESET[@]}
+        summarizeimageset "$DIM" "${TEMPLATES[$i]}" "$STATSMETHOD" "${CURRENTIMAGESET[@]}"
         #${ANTSPATH}/AverageImages $DIM ${TEMPLATES[$i]} 1 ${CURRENTIMAGESET[@]}
       fi
 
     if [[ ! -s ${TEMPLATES[$i]} ]];
       then
-        echo "Your initial template : $TEMPLATES[$i] was not created.  This indicates trouble!  You may want to check correctness of your input parameters. exiting."
+        echo "Your initial template : ${TEMPLATES[$i]} was not created.  This indicates trouble!  You may want to check correctness of your input parameters. exiting."
         exit 1
       fi
 done
 
 
 # remove old job bash scripts
-outdir=`dirname ${TEMPLATES[0]}`
+outdir=$(dirname "${TEMPLATES[0]}")
 if [[ ${#outdir} -eq 0 ]];
     then
-    outdir=`pwd`
+    outdir=$(pwd)
 fi
-rm -f ${outdir}/job*.sh
+rm -f "${outdir}"/job*.sh
 
 ##########################################################################
 #
@@ -1167,16 +1167,16 @@ if [[ "$RIGID" -eq 1 ]];
           do
             k=0
             let k=$i-$j
-            IMGbase=`basename ${IMAGESETARRAY[$i]}`
-            BASENAME=` echo ${IMGbase} | cut -d '.' -f 1 `
+            IMGbase=$(basename "${IMAGESETARRAY[$i]}")
+            BASENAME=$( echo "${IMGbase}" | cut -d '.' -f 1 )
             RIGID="${outdir}/rigid${k}_${j}_${IMGbase}"
 
             IMAGERIGIDSET[${#IMAGERIGIDSET[@]}]=$RIGID
           done
         echo
-        echo  "${ANTSPATH}/AverageImages $DIM ${TEMPLATES[$j]} 1 ${IMAGERIGIDSET[@]}"
+        echo  "${ANTSPATH}/AverageImages $DIM ${TEMPLATES[$j]} 1 " "${IMAGERIGIDSET[@]}"
 
-      summarizeimageset $DIM ${TEMPLATES[$j]} $STATSMETHOD ${IMAGERIGIDSET[@]}
+      summarizeimageset "$DIM" "${TEMPLATES[$j]}" "$STATSMETHOD" "${IMAGERIGIDSET[@]}"
       #${ANTSPATH}/AverageImages $DIM ${TEMPLATES[$j]} 1 ${IMAGERIGIDSET[@]}
       done
 
@@ -1188,33 +1188,33 @@ if [[ "$RIGID" -eq 1 ]];
         echo " Backing up results from rigid iteration"
         echo "--------------------------------------------------------------------------------------"
 
-        mkdir ${outdir}/rigid
-        mv ${outdir}/rigid*.nii.gz ${outdir}/*GenericAffine.mat ${outdir}/rigid/
+        mkdir "${outdir}"/rigid
+        mv "${outdir}"/rigid*.nii.gz "${outdir}"/*GenericAffine.mat "${outdir}"/rigid/
         # backup logs
         if [[ $DOQSUB -eq 1 ]];
           then
-            mv ${outdir}/antsBuildTemplate_rigid* ${outdir}/rigid/
+            mv "${outdir}"/antsBuildTemplate_rigid* "${outdir}"/rigid/
             # Remove qsub scripts
-            rm -f ${outdir}/job_${count}_qsub.sh
+            rm -f "${outdir}"/job_${count}_qsub.sh
         elif [[ $DOQSUB -eq 4 ]];
           then
-            mv ${outdir}/antsrigid* ${outdir}/job* ${outdir}/rigid/
+            mv "${outdir}"/antsrigid* "${outdir}"/job* "${outdir}"/rigid/
         elif [[ $DOQSUB -eq 2 ]];
           then
-            mv ${outdir}/job*.txt ${outdir}/rigid/
+            mv "${outdir}"/job*.txt "${outdir}"/rigid/
         elif [[ $DOQSUB -eq 3 ]];
           then
-            rm -f ${outdir}/job_*_qsub.sh
+            rm -f "${outdir}"/job_*_qsub.sh
         elif [[ $DOQSUB -eq 5 ]];
           then
-            mv ${outdir}/slurm-*.out ${outdir}/rigid/
-            mv ${outdir}/job*.txt ${outdir}/rigid/
+            mv "${outdir}"/slurm-*.out "${outdir}"/rigid/
+            mv "${outdir}"/job*.txt "${outdir}"/rigid/
 
             # Remove submission scripts
-            rm -f ${outdir}/job_${count}_qsub.sh
+            rm -f "${outdir}"/job_${count}_qsub.sh
         fi
       else
-        rm -f  ${outdir}/rigid*.* ${outdir}/job*.txt ${outdir}/slurm-*.out
+        rm -f  "${outdir}"/rigid*.* "${outdir}"/job*.txt "${outdir}"/slurm-*.out
     fi
 fi # endif RIGID
 
@@ -1234,7 +1234,7 @@ NUMLEVELS=${#ITERATLEVEL[@]}
 #
 echo
 echo "--------------------------------------------------------------------------------------"
-echo " Start to build templates: ${TEMPLATES[@]}"
+echo " Start to build templates: " "${TEMPLATES[@]}"
 echo "--------------------------------------------------------------------------------------"
 #
 
@@ -1245,9 +1245,9 @@ i=0
 while [[ $i -lt ${ITERATIONLIMIT} ]];
   do
     itdisplay=$((i+1))
-    rm -f ${OUTPUTNAME}*Warp.nii*
-    rm -f ${OUTPUTNAME}*GenericAffine.mat
-    rm -f ${outdir}/job*.sh
+    rm -f "${OUTPUTNAME}"*Warp.nii*
+    rm -f "${OUTPUTNAME}"*GenericAffine.mat
+    rm -f "${outdir}"/job*.sh
     # Used to save time by only running coarse registration for the first couple of iterations
     # But with decent initialization, this is probably not worthwhile.
     # If you uncomment this, replace MAXITERATIONS with ITERATIONS in the call to ants below
@@ -1312,23 +1312,23 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
                 METRIC=MeanSquares[
                 METRICPARAMS="${MODALITYWEIGHTS[$k]},0]"
             else
-              echo "Invalid similarity metric. Use CC, MI, MSQ, DEMONS or type bash `basename $0` -h."
+              echo "Invalid similarity metric. Use CC, MI, MSQ, DEMONS or type bash $(basename "$0") -h."
               exit 1
             fi
-            TEMPLATEbase=`basename ${TEMPLATES[$k]}`
-            indir=`dirname ${IMAGESETARRAY[$j]}`
+            TEMPLATEbase=$(basename "${TEMPLATES[$k]}")
+            indir=$(dirname "${IMAGESETARRAY[$j]}")
             if [[ ${#indir} -eq 0 ]];
               then
-                indir=`pwd`
+                indir=$(pwd)
               fi
-            IMGbase=`basename ${IMAGESETARRAY[$l]}`
+            IMGbase=$(basename "${IMAGESETARRAY[$l]}")
             OUTFN=${OUTPUTNAME}template${k}${IMGbase%%.*}
-            OUTFN=`basename ${OUTFN}`
+            OUTFN=$(basename "${OUTFN}")
             DEFORMED="${outdir}/${OUTFN}${l}WarpedToTemplate.nii.gz"
 
-            IMGbase=`basename ${IMAGESETARRAY[$j]}`
+            IMGbase=$(basename "${IMAGESETARRAY[$j]}")
             OUTWARPFN=${OUTPUTNAME}${IMGbase%%.*}
-            OUTWARPFN=`basename ${OUTWARPFN}`
+            OUTWARPFN=$(basename "${OUTWARPFN}")
             OUTWARPFN="${OUTWARPFN}${j}"
 
             if [ $NOWARP -eq 0 ];
@@ -1359,9 +1359,9 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
 
         done
 
-        IMGbase=`basename ${IMAGESETARRAY[$j]}`
+        IMGbase=$(basename "${IMAGESETARRAY[$j]}")
         OUTWARPFN=${OUTPUTNAME}${IMGbase%%.*}
-        OUTWARPFN=`basename ${OUTWARPFN}${j}`
+        OUTWARPFN=$(basename "${OUTWARPFN}"${j})
 
         stage0="-r [${TEMPLATES[0]},${IMAGESETARRAY[$j]},1]"
         stage1="-t Rigid[0.1] ${IMAGEMETRICLINEARSET} -c [1000x500x250x0,1e-6,10] -f 6x4x2x1 -s 4x2x1x0"
@@ -1451,7 +1451,7 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
         echo " Starting ANTS registration on SGE cluster. Iteration: $itdisplay of $ITERATIONLIMIT"
         echo "--------------------------------------------------------------------------------------"
         # now wait for the stuff to finish - this will take a while so poll queue every 10 mins
-        ${ANTSPATH}/waitForSGEQJobs.pl 1 600 $jobIDs
+        "${ANTSPATH}"/waitForSGEQJobs.pl 1 600 "$jobIDs"
         if [[ ! $? -eq 0 ]];
           then
             echo "qsub submission failed - jobs went into error state"
@@ -1464,7 +1464,7 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
         echo " Starting ANTS registration on PBS cluster. Iteration: $itdisplay of $ITERATIONLIMIT"
         echo "--------------------------------------------------------------------------------------"
         # now wait for the stuff to finish - this will take a while so poll queue every 10 mins
-        ${ANTSPATH}/waitForPBSQJobs.pl 1 600 $jobIDs
+        "${ANTSPATH}"/waitForPBSQJobs.pl 1 600 "$jobIDs"
         if [[ ! $? -eq 0 ]];
           then
             echo "qsub submission failed - jobs went into error state"
@@ -1480,8 +1480,8 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
         echo " Progress can be viewed in job*_${i}_metriclog.txt"
         echo "--------------------------------------------------------------------------------------"
         jobfnamepadding #adds leading zeros to the jobnames, so they are carried out chronologically
-        chmod +x ${outdir}/job*.sh
-        $PEXEC -j ${CORES} sh ${outdir}/job*.sh
+        chmod +x "${outdir}"/job*.sh
+        $PEXEC -j "${CORES}" sh "${outdir}"/job*.sh
       fi
 
     if [[ $DOQSUB -eq 3 ]];
@@ -1492,7 +1492,7 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
         echo " Starting ANTS registration on XGrid cluster. Submitted $count jobs "
         echo "--------------------------------------------------------------------------------------"
         # now wait for the jobs to finish. This is slow, so poll less often
-        ${ANTSPATH}/waitForXGridJobs.pl -xgridflags "$XGRIDOPTS" -verbose -delay 300 $jobIDs
+        "${ANTSPATH}"/waitForXGridJobs.pl -xgridflags "$XGRIDOPTS" -verbose -delay 300 "$jobIDs"
         # Returns 1 if there are errors
         if [[ ! $? -eq 0 ]];
           then
@@ -1509,7 +1509,7 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
         echo " Starting ANTS registration on SLURM cluster. Submitted $count jobs "
         echo "--------------------------------------------------------------------------------------"
         # now wait for the stuff to finish - this will take a while so poll queue every 10 mins
-        ${ANTSPATH}/waitForSlurmJobs.pl 1 600 $jobIDs
+        "${ANTSPATH}"/waitForSlurmJobs.pl 1 600 $jobIDs
         if [[ ! $? -eq 0 ]];
           then
             echo "SLURM submission failed - jobs went into error state"
@@ -1517,8 +1517,8 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
           fi
       fi
 
-    WARPFILES=`ls ${OUTPUTNAME}*Warp.nii.gz | grep -v "InverseWarp"`
-    AFFINEFILES=`ls ${OUTPUTNAME}*GenericAffine.mat`
+    WARPFILES=$(ls "${OUTPUTNAME}"*Warp.nii.gz | grep -v "InverseWarp")
+    AFFINEFILES=$(ls "${OUTPUTNAME}"*GenericAffine.mat)
 
     if [[ ${#WARPFILES[@]} -eq 0 || ${#AFFINEFILES[@]} -eq 0 ]];
       then
@@ -1537,7 +1537,7 @@ while [[ $i -lt ${ITERATIONLIMIT} ]];
 
     for (( j = 0; j < $NUMBEROFMODALITIES; j++ ))
       do
-        shapeupdatetotemplate ${DIM} ${TEMPLATES[$j]} ${TEMPLATENAME} ${OUTPUTNAME} ${GRADIENTSTEP} ${j} ${STATSMETHOD}
+        shapeupdatetotemplate "${DIM}" "${TEMPLATES[$j]}" "${TEMPLATENAME}" "${OUTPUTNAME}" "${GRADIENTSTEP}" ${j} "${STATSMETHOD}"
       done
 
     if [[ $BACKUPEACHITERATION -eq 1 ]];
@@ -1578,15 +1578,15 @@ rm -f job*.sh
 #cleanup of 4D files
 if [[ "${range}" -gt 1 && "${TDIM}" -eq 4 ]];
   then
-    mv ${tmpdir}/selection/${TEMPLATES[@]} ${currentdir}/
-    cd ${currentdir}
+    mv "${tmpdir}""/selection/""${TEMPLATES[*]}" "${currentdir}"/
+    cd "${currentdir}" || exit
     rm -rf ${tmpdir}/
   fi
-time_end=`date +%s`
+time_end=$(date +%s)
 time_elapsed=$((time_end - time_start))
 echo
 echo "--------------------------------------------------------------------------------------"
-echo " Done creating: ${TEMPLATES[@]}"
+echo " Done creating: " "${TEMPLATES[@]}"
 echo " Script executed in $time_elapsed seconds"
 echo " $(( time_elapsed / 3600 ))h $(( time_elapsed %3600 / 60 ))m $(( time_elapsed % 60 ))s"
 echo "--------------------------------------------------------------------------------------"
