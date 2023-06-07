@@ -15,7 +15,7 @@ d) NPROC=${OPTARG};;
 esac
 done
 
-/home/ec2-user/multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py \
+/home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
 --ref_list "${REF_LIST}" \
 --tar_list "${TAR_LIST}" \
 --ref_name "${REF_NAME}" \
