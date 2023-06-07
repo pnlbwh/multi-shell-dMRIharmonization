@@ -378,7 +378,7 @@ class pipeline(cli.Application):
 
         df.to_csv(statFile, index=False)
 
-        # print statistics on console        
+        # print statistics on console
         with open(statFile) as f:
             print(f.read())
 
@@ -400,7 +400,8 @@ class pipeline(cli.Application):
         external_commands = [
             'antsMultivariateTemplateConstruction2.sh',
             'antsApplyTransforms',
-            'antsRegistrationSyNQuick.sh']
+            'antsRegistrationSyNQuick.sh',
+            'unring.a64']
 
         for cmd in external_commands:
             exe = find_executable(cmd)
@@ -434,6 +435,7 @@ class pipeline(cli.Application):
             prefix = basename(ref_nshm_img).split('.nii')[0]
             bvalFile = pjoin(directory, prefix + '.bval')
             self.N_shm, _ = determineNshm(bvalFile)
+
 
         # automatic determination of N_shm during data harmonization is limited by N_shm used during template creation
         # Scale_L{i}.nii.gz of <= {N_shm during template creation} are present only
@@ -490,3 +492,5 @@ class pipeline(cli.Application):
 
 if __name__ == '__main__':
     pipeline.run()
+
+

@@ -13,30 +13,30 @@
 
 from util import exists, warnings, makedirs, rmtree, pjoin, dirname
 
-
 def check_csv(file, force):
+
     with open(file) as f:
-        content = f.read()
+        content= f.read()
 
         for line, row in enumerate(content.split()):
-            dwi_mask = [element for element in row.split(',') if element]  # handling w/space
+            dwi_mask= [element for element in row.split(',') if element] # handling w/space
             if len(dwi_mask) != 2:
                 raise FileNotFoundError(f'Columns don\'t have same number of entries: check line {line} in {file}')
 
-            dirCheckFlag = 1
+            dirCheckFlag= 1
             for img in dwi_mask:
                 if not exists(img):
                     raise FileNotFoundError(f'{img} does not exist: check line {line} in {file}')
 
                 elif dirCheckFlag:
                     # create DTI and harmonization directory
-                    dtiPath = pjoin(dirname(img), 'dti')
+                    dtiPath= pjoin(dirname(img),'dti')
                     check_dir(dtiPath, force)
 
-                    harmPath = pjoin(dirname(img), 'harm')
+                    harmPath= pjoin(dirname(img),'harm')
                     check_dir(harmPath, force)
 
-                    dirCheckFlag = 0
+                    dirCheckFlag= 0
 
 
 def check_dir(path, force):
@@ -51,14 +51,17 @@ def check_dir(path, force):
 
 
 def read_caselist(file):
+
     with open(file) as f:
+
         imgs = []
         masks = []
-        content = f.read()
+        content= f.read()
         for line, row in enumerate(content.split()):
-            temp = [element for element in row.split(',') if element]  # handling w/space
+            temp= [element for element in row.split(',') if element] # handling w/space
             imgs.append(temp[0])
             masks.append(temp[1])
+
 
     return (imgs, masks)
 
@@ -77,3 +80,4 @@ def read_caselist(file):
 #
 #     nifti_write(imgPath, niftiImgPrefix)
 #     return niftiImgPrefix+'.nii.gz'
+
