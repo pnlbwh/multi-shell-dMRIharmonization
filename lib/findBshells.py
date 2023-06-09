@@ -20,44 +20,46 @@ from util import B0_THRESH, B_QUANT, BSHELL_MIN_DIST
 
 
 def usage():
-    print('''Find b-shells in a DWI 
+    print(
+        """Find b-shells in a DWI 
 Usage:
 findBShells /path/to/input/bval/file /output/file/to/write/bshells
-''')
+"""
+    )
 
 
-def findBShells(bvalFile, outputBshellFile= None):
+def findBShells(bvalFile, outputBshellFile=None):
 
-    given_bvals= read_bvals(abspath(bvalFile))
+    given_bvals = read_bvals(abspath(bvalFile))
 
     # get unique bvalues in ascending order
-    unique_bvals= np.unique(given_bvals)
+    unique_bvals = np.unique(given_bvals)
 
     # identify b0s
-    quantized_bvals= unique_bvals.copy()
-    quantized_bvals[unique_bvals<=B0_THRESH]= 0.
+    quantized_bvals = unique_bvals.copy()
+    quantized_bvals[unique_bvals <= B0_THRESH] = 0.0
 
     # round to multiple of B_QUANT (50 or 100)
-    quantized_bvals= np.unique(np.round(quantized_bvals/B_QUANT)*B_QUANT)
+    quantized_bvals = np.unique(np.round(quantized_bvals / B_QUANT) * B_QUANT)
 
-    print('b-shell bvalues', quantized_bvals)
+    print("b-shell bvalues", quantized_bvals)
 
     for bval in quantized_bvals:
-        print('Indices corresponding to b-shell', bval)
-        print(np.where(abs(bval-given_bvals)<=BSHELL_MIN_DIST)[0],'\n')
-
+        print("Indices corresponding to b-shell", bval)
+        print(np.where(abs(bval - given_bvals) <= BSHELL_MIN_DIST)[0], "\n")
 
     if outputBshellFile:
-        print('Saving the b-shell bvalues in', outputBshellFile)
+        print("Saving the b-shell bvalues in", outputBshellFile)
         write_bvals(outputBshellFile, quantized_bvals)
 
     return quantized_bvals
 
-if __name__== '__main__':
+
+if __name__ == "__main__":
     import sys
-    if len(sys.argv)==1 or sys.argv[1]=='-h' or sys.argv[1]=='--help':
+
+    if len(sys.argv) == 1 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         usage()
         exit()
 
-    findBShells(sys.argv[1],sys.argv[2])
-
+    findBShells(sys.argv[1], sys.argv[2])

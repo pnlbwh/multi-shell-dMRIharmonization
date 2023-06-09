@@ -11,33 +11,44 @@
 # View LICENSE at https://github.com/pnlbwh/dMRIharmonization/blob/master/LICENSE
 # ===============================================================================
 
-from os.path import abspath, dirname, basename, exists, join as pjoin, isfile, split as psplit
+from os.path import (
+    abspath,
+    dirname,
+    basename,
+    exists,
+    join as pjoin,
+    isfile,
+    split as psplit,
+)
 from os import mkdir
 import sys
 from shutil import rmtree, copyfile
 import unittest
 from subprocess import check_call, Popen
 
-FILEDIR= abspath(dirname(__file__))
-LIBDIR= dirname(FILEDIR)
+FILEDIR = abspath(dirname(__file__))
+LIBDIR = dirname(FILEDIR)
 
 # sys.path.append(FILEDIR)
 sys.path.append(LIBDIR)
 
 import warnings
+
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=FutureWarning)
     from nibabel import load, Nifti1Image
     from dipy.io import read_bvals_bvecs
 
+
 def save_nifti(fname, data, affine, hdr=None):
-    if data.dtype.name=='uint8':
-        hdr.set_data_dtype('uint8')
+    if data.dtype.name == "uint8":
+        hdr.set_data_dtype("uint8")
     else:
-        hdr.set_data_dtype('float32')
+        hdr.set_data_dtype("float32")
 
     result_img = Nifti1Image(data, affine, header=hdr)
     result_img.to_filename(fname)
+
 
 from numpy import array
 from conversion import write_bvals

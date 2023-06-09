@@ -15,65 +15,74 @@
 
 from normalize import find_b0
 from plumbum import cli, local
-from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs, read_imgs_masks
+from conversion import (
+    read_bvals,
+    read_bvecs,
+    write_bvals,
+    write_bvecs,
+    read_imgs,
+    read_imgs_masks,
+)
 from nibabel import load
 from util import abspath, pjoin, save_nifti, RAISE, isfile
 import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
 
+
 def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
 
     if ref_bvals_file:
-        print('Reading reference b-shell file ...')
-        ref_bvals= read_bvals(ref_bvals_file)
+        print("Reading reference b-shell file ...")
+        ref_bvals = read_bvals(ref_bvals_file)
 
+    print("Separating b-shells for", imgPath)
 
-    print('Separating b-shells for', imgPath)
-        
-    imgPath= local.path(imgPath)
+    imgPath = local.path(imgPath)
 
-    img= load(imgPath._path)
-    dwi= img.get_data()
-    inPrefix= abspath(imgPath).split('.nii')[0]
-    bvals= np.array(read_bvals(inPrefix+'.bval'))
-    bvecs= np.array(read_bvecs(inPrefix+'.bvec'))
-
+    img = load(imgPath._path)
+    dwi = img.get_data()
+    inPrefix = abspath(imgPath).split(".nii")[0]
+    bvals = np.array(read_bvals(inPrefix + ".bval"))
+    bvecs = np.array(read_bvecs(inPrefix + ".bvec"))
 
     for bval in ref_bvals:
 
         # ind= np.where(bval==bvals)[0]
-        ind= np.where(abs(bval-bvals)<=BSHELL_MIN_DIST)[0]
-        N_b= len(ind)
+        ind = np.where(abs(bval - bvals) <= BSHELL_MIN_DIST)[0]
+        N_b = len(ind)
 
-        bPrefix = inPrefix + f'_b{int(bval)}'
-        
-        if bval==0.:
+        bPrefix = inPrefix + f"_b{int(bval)}"
+
+        if bval == 0.0:
             b0 = find_b0(dwi, ind)
 
-        if isfile(bPrefix + '.nii.gz'):
+        if isfile(bPrefix + ".nii.gz"):
             continue
-        
-        if bval==0.:
-            save_nifti(bPrefix + '.nii.gz', b0, img.affine, img.header)
+
+        if bval == 0.0:
+            save_nifti(bPrefix + ".nii.gz", b0, img.affine, img.header)
 
         else:
-            b0_bshell = np.zeros((dwi.shape[0],dwi.shape[1],dwi.shape[2],N_b+1), dtype='float32')
-            b0_bshell[:,:,:,0]= b0
-            b0_bshell[:,:,:,1:]= dwi[:,:,:,ind]
+            b0_bshell = np.zeros(
+                (dwi.shape[0], dwi.shape[1], dwi.shape[2], N_b + 1), dtype="float32"
+            )
+            b0_bshell[:, :, :, 0] = b0
+            b0_bshell[:, :, :, 1:] = dwi[:, :, :, ind]
 
-            b0_bvals= [0.]+[bval]*N_b
+            b0_bvals = [0.0] + [bval] * N_b
 
-            b0_bvecs= np.zeros((N_b+1,3), dtype='float32')
-            b0_bvecs[1:,]= bvecs[ind,: ]
+            b0_bvecs = np.zeros((N_b + 1, 3), dtype="float32")
+            b0_bvecs[
+                1:,
+            ] = bvecs[ind, :]
 
-            save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
-            write_bvals(bPrefix+'.bval', b0_bvals)
-            write_bvecs(bPrefix+'.bvec', b0_bvecs)
+            save_nifti(bPrefix + ".nii.gz", b0_bshell, img.affine, img.header)
+            write_bvals(bPrefix + ".bval", b0_bvals)
+            write_bvecs(bPrefix + ".bvec", b0_bvecs)
 
 
-
-def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
+def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix=None):
 
     ref_bvals = read_bvals(ref_bvals_file)
 
@@ -85,12 +94,14 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
 
     pool = Pool(int(ncpu))
     for imgPath in imgs:
-        pool.apply_async(separateBshells,
-                         kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}, error_callback=RAISE)
+        pool.apply_async(
+            separateBshells,
+            kwds={"imgPath": imgPath, "ref_bvals": ref_bvals},
+            error_callback=RAISE,
+        )
 
     pool.close()
     pool.join()
-
 
     if outPrefix:
         outPrefix = abspath(outPrefix)
@@ -99,19 +110,19 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
 
     for bval in ref_bvals:
 
-        f = open(f'{outPrefix}_b{int(bval)}.csv', 'w')
+        f = open(f"{outPrefix}_b{int(bval)}.csv", "w")
 
         if masks:
             for imgPath, maskPath in zip(imgs, masks):
-                inPrefix = abspath(imgPath).split('.nii')[0]
-                bPrefix = inPrefix + f'_b{int(bval)}'
-                f.write(f'{bPrefix}.nii.gz,{maskPath}\n')
+                inPrefix = abspath(imgPath).split(".nii")[0]
+                bPrefix = inPrefix + f"_b{int(bval)}"
+                f.write(f"{bPrefix}.nii.gz,{maskPath}\n")
 
         else:
             for imgPath in imgs:
-                inPrefix = abspath(imgPath).split('.nii')[0]
-                bPrefix = inPrefix + f'_b{int(bval)}'
-                f.write(f'{bPrefix}.nii.gz\n')
+                inPrefix = abspath(imgPath).split(".nii")[0]
+                bPrefix = inPrefix + f"_b{int(bval)}"
+                f.write(f"{bPrefix}.nii.gz\n")
 
         f.close()
 
@@ -119,32 +130,35 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
 class separateShells(cli.Application):
 
     ref_csv = cli.SwitchAttr(
-        ['--img_list'],
+        ["--img_list"],
         cli.ExistingFile,
-        help='csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n...'
-             'or just one column for dwi1\\ndwi2\\n...',
-        mandatory= True)
+        help="csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\ndwi2,mask2\\n..."
+        "or just one column for dwi1\\ndwi2\\n...",
+        mandatory=True,
+    )
 
     ref_bvals_file = cli.SwitchAttr(
-        ['--ref_bshell_file'],
+        ["--ref_bshell_file"],
         cli.ExistingFile,
-        help='reference bshell file',
-        mandatory= True)
+        help="reference bshell file",
+        mandatory=True,
+    )
 
-    outPrefix= cli.SwitchAttr(
-        ['-outPrefix'],
-        help='outPrefix for list of generated single shell images(,masks)')
+    outPrefix = cli.SwitchAttr(
+        ["-outPrefix"],
+        help="outPrefix for list of generated single shell images(,masks)",
+    )
 
     ncpu = cli.SwitchAttr(
-        '--ncpu',
-        help='number of processes/threads to use (-1 for all available, may slow down your system)',
-        default=4)
-
+        "--ncpu",
+        help="number of processes/threads to use (-1 for all available, may slow down your system)",
+        default=4,
+    )
 
     def main(self):
 
         separateAllBshells(self.ref_csv, self.ref_bvals_file, self.ncpu, self.outPrefix)
 
 
-if __name__== '__main__':
+if __name__ == "__main__":
     separateShells.run()
