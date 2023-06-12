@@ -2,7 +2,7 @@ import os
 import argparse
 import s3fs
 import concurrent.futures
-from tqdm import tqdm
+from tqdm import tqdm  # Make sure to import tqdm
 
 
 def download_from_s3(s3_path, local_path):
@@ -13,28 +13,22 @@ def download_from_s3(s3_path, local_path):
     :param local_path: Path to the local directory.
     """
     fs = s3fs.S3FileSystem()
-    try:
-        # Check if the file exists in S3
-        if fs.exists(s3_path):
-            # Download the file
-            fs.get(s3_path, os.path.join(local_path, os.path.basename(s3_path)))
-            return s3_path
-        else:
-            print(f"File {s3_path} does not exist in S3")
-    except Exception as e:
-        print(f"An error occurred while trying to download {s3_path}: {e}")
+
+    # Check if the file exists in S3
+    if fs.exists(s3_path):
+        # Download the file
+        fs.get(s3_path, os.path.join(local_path, os.path.basename(s3_path)))
+        # Return the file path instead of printing it
+        return s3_path
+    else:
+        print(f"File {s3_path} does not exist in S3")
 
 
 def main():
     parser = argparse.ArgumentParser(description='Download files from S3 based on a text file.')
     parser.add_argument('-t', '--textfile', help='Path to the text file.', required=True)
     parser.add_argument('-d', '--directory', help='Path to the target directory.', required=True)
-    parser.add_argument('-m', '--multithreaded', type=int, help='Number of threads to use for multithreaded download.', required=False)
     args = parser.parse_args()
-
-    # Ensure that the local directory exists
-    if not os.path.exists(args.directory):
-        os.makedirs(args.directory)
 
     # Get all nii, mask, bval, and bvec files
     files_to_download = []
@@ -51,19 +45,13 @@ def main():
     # List to store the downloaded files
     downloaded_files = []
 
-    # Check if multithreading is requested
-    if args.multithreaded is not None:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=args.multithreaded) as executor:
-            futures = {executor.submit(download_from_s3, file, args.directory) for file in files_to_download}
-            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
-                result = future.result()
-                if result is not None:
-                    downloaded_files.append(result)
-    else:
-        for file in tqdm(files_to_download):
-            result = download_from_s3(file, args.directory)
+    # Download the files using multi-threading
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(download_from_s3, file, args.directory) for file in files_to_download}
+        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+            result = future.result()  # Get the return value from download_from_s3
             if result is not None:
-                downloaded_files.append(result)
+                downloaded_files.append(result)  # Append to the list
 
     # Print the downloaded files at the end
     print("Downloaded files:")
