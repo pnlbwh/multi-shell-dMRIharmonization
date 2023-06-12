@@ -180,7 +180,7 @@ def sub2tmp2mni(
 
     imgs, _ = read_caselist(caselist)
 
-    pool = multiprocessing.Pool(N_proc)
+    pool = multiprocessing.Pool(N_proc, maxtasksperchild=2)
     for imgPath in imgs:
 
         if ref:

@@ -92,7 +92,7 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix=None):
         imgs = read_imgs(ref_csv)
         masks = None
 
-    pool = Pool(int(ncpu))
+    pool = Pool(int(ncpu), maxtasksperchild=2)
     for imgPath in imgs:
         pool.apply_async(
             separateBshells,

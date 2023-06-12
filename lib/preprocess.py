@@ -12,6 +12,7 @@
 # ===============================================================================
 
 import multiprocessing
+from shutil import SameFileError
 from conversion import write_bvals
 from util import *
 from fileUtil import read_caselist
@@ -139,7 +140,7 @@ def common_processing(caselist):
     imgs, masks = read_caselist(caselist)
 
     # compute dti_harm of unprocessed data
-    pool = multiprocessing.Pool(N_proc)
+    pool = multiprocessing.Pool(N_proc, maxtasksperchild=2)
     for imgPath, maskPath in zip(imgs, masks):
         pool.apply_async(func=dti_harm, args=(imgPath, maskPath))
     pool.close()

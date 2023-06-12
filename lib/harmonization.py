@@ -189,7 +189,7 @@ class pipeline(cli.Application):
         templateHdr = load(template0).header
 
         # warp mask, dti, and rish bands
-        pool = multiprocessing.Pool(self.N_proc)
+        pool = multiprocessing.Pool(self.N_proc, maxtasksperchild=2)
         for imgPath, maskPath in zip(imgs, masks):
             pool.apply_async(
                 func=warp_bands,
@@ -298,7 +298,7 @@ class pipeline(cli.Application):
             #     refImgs[i] = attributes[i][0]
             #     refMasks[i] = attributes[i][1]
 
-            pool = multiprocessing.Pool(self.N_proc)
+            pool = multiprocessing.Pool(self.N_proc, maxtasksperchild=2)
             for imgPath, maskPath in zip(refImgs, refMasks):
                 pool.apply_async(
                     func=approx,
@@ -327,7 +327,7 @@ class pipeline(cli.Application):
 
         self.harm_csv = self.target_csv + ".harmonized"
         fh = open(self.harm_csv, "w")
-        pool = multiprocessing.Pool(self.N_proc)
+        pool = multiprocessing.Pool(self.N_proc, maxtasksperchild=2)
         res = []
         for imgPath, maskPath in zip(targetImgs, targetMasks):
             res.append(
@@ -362,7 +362,7 @@ class pipeline(cli.Application):
 
         if self.debug:
             harmImgs, harmMasks = read_caselist(self.harm_csv)
-            pool = multiprocessing.Pool(self.N_proc)
+            pool = multiprocessing.Pool(self.N_proc, maxtasksperchild=2)
             for imgPath, maskPath in zip(harmImgs, harmMasks):
                 pool.apply_async(
                     func=dti_harm,

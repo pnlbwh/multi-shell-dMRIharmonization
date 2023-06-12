@@ -84,7 +84,7 @@ def joinAllBshells(tar_csv, ref_bvals_file, separatedPrefix=None, ncpu=4):
         except:
             imgs = read_imgs(tar_csv)
 
-        pool = Pool(int(ncpu))
+        pool = Pool(int(ncpu), maxtasksperchild=2)
         for imgPath in imgs:
             pool.apply_async(
                 joinBshells,
