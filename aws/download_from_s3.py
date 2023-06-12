@@ -5,6 +5,12 @@ import concurrent.futures
 
 
 def download_from_s3(s3_path, local_path):
+    """
+    Download a file from S3 to a local directory.
+
+    :param s3_path: Path to the file in S3.
+    :param local_path: Path to the local directory.
+    """
     fs = s3fs.S3FileSystem()
 
     # Check if the file exists in S3

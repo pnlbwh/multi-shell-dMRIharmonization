@@ -3,6 +3,9 @@ import argparse
 
 
 def write_local_paths(root_dir, output_file):
+    """
+    Write local paths to nifti and mask files to a text file.
+    """
     # Store all file paths
     nii_files = []
     mask_files = []
