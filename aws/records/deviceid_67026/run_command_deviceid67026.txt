@@ -1,4 +1,4 @@
-./home/ec2-user/multi-shell-dMRIharmonization/aws/run_template \
+./run_template \
 -r /home/ec2-user/TEST_DATA/reference-deviceid166007.txt \
 -t /home/ec2-user/TEST_DATA/target-deviceid67026.txt \
 -n ReferenceForDevice67026 \
