@@ -29,7 +29,7 @@ def main():
     parser = argparse.ArgumentParser(description='Download files from S3 based on a text file.')
     parser.add_argument('-t', '--textfile', help='Path to the text file.', required=True)
     parser.add_argument('-d', '--directory', help='Path to the target directory.', required=True)
-    parser.add_argument('-m', '--multithreaded', type=int, help='Number of threads to use for multithreaded download.', required=False)
+    parser.add_argument('-m', '--multithreading', type=int, help='Number of threads to use for multithreading download.', required=False)
     args = parser.parse_args()
 
     # Ensure that the local directory exists
@@ -52,8 +52,8 @@ def main():
     downloaded_files = []
 
     # Check if multithreading is requested
-    if args.multithreaded is not None:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=args.multithreaded) as executor:
+    if args.multithreadng is not None:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=args.multithreading) as executor:
             futures = {executor.submit(download_from_s3, file, args.directory) for file in files_to_download}
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
                 result = future.result()
