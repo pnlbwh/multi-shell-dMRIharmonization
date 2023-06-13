@@ -1,6 +1,6 @@
 ![](../doc/pnl-bwh-hms.png)
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.3451427.svg)](https://doi.org/10.5281/zenodo.3451427) [![Python](https://img.shields.io/badge/Python-3.6-green.svg)]() [![Platform](https://img.shields.io/badge/Platform-linux--64%20%7C%20osx--64-orange.svg)]()
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.3451427.svg)](https://doi.org/10.5281/zenodo.3451427) [![Python](https://img.shields.io/badge/Python-3.7-green.svg)]() [![Platform](https://img.shields.io/badge/Platform-linux--64%20%7C%20osx--64-orange.svg)]()
 
 # Harmonization of Multi-shell Diffusion MRI Data
 
