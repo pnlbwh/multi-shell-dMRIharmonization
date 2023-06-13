@@ -102,36 +102,40 @@ The automated pipeline requires a configuration file in INI format that specifie
 
 ```ini
 [s3_download]
-reference_textfile = /path/to/ref_textfile.txt
-target_textfile = /path/to/tar_textfile.txt
-reference_directory = /path/to/download/ref_directory
-target_directory = /path/to/download/tar_directory
-multithreading = 8
+reference_textfile = /path/to/reference/textfile.txt
+target_textfile = /path/to/target/textfile.txt
+reference_directory = /path/to/reference/directory
+target_directory = /path/to/target/directory
+multithreading = num_threads
 
 [local_paths]
-reference_output = /path/to/ref_output.txt
-target_output = /path/to/tar_output.txt
+reference_output = /path/to/reference/output.txt
+target_output = /path/to/target/output.txt
 
 [bash_script]
-ref_list = /path/to/ref_output.txt
-tar_list = /path/to/tar_output.txt
-ref_name = ref_name
-tar_name = tar_name
+ref_list = /path/to/reference/list.txt
+tar_list = /path/to/target/list.txt
+ref_name = reference_name
+tar_name = target_name
 template = /path/to/template
-nproc = 4
+nproc = num_processors
 ```
 Please replace the placeholders with your actual values:
 
-- `/your/path/to/ref_textfile.txt`: Replace with the path to your reference text file.
-- `/your/path/to/tar_textfile.txt`: Replace with the path to your target text file.
-- `/your/path/to/download/ref_directory`: Replace with the path where your reference directory will be downloaded to.
-- `/your/path/to/download/tar_directory`: Replace with the path where your target directory will be downloaded to.
-- `number_of_threads`: Replace with the number of threads you wish to allocate for multithreading.
-- `/your/path/to/ref_output.txt`: Replace with the path to your reference output text file.
-- `/your/path/to/tar_output.txt`: Replace with the path to your target output text file.
-- `ReferenceName`: Replace with the name of your reference.
-- `TargetName`: Replace with the name of your target.
-- `/your/path/to/template/directory`: Replace with the path to your template directory.
+- `/path/to/reference/textfile.txt`: Replace with the path to your reference text file.
+- `/path/to/target/textfile.txt`: Replace with the path to your target text file.
+- `/path/to/reference/directory`: Replace with the path where your reference directory will be downloaded to.
+- `/path/to/target/directory`: Replace with the path where your target directory will be downloaded to.
+- `num_threads`: Replace with the number of threads you wish to allocate for multithreading.
+- `/path/to/reference/output.txt`: Replace with the path to your reference output text file.
+- `/path/to/target/output.txt`: Replace with the path to your target output text file.
+- `/path/to/reference/list.txt`: Replace with the path to your reference list text file.
+- `/path/to/target/list.txt`: Replace with the path to your target list text file.
+- `reference_name`: Replace with the name of your reference.
+- `target_name`: Replace with the name of your target.
+- `/path/to/template`: Replace with the path to your template.
+- `num_processors`: Replace with the number of processes you wish to allocate for processing.
+
 
 Remember to save your configuration file with the `.ini` extension.
 
