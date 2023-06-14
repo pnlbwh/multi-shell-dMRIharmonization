@@ -52,7 +52,7 @@ def main():
     downloaded_files = []
 
     # Check if multithreading is requested
-    if args.multithreadng is not None:
+    if args.multithreading is not None:
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.multithreading) as executor:
             futures = {executor.submit(download_from_s3, file, args.directory) for file in files_to_download}
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):

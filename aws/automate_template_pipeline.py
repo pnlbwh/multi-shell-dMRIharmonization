@@ -7,8 +7,11 @@ import os
 
 
 def setup_logging(logfile):
-    os.makedirs(os.path.dirname(logfile), exist_ok=True)
+    directory = os.path.dirname(logfile)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+
 
 
 def run_bash_script(config):
