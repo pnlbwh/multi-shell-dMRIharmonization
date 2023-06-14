@@ -1,3 +1,16 @@
+# ===============================================================================
+# AWS-based automated pipeline for dMRI harmonization (2023) is written by-
+#
+# RYAN ZURRIN
+# Brigham and Women's Hospital/Harvard Medical School
+# rzurrin@bwh.harvard.edu, ryanzurrin@gmail.com
+#
+# ===============================================================================
+# See details at https://github.com/RyanZurrin/multi-shell-dMRIharmonization/tree/hcp_aws
+# Submit issues at https://github.com/RyanZurrin/multi-shell-dMRIharmonization/issues
+# View LICENSE at https://github.com/RyanZurrin/multi-shell-dMRIharmonization//LICENSE
+# ===============================================================================
+
 import os
 import argparse
 import s3fs
@@ -26,10 +39,22 @@ def download_from_s3(s3_path, local_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Download files from S3 based on a text file.')
-    parser.add_argument('-t', '--textfile', help='Path to the text file.', required=True)
-    parser.add_argument('-d', '--directory', help='Path to the target directory.', required=True)
-    parser.add_argument('-m', '--multithreading', type=int, help='Number of threads to use for multithreading download.', required=False)
+    parser = argparse.ArgumentParser(
+        description="Download files from S3 based on a text file."
+    )
+    parser.add_argument(
+        "-t", "--textfile", help="Path to the text file.", required=True
+    )
+    parser.add_argument(
+        "-d", "--directory", help="Path to the target directory.", required=True
+    )
+    parser.add_argument(
+        "-m",
+        "--multithreading",
+        type=int,
+        help="Number of threads to use for multithreading download.",
+        required=False,
+    )
     args = parser.parse_args()
 
     # Ensure that the local directory exists
@@ -38,12 +63,12 @@ def main():
 
     # Get all nii, mask, bval, and bvec files
     files_to_download = []
-    with open(args.textfile, 'r') as f:
+    with open(args.textfile, "r") as f:
         for line in f:
-            nii_file, mask_file = line.strip().split(',')
+            nii_file, mask_file = line.strip().split(",")
             # Also download associated .bval and .bvec files
-            bval_file = nii_file.replace('.nii.gz', '.bval')
-            bvec_file = nii_file.replace('.nii.gz', '.bvec')
+            bval_file = nii_file.replace(".nii.gz", ".bval")
+            bvec_file = nii_file.replace(".nii.gz", ".bvec")
             files_to_download.extend([nii_file, mask_file, bval_file, bvec_file])
 
     print(f"Total files to download: {len(files_to_download)}")
@@ -53,9 +78,16 @@ def main():
 
     # Check if multithreading is requested
     if args.multithreading is not None:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=args.multithreading) as executor:
-            futures = {executor.submit(download_from_s3, file, args.directory) for file in files_to_download}
-            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=args.multithreading
+        ) as executor:
+            futures = {
+                executor.submit(download_from_s3, file, args.directory)
+                for file in files_to_download
+            }
+            for future in tqdm(
+                concurrent.futures.as_completed(futures), total=len(futures)
+            ):
                 result = future.result()
                 if result is not None:
                     downloaded_files.append(result)
@@ -71,5 +103,5 @@ def main():
         print(file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

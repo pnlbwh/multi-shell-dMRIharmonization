@@ -1,19 +1,46 @@
 #!/bin/bash
 
+# ------------------------------------------------------------------------------
+# This script automates the MRI data harmonization process.
+#
+# Version: 1.0
+# Updated Date: June 14, 2023,
+# Author: Ryan Zurrin
+# Company: Brigham and Women's Hospital/Harvard Medical School
+# ------------------------------------------------------------------------------
+
+function usage() {
+    echo "Usage: $0 -r REF_LIST -t TAR_LIST -n REF_NAME -T TAR_NAME -p TEMPLATE -d NPROC"
+    echo "Options:"
+    echo "  -r  Reference list"
+    echo "  -t  Target list"
+    echo "  -n  Reference name"
+    echo "  -T  Target name"
+    echo "  -p  Template"
+    echo "  -d  Number of processors"
+    exit 1
+}
+
 # Parse command line arguments
-while getopts r:t:n:T:p:d: option
+while getopts r:t:n:T:p:d:h option
 do
-case "${option}"
-in
-r) REF_LIST=${OPTARG};;
-t) TAR_LIST=${OPTARG};;
-n) REF_NAME=${OPTARG};;
-T) TAR_NAME=${OPTARG};;
-p) TEMPLATE=${OPTARG};;
-d) NPROC=${OPTARG};;
-*) echo "Invalid option: -${OPTARG}" >&2; exit 1;;
-esac
+    case "${option}"
+    in
+    r) REF_LIST=${OPTARG};;
+    t) TAR_LIST=${OPTARG};;
+    n) REF_NAME=${OPTARG};;
+    T) TAR_NAME=${OPTARG};;
+    p) TEMPLATE=${OPTARG};;
+    d) NPROC=${OPTARG};;
+    h) usage;;
+    *) echo "Invalid option: -${OPTARG}" >&2; usage;;
+    esac
 done
+
+# Run the main program if all the parameters are set
+if [[ -z "$REF_LIST" || -z "$TAR_LIST" || -z "$REF_NAME" || -z "$TAR_NAME" || -z "$TEMPLATE" || -z "$NPROC" ]]; then
+    usage
+fi
 
 /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
 --ref_list "${REF_LIST}" \
