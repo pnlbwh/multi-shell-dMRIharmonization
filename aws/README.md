@@ -48,7 +48,6 @@ Please make sure that all these requirements are properly installed and configur
 
 ## Usage
 
-## Usage
 
 To use the `download_from_s3.py` script, you'll need to provide a text file containing the S3 paths to the files you want to download, specify the local directory where the files should be downloaded to, and specify the number of threads to be used for multithreading.
 
