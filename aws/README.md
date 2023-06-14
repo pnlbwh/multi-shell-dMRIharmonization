@@ -38,7 +38,7 @@ This project requires:
 - Python 3.7 or newer
 - s3fs library
 
-These Python libraries can be installed using pip:
+These Python libraries can be installed using pip if they are not already installed:
 
 ```sh
 pip install s3fs
