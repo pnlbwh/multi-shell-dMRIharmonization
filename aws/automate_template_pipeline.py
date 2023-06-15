@@ -42,9 +42,12 @@ def run_bash_script(config):
         --nproc "{config['nproc']}" \
         --create --process --debug
         """
-        subprocess.run(command, shell=True, check=True)
-        logging.info("Successfully ran the bash script.")
+        completed_process = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        logging.info(f"Script output:\n{completed_process.stdout}")
+        logging.info(f"Script error:\n{completed_process.stderr}")
     except subprocess.CalledProcessError as e:
+        logging.error(f"Script output:\n{e.stdout}")
+        logging.error(f"Script error:\n{e.stderr}")
         logging.error(f"An error occurred while running the bash script: {e}")
         sys.exit(1)
 
