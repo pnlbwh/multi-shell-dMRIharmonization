@@ -63,13 +63,12 @@ def run_bash_script(config, verbose):
         sys.exit(1)
 
 
-
-def main(args):
-    setup_logging("pipeline.log")
+def main(args_):
+    setup_logging("pipeline.log", args_.verbose)
 
     # Load the configuration file
     config = configparser.ConfigParser()
-    config.read(args.config)
+    config.read(args_.config)
     logging.info("Successfully read the configuration file.")
 
     # Check if the directories exist and create them if not
@@ -120,7 +119,7 @@ def main(args):
         sys.exit(1)
 
     # Run the bash script
-    run_bash_script(config["bash_script"], args.verbose)
+    run_bash_script(config["bash_script"], args_.verbose)
 
 
 if __name__ == "__main__":
