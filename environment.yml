@@ -7,12 +7,10 @@ channels:
     - anaconda
 
 dependencies:
-    - python>=3.0
+    - python>=3.7
     - ipython
     - numpy
-    - nibabel
     - pandas
-    - dipy
     - scipy
     - scikit-image
     - psutil
@@ -23,5 +21,7 @@ dependencies:
     - s3fs
     - pip
     - pip:
+        - nibabel
+        - dipy
         - git+https://github.com/mhe/pynrrd.git
         - git+https://github.com/pnlbwh/conversion.git
