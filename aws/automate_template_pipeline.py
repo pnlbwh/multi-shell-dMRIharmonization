@@ -19,7 +19,7 @@ import logging
 import os
 
 
-def setup_logging(logfile):
+def setup_logging(logfile, verbose):
     directory = os.path.dirname(logfile)
     if directory:
         os.makedirs(directory, exist_ok=True)
@@ -28,41 +28,49 @@ def setup_logging(logfile):
         level=logging.INFO,
         format="%(asctime)s:%(levelname)s:%(message)s",
     )
+    if verbose:
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(message)s")
+        console.setFormatter(formatter)
+        logging.getLogger("").addHandler(console)
 
 
-def run_bash_script(config):
-    try:
-        command = f"""
-        /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
-        --ref_list "{config['ref_list']}" \
-        --tar_list "{config['tar_list']}" \
-        --ref_name "{config['ref_name']}" \
-        --tar_name "{config['tar_name']}" \
-        --template "{config['template']}" \
-        --nproc "{config['nproc']}" \
-        --create --process --debug
-        """
-        completed_process = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        logging.info(f"Script output:\n{completed_process.stdout}")
-        logging.info(f"Script error:\n{completed_process.stderr}")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Script output:\n{e.stdout}")
-        logging.error(f"Script error:\n{e.stderr}")
-        logging.error(f"An error occurred while running the bash script: {e}")
+def run_bash_script(config, verbose):
+    command = f"""
+    /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
+    --ref_list "{config['ref_list']}" \
+    --tar_list "{config['tar_list']}" \
+    --ref_name "{config['ref_name']}" \
+    --tar_name "{config['tar_name']}" \
+    --template "{config['template']}" \
+    --nproc "{config['nproc']}" \
+    --create --process --debug
+    """
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            log_message = output.strip().decode('utf-8')
+            logging.info(log_message)
+            if verbose:
+                print(log_message)
+    rc = process.poll()
+    if rc != 0:
+        logging.error("An error occurred while running the bash script")
         sys.exit(1)
 
 
-def main(config_file):
+
+def main(args):
     setup_logging("pipeline.log")
 
     # Load the configuration file
     config = configparser.ConfigParser()
-    try:
-        config.read(config_file)
-        logging.info("Successfully read the configuration file.")
-    except configparser.ParsingError as e:
-        logging.error(f"An error occurred while parsing the configuration file: {e}")
-        sys.exit(1)
+    config.read(args.config)
+    logging.info("Successfully read the configuration file.")
 
     # Check if the directories exist and create them if not
     template_dir = os.path.dirname(config["bash_script"]["template"])
@@ -112,7 +120,7 @@ def main(config_file):
         sys.exit(1)
 
     # Run the bash script
-    run_bash_script(config["bash_script"])
+    run_bash_script(config["bash_script"], args.verbose)
 
 
 if __name__ == "__main__":
@@ -122,5 +130,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config", type=str, required=True, help="Path to the configuration file."
     )
+    parser.add_argument(
+        "--verbose", action='store_true', help="Print log messages in the terminal."
+    )
     args = parser.parse_args()
-    main(args.config)
+    main(args)
