@@ -8,14 +8,14 @@ channels:
     - aramislab
 
 dependencies:
-    - python>=3.7
+    - python>=3.6
+    - ants
     - ipython
     - numpy
     - pandas
     - scipy
     - scikit-image
     - plumbum
-    - ants
     - conda-build
     - git
     - s3fs
