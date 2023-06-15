@@ -1,6 +1,0 @@
-2023-06-15 16:01:42,820:INFO:Successfully read the configuration file.
-2023-06-15 16:01:42,820:INFO:Checked and/or created the directory: /home/ec2-user/DATA/testDeviceID67089/templateTestDirForDeviceID67089
-2023-06-15 16:01:42,820:INFO:Checked and/or created the directory: /home/ec2-user/DATA/testDeviceID67089/reference
-2023-06-15 16:01:42,820:INFO:Checked and/or created the directory: /home/ec2-user/DATA/testDeviceID67089/target
-2023-06-15 16:04:26,504:INFO:Successfully ran the download_from_s3 script.
-2023-06-15 16:04:26,572:INFO:Successfully ran the write_local_paths script.
