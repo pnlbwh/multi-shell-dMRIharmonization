@@ -36,7 +36,18 @@ def setup_logging(logfile, verbose):
         logging.getLogger("").addHandler(console)
 
 
-def run_bash_script(config, verbose):
+def run_bash_script(config, verbose, create, process, debug):
+    """
+    Run the bash script that calls the multi-shell harmonization script.
+
+    Parameters:
+    :param config: ConfigParser object containing the configuration file.
+    :param verbose: Boolean indicating whether to print log messages in the terminal.
+    :param create: Boolean indicating whether to create the harmonized images.
+    :param process: Boolean indicating whether to process the harmonized images.
+    :param debug: Boolean indicating whether to print debug messages in the terminal.
+    """
+
     command = f"""
     /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
     --ref_list "{config['ref_list']}" \
@@ -44,9 +55,16 @@ def run_bash_script(config, verbose):
     --ref_name "{config['ref_name']}" \
     --tar_name "{config['tar_name']}" \
     --template "{config['template']}" \
-    --nproc "{config['nproc']}" \
-    --create --process --debug
+    --nproc "{config['nproc']}" 
     """
+
+    if create:
+        command += " --create"
+    if process:
+        command += " --process"
+    if debug:
+        command += " --debug"
+
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
         output = process.stdout.readline()
@@ -82,22 +100,41 @@ def main(args_):
 
     # Run the download_from_s3 script
     try:
-        subprocess.run(
-            f"python download_from_s3.py -t {config['s3_download']['reference_textfile']} -d {reference_dir} -m {config['s3_download']['multithreading']}",
-            shell=True,
-            check=True,
-        )
-        subprocess.run(
-            f"python download_from_s3.py -t {config['s3_download']['target_textfile']} -d {target_dir} -m {config['s3_download']['multithreading']}",
-            shell=True,
-            check=True,
-        )
-        logging.info("Successfully ran the download_from_s3 script.")
+        # check that reference and target are not empty strings and if not run the download_from_s3 script
+        if reference_dir != "":
+            subprocess.run(
+                f"python download_from_s3.py -t {config['s3_download']['reference_textfile']} -d {reference_dir} -m {config['s3_download']['multithreading']}",
+                shell=True,
+                check=True,
+            )
+            logging.info("Successfully ran the download_from_s3 script for the reference data.")
+        if target_dir != "":
+            subprocess.run(
+                f"python download_from_s3.py -t {config['s3_download']['target_textfile']} -d {target_dir} -m {config['s3_download']['multithreading']}",
+                shell=True,
+                check=True,
+            )
+            logging.info("Successfully ran the download_from_s3 script for the target data.")
     except subprocess.CalledProcessError as e:
         logging.error(
             f"An error occurred while running the download_from_s3 script: {e}"
         )
         sys.exit(1)
+
+    # download the template if it is specified in the config file
+    if 's3_download' in config and 'template_path' in config['s3_download']:
+        try:
+            subprocess.run(
+                f"python download_from_s3.py -p {config['s3_download']['template_path']} -d {template_dir} -m {config['s3_download']['multithreading']}",
+                shell=True,
+                check=True,
+            )
+            logging.info("Successfully ran the download_from_s3 script.")
+        except subprocess.CalledProcessError as e:
+            logging.error(
+                f"An error occurred while running the download_from_s3 script: {e}"
+            )
+            sys.exit(1)
 
     # Run the write_local_paths script
     try:
@@ -131,6 +168,15 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--verbose", action='store_true', help="Print log messages in the terminal."
+    )
+    parser.add_argument(
+        "--debug", action='store_true', help="Print debug messages in the terminal."
+    )
+    parser.add_argument(
+        "--create", action='store_true', help="Create the harmonized images."
+    )
+    parser.add_argument(
+        "--process", action='store_true', help="Process the harmonized images."
     )
     args = parser.parse_args()
     main(args)

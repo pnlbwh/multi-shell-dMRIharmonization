@@ -38,12 +38,39 @@ def download_from_s3(s3_path, local_path):
         print(f"An error occurred while trying to download {s3_path}: {e}")
 
 
+def download_directory_from_s3(s3_directory, local_directory, multithreading):
+    fs = s3fs.S3FileSystem()
+    try:
+        # Get list of all files in the s3 directory
+        files_to_download = fs.glob(s3_directory + '/*')
+
+        # Create the local directory if it doesn't exist
+        os.makedirs(local_directory, exist_ok=True)
+
+        # List to store the downloaded files
+        downloaded_files = []
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=multithreading) as executor:
+            futures = {executor.submit(download_from_s3, file, local_directory) for file in files_to_download}
+            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+                result = future.result()
+                if result is not None:
+                    downloaded_files.append(result)
+
+        # Print the downloaded files at the end
+        print("Downloaded files:")
+        for file in downloaded_files:
+            print(file)
+    except Exception as e:
+        print(f"An error occurred while trying to download directory {s3_directory}: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Download files from S3 based on a text file."
     )
     parser.add_argument(
-        "-t", "--textfile", help="Path to the text file.", required=True
+        "-t", "--textfile", help="Path to the text file.", required=False
     )
     parser.add_argument(
         "-d", "--directory", help="Path to the target directory.", required=True
@@ -55,6 +82,11 @@ def main():
         help="Number of threads to use for multithreading download.",
         required=False,
     )
+    parser.add_argument(
+        "-p", "--template",
+        help="Path to the template on S3.",
+        required=False
+    )
     args = parser.parse_args()
 
     # Ensure that the local directory exists
@@ -63,13 +95,14 @@ def main():
 
     # Get all nii, mask, bval, and bvec files
     files_to_download = []
-    with open(args.textfile, "r") as f:
-        for line in f:
-            nii_file, mask_file = line.strip().split(",")
-            # Also download associated .bval and .bvec files
-            bval_file = nii_file.replace(".nii.gz", ".bval")
-            bvec_file = nii_file.replace(".nii.gz", ".bvec")
-            files_to_download.extend([nii_file, mask_file, bval_file, bvec_file])
+    if args.textfile is not None:
+        with open(args.textfile, "r") as f:
+            for line in f:
+                nii_file, mask_file = line.strip().split(",")
+                # Also download associated .bval and .bvec files
+                bval_file = nii_file.replace(".nii.gz", ".bval")
+                bvec_file = nii_file.replace(".nii.gz", ".bvec")
+                files_to_download.extend([nii_file, mask_file, bval_file, bvec_file])
 
     print(f"Total files to download: {len(files_to_download)}")
 
@@ -77,25 +110,32 @@ def main():
     downloaded_files = []
 
     # Check if multithreading is requested
-    if args.multithreading is not None:
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=args.multithreading
-        ) as executor:
-            futures = {
-                executor.submit(download_from_s3, file, args.directory)
-                for file in files_to_download
-            }
-            for future in tqdm(
-                concurrent.futures.as_completed(futures), total=len(futures)
-            ):
-                result = future.result()
+    if len(files_to_download) > 0:
+        if args.multithreading is not None:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=args.multithreading
+            ) as executor:
+                futures = {
+                    executor.submit(download_from_s3, file, args.directory)
+                    for file in files_to_download
+                }
+                for future in tqdm(
+                    concurrent.futures.as_completed(futures), total=len(futures)
+                ):
+                    result = future.result()
+                    if result is not None:
+                        downloaded_files.append(result)
+        else:
+            for file in tqdm(files_to_download):
+                result = download_from_s3(file, args.directory)
                 if result is not None:
                     downloaded_files.append(result)
-    else:
-        for file in tqdm(files_to_download):
-            result = download_from_s3(file, args.directory)
-            if result is not None:
-                downloaded_files.append(result)
+
+    # Download the template if requested
+    if args.template is not None:
+        template_s3_path = args.template
+        template_local_path = os.path.join(args.directory, "template")
+        download_directory_from_s3(template_s3_path, template_local_path, args.multithreading)
 
     # Print the downloaded files at the end
     print("Downloaded files:")
