@@ -148,7 +148,7 @@ def main(args_):
         sys.exit(1)
 
     # download the template if it is specified in the config file
-    if 's3_download' in config and 'template_path' in config['s3_download']:
+    if 's3_download' in config and 'template_path' in config['s3_download'] and config['s3_download']['template_path']:
         try:
             subprocess.run(
                 f"python download_from_s3.py -p {config['s3_download']['template_path']} -d {template_dir} -m {config['s3_download']['multithreading']}",
