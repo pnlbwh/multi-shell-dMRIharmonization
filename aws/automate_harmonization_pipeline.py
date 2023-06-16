@@ -94,6 +94,32 @@ def main(args_):
     reference_dir = config["s3_download"]["reference_directory"]
     target_dir = config["s3_download"]["target_directory"]
 
+    # if the flags create, process and debug are not in args, then look for them in the config file, if they not there
+    # then set them to True by default
+    if not args_.create:
+        if 'create' in config['bash_script']:
+            create = config['bash_script']['create']
+        else:
+            create = True
+    else:
+        create = args_.create
+
+    if not args_.process:
+        if 'process' in config['bash_script']:
+            process = config['bash_script']['process']
+        else:
+            process = True
+    else:
+        process = args_.process
+
+    if not args_.debug:
+        if 'debug' in config['bash_script']:
+            debug = config['bash_script']['debug']
+        else:
+            debug = True
+    else:
+        debug = args_.debug
+
     for directory in [template_dir, reference_dir, target_dir]:
         os.makedirs(directory, exist_ok=True)
         logging.info(f"Checked and/or created the directory: {directory}")
@@ -156,7 +182,7 @@ def main(args_):
         sys.exit(1)
 
     # Run the bash script
-    run_bash_script(config["bash_script"], args_.verbose)
+    run_bash_script(config["bash_script"], args_.verbose, create, process, debug)
 
 
 if __name__ == "__main__":
