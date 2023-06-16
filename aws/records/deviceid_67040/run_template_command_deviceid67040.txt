@@ -1,0 +1,7 @@
+./run_template \
+-r /home/ec2-user/DATA/deviceID67040/reference-deviceid166007.txt \
+-t /home/ec2-user/DATA/deviceID67040/target-deviceid67040.txt \
+-n ReferenceForDevice67040 \
+-T TargetForDevice67040 \
+-p /home/ec2-user/DATA/deviceID67040/template_Device67040_12-June-2023/ \
+-d 4
