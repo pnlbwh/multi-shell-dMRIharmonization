@@ -55,15 +55,19 @@ def run_bash_script(config, verbose, create, process, debug):
     --ref_name "{config['ref_name']}" \
     --tar_name "{config['tar_name']}" \
     --template "{config['template']}" \
-    --nproc "{config['nproc']}" 
+    --nproc "{config['nproc']}" \
+    --create --process --debug
     """
 
-    if create:
-        command += " --create"
-    if process:
-        command += " --process"
-    if debug:
-        command += " --debug"
+    #if create:
+    #    command += " --create"
+    #if process:
+    #    command += " --process"
+    #if debug:
+    #    command += " --debug"
+
+    # log the command
+    logging.info(f"Running the following command: {command}")
 
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
@@ -97,28 +101,52 @@ def main(args_):
     # if the flags create, process and debug are not in args, then look for them in the config file, if they not there
     # then set them to True by default
     if not args_.create:
+        print("--create is not in args")
         if 'create' in config['bash_script']:
+            print("--create in config")
             create = config['bash_script']['create']
+            print(f"value of create is {create}")
         else:
-            create = True
+            create = False
     else:
         create = args_.create
 
     if not args_.process:
+        print("--process is not in args")
         if 'process' in config['bash_script']:
             process = config['bash_script']['process']
+            print(f"--process in config, value of process is {process}")
         else:
-            process = True
+            process = False
     else:
         process = args_.process
 
     if not args_.debug:
+        print("--debug is not in args")
         if 'debug' in config['bash_script']:
             debug = config['bash_script']['debug']
+            print(f"--debug in config, value of debug is {debug}")
         else:
-            debug = True
+            debug = False
     else:
         debug = args_.debug
+
+    # log all the args and config settings that will be used
+    logging.info(f"create: {create}")
+    logging.info(f"process: {process}")
+    logging.info(f"debug: {debug}")
+    logging.info(f"template_dir: {template_dir}")
+    logging.info(f"reference_dir: {reference_dir}")
+    logging.info(f"target_dir: {target_dir}")
+    logging.info(f"ref_list: {config['bash_script']['ref_list']}")
+    logging.info(f"tar_list: {config['bash_script']['tar_list']}")
+    logging.info(f"ref_name: {config['bash_script']['ref_name']}")
+    logging.info(f"tar_name: {config['bash_script']['tar_name']}")
+    logging.info(f"template: {config['bash_script']['template']}")
+    logging.info(f"nproc: {config['bash_script']['nproc']}")
+    logging.info(f"multithreading: {config['s3_download']['multithreading']}")
+    logging.info(f"reference_output: {config['local_paths']['reference_output']}")
+    logging.info(f"target_output: {config['local_paths']['target_output']}")
 
     for directory in [template_dir, reference_dir, target_dir]:
         os.makedirs(directory, exist_ok=True)

@@ -39,6 +39,8 @@ def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
 
 
 class multi_shell_pipeline(cli.Application):
+    """dMRI harmonization pipeline"""
+    print("In multi_shell_pipeline")
     VERSION = 1.7
 
     ref_csv = cli.SwitchAttr(
@@ -109,7 +111,28 @@ class multi_shell_pipeline(cli.Application):
 
     verbose = cli.Flag("--verbose", help="print everything to STDOUT", default=False)
 
+    # print out all the arguments
+    print("ref_csv: ", ref_csv)
+    print("target_csv: ", target_csv)
+    print("templatePath: ", templatePath)
+    print("N_shm: ", N_shm)
+    print("N_proc: ", N_proc)
+    print("N_zero: ", N_zero)
+    print("force: ", force)
+    print("travelHeads: ", travelHeads)
+    print("denoise: ", denoise)
+    print("bvalMap: ", bvalMap)
+    print("resample: ", resample)
+    print("create: ", create)
+    print("process: ", process)
+    print("debug: ", debug)
+    print("reference: ", reference)
+    print("target: ", target)
+    print("verbose: ", verbose)
+
+
     def main(self):
+        print("MultishellHarmonization: In main")
 
         if self.N_proc == "-1":
             self.N_proc = N_CPU
