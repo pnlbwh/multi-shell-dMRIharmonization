@@ -48,23 +48,21 @@ def run_bash_script(config, verbose, create, process, debug):
     :param debug: Boolean indicating whether to print debug messages in the terminal.
     """
 
-    command = f"""
+    command = f"""    
     /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
     --ref_list "{config['ref_list']}" \
     --tar_list "{config['tar_list']}" \
     --ref_name "{config['ref_name']}" \
     --tar_name "{config['tar_name']}" \
     --template "{config['template']}" \
-    --nproc "{config['nproc']}" \
-    --create --process --debug
-    """
+    --nproc "{config['nproc']}" """
 
-    #if create:
-    #    command += " --create"
-    #if process:
-    #    command += " --process"
-    #if debug:
-    #    command += " --debug"
+    if create:
+        command += " --create"
+    if process:
+        command += " --process"
+    if debug:
+        command += " --debug"
 
     # log the command
     logging.info(f"Running the following command: {command}")
@@ -101,31 +99,24 @@ def main(args_):
     # if the flags create, process and debug are not in args, then look for them in the config file, if they not there
     # then set them to True by default
     if not args_.create:
-        print("--create is not in args")
         if 'create' in config['bash_script']:
-            print("--create in config")
             create = config['bash_script']['create']
-            print(f"value of create is {create}")
         else:
             create = False
     else:
         create = args_.create
 
     if not args_.process:
-        print("--process is not in args")
         if 'process' in config['bash_script']:
             process = config['bash_script']['process']
-            print(f"--process in config, value of process is {process}")
         else:
             process = False
     else:
         process = args_.process
 
     if not args_.debug:
-        print("--debug is not in args")
         if 'debug' in config['bash_script']:
             debug = config['bash_script']['debug']
-            print(f"--debug in config, value of debug is {debug}")
         else:
             debug = False
     else:
