@@ -12,6 +12,7 @@
 # ===============================================================================
 
 import os
+import csv
 import argparse
 import s3fs
 import concurrent.futures
@@ -65,6 +66,34 @@ def download_directory_from_s3(s3_directory, local_directory, multithreading):
         print(f"An error occurred while trying to download directory {s3_directory}: {e}")
 
 
+def handle_files(nii_file, mask_file):
+    files_to_download = [nii_file, mask_file]
+    bval_file = nii_file.replace(".nii.gz", ".bval")
+    bvec_file = nii_file.replace(".nii.gz", ".bvec")
+    files_to_download.extend([bval_file, bvec_file])
+    return files_to_download
+
+
+def get_files_to_download(textfile):
+    files_to_download = []
+    _, ext = os.path.splitext(textfile)
+    with open(textfile, "r") as f:
+        if ext == '.csv':
+            reader = csv.reader(f)
+            for line in reader:
+                if line[0].startswith('#') or line[0].startswith(';'):
+                    continue
+                nii_file, mask_file = line
+                files_to_download.extend(handle_files(nii_file, mask_file))
+        else:
+            for line in f:
+                if line.strip().startswith('#') or line.strip().startswith(';'):
+                    continue
+                nii_file, mask_file = line.strip().split(",")
+                files_to_download.extend(handle_files(nii_file, mask_file))
+    return files_to_download
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Download files from S3 based on a text file."
@@ -93,16 +122,9 @@ def main():
     if not os.path.exists(args.directory):
         os.makedirs(args.directory)
 
-    # Get all nii, mask, bval, and bvec files
     files_to_download = []
     if args.textfile is not None:
-        with open(args.textfile, "r") as f:
-            for line in f:
-                nii_file, mask_file = line.strip().split(",")
-                # Also download associated .bval and .bvec files
-                bval_file = nii_file.replace(".nii.gz", ".bval")
-                bvec_file = nii_file.replace(".nii.gz", ".bvec")
-                files_to_download.extend([nii_file, mask_file, bval_file, bvec_file])
+        files_to_download = get_files_to_download(args.textfile)
 
     print(f"Total files to download: {len(files_to_download)}")
 
