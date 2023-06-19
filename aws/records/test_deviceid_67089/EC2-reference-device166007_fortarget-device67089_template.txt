@@ -1,2 +1,0 @@
-s3://nda-enclave-c3371/HCP/HCPA/HCA6002236_V1_MR/harmonization/HCA6002236_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/HCPA/HCA6002236_V1_MR/harmonization/HCA6002236_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/HCPA/HCA6018857_V1_MR/harmonization/HCA6018857_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/HCPA/HCA6018857_V1_MR/harmonization/HCA6018857_EdEp_bse-multi_BrainMask.nii.gz
