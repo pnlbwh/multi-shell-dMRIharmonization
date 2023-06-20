@@ -155,9 +155,7 @@ def main():
 
     # Download the template if requested
     if args.template is not None:
-        template_s3_path = args.template
-        template_local_path = os.path.join(args.directory, "template")
-        download_directory_from_s3(template_s3_path, template_local_path, args.multithreading)
+        download_directory_from_s3(args.template, args.directory, args.multithreading)
 
     # Print the downloaded files at the end
     print("Downloaded files:")
