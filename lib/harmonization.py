@@ -105,7 +105,9 @@ class pipeline(cli.Application):
         "--denoise", help="turn on this flag to denoise voxel data", default=False
     )
 
-    bshell_b = cli.SwitchAttr("--bshell_b", help="bvalue of the bshell", mandatory=True)
+    bshell_b = cli.SwitchAttr(
+        "--bshell_b", help="bvalue of the bshell", mandatory=True
+    )
 
     create = cli.Flag(
         "--create", help="turn on this flag to create template", default=False

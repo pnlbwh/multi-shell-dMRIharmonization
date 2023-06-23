@@ -33,9 +33,31 @@ def check_bshells(ref_imgs, ref_bvals):
         inPrefix = abspath(imgPath).split(".nii")[0]
         bvals = findBShells(inPrefix + ".bval")
 
+        # if (bvals == ref_bvals).all():
+        #     print("b-shells matched for", imgPath.name)
+        # do the above check so the following error does not happen: AttributeError: 'bool' object has no attribute 'all'
+        # AttributeError: 'bool' object has no attribute 'all' by checking if it is single values or array of values
+        print("b-shells matched for", imgPath.name)
+        # convert to numpy array first
+        if not isinstance(bvals, np.ndarray):
+            bvals = np.array(bvals)
+        if not isinstance(ref_bvals, np.ndarray):
+            ref_bvals = np.array(ref_bvals)
+        # print out the type of bvals and ref_bvals
+        print("bvals: ", type(bvals))
+        print("ref_bvals: ", type(ref_bvals))
+        # print out the shape of bvals and ref_bvals
+        print("bvals.shape: ", bvals.shape)
+        print("ref_bvals.shape: ", ref_bvals.shape)
+        # print out the values of bvals and ref_bvals
+        print("bvals: ", bvals)
+
+        print("ref_bvals: ", ref_bvals)
+        # print the image path for debugging
+        print("************ imgPath: ", imgPath)
+    
         if (bvals == ref_bvals).all():
             print("b-shells matched for", imgPath.name)
-
         else:
             print(f"\nUnmatched b-shells for {imgPath.name}")
             print(bvals)
