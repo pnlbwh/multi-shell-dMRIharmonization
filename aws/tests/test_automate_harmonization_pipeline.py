@@ -31,7 +31,7 @@ class TestPipeline(unittest.TestCase):
         attrs = {"poll.return_value": None}
         process_mock.configure_mock(**attrs)
         mock_popen.return_value = process_mock
-        run_bash_script(mock_config, False, False, False, False)
+        run_bash_script(mock_config, False, False, False)
         mock_popen.assert_called_once()
 
     # For main function, please mock necessary dependencies such as 'argparse.ArgumentParser.parse_args'

@@ -36,18 +36,16 @@ def setup_logging(logfile, verbose):
         logging.getLogger("").addHandler(console)
 
 
-def run_bash_script(config, verbose, create, process, debug):
+def run_bash_script(config, create, process, debug):
     """
     Run the bash script that calls the multi-shell harmonization script.
 
     Parameters:
     :param config: ConfigParser object containing the configuration file.
-    :param verbose: Boolean indicating whether to print log messages in the terminal.
     :param create: Boolean indicating whether to create the harmonized images.
     :param process: Boolean indicating whether to process the harmonized images.
     :param debug: Boolean indicating whether to print debug messages in the terminal.
     """
-
     command = f"""    
     /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
     --ref_list "{config['ref_list']}" \
@@ -102,7 +100,7 @@ def main(args_):
     # then set them to True by default
     if not args_.create:
         if "create" in config["bash_script"]:
-            create = config["bash_script"]["create"]
+            create = config.getboolean("bash_script", "create")
         else:
             create = False
     else:
@@ -110,7 +108,7 @@ def main(args_):
 
     if not args_.process:
         if "process" in config["bash_script"]:
-            process = config["bash_script"]["process"]
+            process = config.getboolean("bash_script", "process")
         else:
             process = False
     else:
@@ -118,7 +116,7 @@ def main(args_):
 
     if not args_.debug:
         if "debug" in config["bash_script"]:
-            debug = config["bash_script"]["debug"]
+            debug = config.getboolean("bash_script", "debug")
         else:
             debug = False
     else:
@@ -211,7 +209,7 @@ def main(args_):
         sys.exit(1)
 
     # Run the bash script
-    run_bash_script(config["bash_script"], args_.verbose, create, process, debug)
+    run_bash_script(config["bash_script"], create, process, debug)
 
 
 if __name__ == "__main__":
