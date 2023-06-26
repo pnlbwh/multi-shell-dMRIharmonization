@@ -3,7 +3,6 @@ s3://nda-enclave-c3371/HCP/BANDA/BANDA002_MR/harmonization/BANDA002_EdEp.nii.gz,
 s3://nda-enclave-c3371/HCP/BANDA/BANDA003_MR/harmonization/BANDA003_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA003_MR/harmonization/BANDA003_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA004_MR/harmonization/BANDA004_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA004_MR/harmonization/BANDA004_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA005_MR/harmonization/BANDA005_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA005_MR/harmonization/BANDA005_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/BANDA/BANDA006_MR/harmonization/BANDA006_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA006_MR/harmonization/BANDA006_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA007_MR/harmonization/BANDA007_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA007_MR/harmonization/BANDA007_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA008_MR/harmonization/BANDA008_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA008_MR/harmonization/BANDA008_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA009_MR/harmonization/BANDA009_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA009_MR/harmonization/BANDA009_EdEp_bse-multi_BrainMask.nii.gz
@@ -100,7 +99,6 @@ s3://nda-enclave-c3371/HCP/BANDA/BANDA100_MR/harmonization/BANDA100_EdEp.nii.gz,
 s3://nda-enclave-c3371/HCP/BANDA/BANDA101_MR/harmonization/BANDA101_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA101_MR/harmonization/BANDA101_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA102_MR/harmonization/BANDA102_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA102_MR/harmonization/BANDA102_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA103_MR/harmonization/BANDA103_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA103_MR/harmonization/BANDA103_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/BANDA/BANDA104_MR/harmonization/BANDA104_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA104_MR/harmonization/BANDA104_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA105_MR/harmonization/BANDA105_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA105_MR/harmonization/BANDA105_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA106_MR/harmonization/BANDA106_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA106_MR/harmonization/BANDA106_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA107_MR/harmonization/BANDA107_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA107_MR/harmonization/BANDA107_EdEp_bse-multi_BrainMask.nii.gz
@@ -197,7 +195,6 @@ s3://nda-enclave-c3371/HCP/BANDA/BANDA205_MR/harmonization/BANDA205_EdEp.nii.gz,
 s3://nda-enclave-c3371/HCP/BANDA/BANDA206_MR/harmonization/BANDA206_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA206_MR/harmonization/BANDA206_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA207_MR/harmonization/BANDA207_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA207_MR/harmonization/BANDA207_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA208_MR/harmonization/BANDA208_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA208_MR/harmonization/BANDA208_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/BANDA/BANDA209_MR/harmonization/BANDA209_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA209_MR/harmonization/BANDA209_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA210_MR/harmonization/BANDA210_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA210_MR/harmonization/BANDA210_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA211_MR/harmonization/BANDA211_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA211_MR/harmonization/BANDA211_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/BANDA/BANDA212_MR/harmonization/BANDA212_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/BANDA/BANDA212_MR/harmonization/BANDA212_EdEp_bse-multi_BrainMask.nii.gz

@@ -36,12 +36,13 @@ def setup_logging(logfile, verbose):
         logging.getLogger("").addHandler(console)
 
 
-def run_bash_script(config, create, process, debug):
+def run_bash_script(config, verbose, create, process, debug):
     """
     Run the bash script that calls the multi-shell harmonization script.
 
     Parameters:
     :param config: ConfigParser object containing the configuration file.
+    :param verbose: Boolean indicating whether to print debug messages in the terminal.
     :param create: Boolean indicating whether to create the harmonized images.
     :param process: Boolean indicating whether to process the harmonized images.
     :param debug: Boolean indicating whether to print debug messages in the terminal.
@@ -209,7 +210,7 @@ def main(args_):
         sys.exit(1)
 
     # Run the bash script
-    run_bash_script(config["bash_script"], create, process, debug)
+    run_bash_script(config["bash_script"], args_.verbose, create, process, debug)
 
 
 if __name__ == "__main__":
