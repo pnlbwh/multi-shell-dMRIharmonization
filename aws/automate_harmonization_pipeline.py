@@ -67,13 +67,15 @@ def run_bash_script(config, verbose, create, process, debug):
     # log the command
     logging.info(f"Running the following command: {command}")
 
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
     while True:
         output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
+        if output == "" and process.poll() is not None:
             break
         if output:
-            log_message = output.strip().decode('utf-8')
+            log_message = output.strip().decode("utf-8")
             logging.info(log_message)
             if verbose:
                 print(log_message)
@@ -99,24 +101,24 @@ def main(args_):
     # if the flags create, process and debug are not in args, then look for them in the config file, if they not there
     # then set them to True by default
     if not args_.create:
-        if 'create' in config['bash_script']:
-            create = config['bash_script']['create']
+        if "create" in config["bash_script"]:
+            create = config["bash_script"]["create"]
         else:
             create = False
     else:
         create = args_.create
 
     if not args_.process:
-        if 'process' in config['bash_script']:
-            process = config['bash_script']['process']
+        if "process" in config["bash_script"]:
+            process = config["bash_script"]["process"]
         else:
             process = False
     else:
         process = args_.process
 
     if not args_.debug:
-        if 'debug' in config['bash_script']:
-            debug = config['bash_script']['debug']
+        if "debug" in config["bash_script"]:
+            debug = config["bash_script"]["debug"]
         else:
             debug = False
     else:
@@ -152,14 +154,18 @@ def main(args_):
                 shell=True,
                 check=True,
             )
-            logging.info("Successfully ran the download_from_s3 script for the reference data.")
+            logging.info(
+                "Successfully ran the download_from_s3 script for the reference data."
+            )
         if target_dir != "":
             subprocess.run(
                 f"python download_from_s3.py -t {config['s3_download']['target_textfile']} -d {target_dir} -m {config['s3_download']['multithreading']}",
                 shell=True,
                 check=True,
             )
-            logging.info("Successfully ran the download_from_s3 script for the target data.")
+            logging.info(
+                "Successfully ran the download_from_s3 script for the target data."
+            )
     except subprocess.CalledProcessError as e:
         logging.error(
             f"An error occurred while running the download_from_s3 script: {e}"
@@ -167,7 +173,11 @@ def main(args_):
         sys.exit(1)
 
     # download the template if it is specified in the config file
-    if 's3_download' in config and 'template_path' in config['s3_download'] and config['s3_download']['template_path']:
+    if (
+        "s3_download" in config
+        and "template_path" in config["s3_download"]
+        and config["s3_download"]["template_path"]
+    ):
         try:
             subprocess.run(
                 f"python download_from_s3.py -p {config['s3_download']['template_path']} -d {template_dir} -m {config['s3_download']['multithreading']}",
@@ -212,16 +222,16 @@ if __name__ == "__main__":
         "--config", type=str, required=True, help="Path to the configuration file."
     )
     parser.add_argument(
-        "--verbose", action='store_true', help="Print log messages in the terminal."
+        "--verbose", action="store_true", help="Print log messages in the terminal."
     )
     parser.add_argument(
-        "--debug", action='store_true', help="Print debug messages in the terminal."
+        "--debug", action="store_true", help="Print debug messages in the terminal."
     )
     parser.add_argument(
-        "--create", action='store_true', help="Create the harmonized images."
+        "--create", action="store_true", help="Create the harmonized images."
     )
     parser.add_argument(
-        "--process", action='store_true', help="Process the harmonized images."
+        "--process", action="store_true", help="Process the harmonized images."
     )
     args = parser.parse_args()
     main(args)

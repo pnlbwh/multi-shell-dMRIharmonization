@@ -43,7 +43,7 @@ def download_directory_from_s3(s3_directory, local_directory, multithreading):
     fs = s3fs.S3FileSystem()
     try:
         # Get list of all files in the s3 directory
-        files_to_download = fs.glob(s3_directory + '/*')
+        files_to_download = fs.glob(s3_directory + "/*")
 
         # Create the local directory if it doesn't exist
         os.makedirs(local_directory, exist_ok=True)
@@ -51,9 +51,16 @@ def download_directory_from_s3(s3_directory, local_directory, multithreading):
         # List to store the downloaded files
         downloaded_files = []
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=multithreading) as executor:
-            futures = {executor.submit(download_from_s3, file, local_directory) for file in files_to_download}
-            for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=multithreading
+        ) as executor:
+            futures = {
+                executor.submit(download_from_s3, file, local_directory)
+                for file in files_to_download
+            }
+            for future in tqdm(
+                concurrent.futures.as_completed(futures), total=len(futures)
+            ):
                 result = future.result()
                 if result is not None:
                     downloaded_files.append(result)
@@ -63,7 +70,9 @@ def download_directory_from_s3(s3_directory, local_directory, multithreading):
         for file in downloaded_files:
             print(file)
     except Exception as e:
-        print(f"An error occurred while trying to download directory {s3_directory}: {e}")
+        print(
+            f"An error occurred while trying to download directory {s3_directory}: {e}"
+        )
 
 
 def handle_files(nii_file, mask_file):
@@ -78,16 +87,16 @@ def get_files_to_download(textfile):
     files_to_download = []
     _, ext = os.path.splitext(textfile)
     with open(textfile, "r") as f:
-        if ext == '.csv':
+        if ext == ".csv":
             reader = csv.reader(f)
             for line in reader:
-                if line[0].startswith('#') or line[0].startswith(';'):
+                if line[0].startswith("#") or line[0].startswith(";"):
                     continue
                 nii_file, mask_file = line
                 files_to_download.extend(handle_files(nii_file, mask_file))
         else:
             for line in f:
-                if line.strip().startswith('#') or line.strip().startswith(';'):
+                if line.strip().startswith("#") or line.strip().startswith(";"):
                     continue
                 nii_file, mask_file = line.strip().split(",")
                 files_to_download.extend(handle_files(nii_file, mask_file))
@@ -112,9 +121,7 @@ def main():
         required=False,
     )
     parser.add_argument(
-        "-p", "--template",
-        help="Path to the template on S3.",
-        required=False
+        "-p", "--template", help="Path to the template on S3.", required=False
     )
     args = parser.parse_args()
 

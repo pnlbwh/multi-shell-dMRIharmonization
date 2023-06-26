@@ -30,6 +30,8 @@ findBShells /path/to/input/bval/file /output/file/to/write/bshells
 
 def findBShells(bvalFile, outputBshellFile=None):
 
+    print(bvalFile)
+
     given_bvals = read_bvals(abspath(bvalFile))
 
     # get unique bvalues in ascending order

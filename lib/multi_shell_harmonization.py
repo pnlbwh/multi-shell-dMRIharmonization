@@ -40,6 +40,7 @@ def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
 
 class multi_shell_pipeline(cli.Application):
     """dMRI harmonization pipeline"""
+
     print("In multi_shell_pipeline")
     VERSION = 1.7
 
@@ -129,7 +130,6 @@ class multi_shell_pipeline(cli.Application):
     print("reference: ", reference)
     print("target: ", target)
     print("verbose: ", verbose)
-
 
     def main(self):
         print("MultishellHarmonization: In main")
