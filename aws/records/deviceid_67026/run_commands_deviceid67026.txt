@@ -1,0 +1,11 @@
+./run_template \
+-r /home/ec2-user/DATA/deviceID67026/reference_for_deviceid_67026.txt \
+-t /home/ec2-user/DATA/deviceID67026/target_for_deviceid_67026.txt \
+-n ReferenceForDevice67026 \
+-T TargetForDevice67026 \
+-p /home/ec2-user/TEST_DATA/template_Device67026_6-June-2023/ \
+-d 4
+
+
+# Harmonization:
+python multi_shell_harmonization.py --ref_list /home/ec2-user/DATA/deviceID67026/reference_for_deviceid_67026.txt --tar_list /home/ec2-user/DATA/deviceID67026/target_for_deviceid_67026.txt --ref_name ReferenceForDevice67026 --tar_name TargetForDevice67026 --template /home/ec2-user/TEST_DATA/template_Device67026_6-June-2023/ --nproc 4 --process --debug
