@@ -141,6 +141,8 @@ def main(args_):
     logging.info(f"target_output: {config['local_paths']['target_output']}")
 
     for directory in [template_dir, reference_dir, target_dir]:
+        if directory == "":
+            continue
         os.makedirs(directory, exist_ok=True)
         logging.info(f"Checked and/or created the directory: {directory}")
 
