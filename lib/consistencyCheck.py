@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import logging
 
 # ===============================================================================
 # dMRIharmonization (2018) pipeline is written by-
@@ -33,6 +34,25 @@ def check_bshells(ref_imgs, ref_bvals):
 
         inPrefix = abspath(imgPath).split(".nii")[0]
         bvals = findBShells(inPrefix + ".bval")
+
+        print("********************** type bvals:", type(bvals))
+        logging.info(f'******** type(bvals) {type(bvals)}')
+        print("********************** type ref_bvals:",type(ref_bvals))
+        logging.info(f'******** type(ref_bvals) {type(ref_bvals)}')
+        print("********************** type bvals == ref_bvals:",bvals == ref_bvals)
+        logging.info(f'******** bvals == ref_bvals {bvals == ref_bvals}')
+
+        # make sure bvals and ref_bvals are numpy arrays
+        bvals = np.array(bvals)
+        ref_bvals = np.array(ref_bvals)
+
+        # print the image path and bvals
+        print("********************** imgPath:",imgPath)
+        logging.info(f'******** imgPath {imgPath}')
+        print("********************** bvals:",bvals)
+        logging.info(f'******** bvals {bvals}')
+        print("********************** ref_bvals:",ref_bvals)
+        logging.info(f'******** ref_bvals {ref_bvals}')
 
         if (bvals == ref_bvals).all():
             print("b-shells matched for", imgPath.name)

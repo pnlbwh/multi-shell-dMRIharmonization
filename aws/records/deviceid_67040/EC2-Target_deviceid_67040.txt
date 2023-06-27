@@ -129,7 +129,6 @@ s3://nda-enclave-c3371/HCP/PDC/e0021_01_MR/harmonization/e0021_01_EdEp.nii.gz,s3
 s3://nda-enclave-c3371/HCP/PDC/e0021_02_MR/harmonization/e0021_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0021_02_MR/harmonization/e0021_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/e0021_03_MR/harmonization/e0021_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0021_03_MR/harmonization/e0021_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/e0022_01_MR/harmonization/e0022_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0022_01_MR/harmonization/e0022_01_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/e0022_02_MR/harmonization/e0022_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0022_02_MR/harmonization/e0022_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/e0022_03_MR/harmonization/e0022_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0022_03_MR/harmonization/e0022_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/e0023_01_MR/harmonization/e0023_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0023_01_MR/harmonization/e0023_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/e0023_02_MR/harmonization/e0023_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/e0023_02_MR/harmonization/e0023_02_EdEp_bse-multi_BrainMask.nii.gz
@@ -227,9 +226,9 @@ s3://nda-enclave-c3371/HCP/PDC/h0052_02_MR/harmonization/h0052_02_EdEp.nii.gz,s3
 s3://nda-enclave-c3371/HCP/PDC/h0057_01_MR/harmonization/h0057_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0057_01_MR/harmonization/h0057_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/h0057_02_MR/harmonization/h0057_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0057_02_MR/harmonization/h0057_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/h0058_01_MR/harmonization/h0058_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0058_01_MR/harmonization/h0058_01_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/h0060_01_MR/harmonization/h0060_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0058_02_MR/harmonization/h0058_02_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/h0060_01_MR/harmonization/h0060_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0059_01_MR/harmonization/h0059_01_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/h0060_01_MR/harmonization/h0060_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0059_02_MR/harmonization/h0059_02_EdEp_bse-multi_BrainMask.nii.gz
+s3://nda-enclave-c3371/HCP/PDC/h0058_02_MR/harmonization/h0058_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0058_02_MR/harmonization/h0058_02_EdEp_bse-multi_BrainMask.nii.gz
+s3://nda-enclave-c3371/HCP/PDC/h0059_01_MR/harmonization/h0059_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0059_01_MR/harmonization/h0059_01_EdEp_bse-multi_BrainMask.nii.gz
+s3://nda-enclave-c3371/HCP/PDC/h0059_02_MR/harmonization/h0059_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0059_02_MR/harmonization/h0059_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/h0060_01_MR/harmonization/h0060_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0060_01_MR/harmonization/h0060_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/h0062_01_MR/harmonization/h0062_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0062_01_MR/harmonization/h0062_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/h0063_01_MR/harmonization/h0063_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/h0063_01_MR/harmonization/h0063_01_EdEp_bse-multi_BrainMask.nii.gz
@@ -325,7 +324,6 @@ s3://nda-enclave-c3371/HCP/PDC/k0074_02_MR/harmonization/k0074_02_EdEp.nii.gz,s3
 s3://nda-enclave-c3371/HCP/PDC/k0074_03_MR/harmonization/k0074_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0074_03_MR/harmonization/k0074_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0074_04_MR/harmonization/k0074_04_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0074_04_MR/harmonization/k0074_04_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0075_01_MR/harmonization/k0075_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0075_01_MR/harmonization/k0075_01_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/k0075_02_MR/harmonization/k0075_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0075_02_MR/harmonization/k0075_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0075_03_MR/harmonization/k0075_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0075_03_MR/harmonization/k0075_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0076_03_MR/harmonization/k0076_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0076_03_MR/harmonization/k0076_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0076_04_MR/harmonization/k0076_04_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0076_04_MR/harmonization/k0076_04_EdEp_bse-multi_BrainMask.nii.gz
@@ -404,7 +402,6 @@ s3://nda-enclave-c3371/HCP/PDC/k0166_03_MR/harmonization/k0166_03_EdEp.nii.gz,s3
 s3://nda-enclave-c3371/HCP/PDC/k0167_01_MR/harmonization/k0167_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0167_01_MR/harmonization/k0167_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0167_03_MR/harmonization/k0167_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0167_03_MR/harmonization/k0167_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0167_04_MR/harmonization/k0167_04_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0167_04_MR/harmonization/k0167_04_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/k0171_01_MR/harmonization/k0171_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0171_01_MR/harmonization/k0171_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0172_01_MR/harmonization/k0172_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0172_01_MR/harmonization/k0172_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0172_03_MR/harmonization/k0172_03_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0172_03_MR/harmonization/k0172_03_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/k0172_04_MR/harmonization/k0172_04_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/k0172_04_MR/harmonization/k0172_04_EdEp_bse-multi_BrainMask.nii.gz
@@ -459,8 +456,6 @@ s3://nda-enclave-c3371/HCP/PDC/s0035_01_MR/harmonization/s0035_01_EdEp.nii.gz,s3
 s3://nda-enclave-c3371/HCP/PDC/s0035_02_MR/harmonization/s0035_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0035_02_MR/harmonization/s0035_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/s0043_01_MR/harmonization/s0043_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0043_01_MR/harmonization/s0043_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/s0043_02_MR/harmonization/s0043_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0043_02_MR/harmonization/s0043_02_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/s0044_01_MR/harmonization/s0044_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0044_01_MR/harmonization/s0044_01_EdEp_bse-multi_BrainMask.nii.gz
-s3://nda-enclave-c3371/HCP/PDC/s0044_02_MR/harmonization/s0044_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0044_02_MR/harmonization/s0044_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/s0045_01_MR/harmonization/s0045_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0045_01_MR/harmonization/s0045_01_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/s0045_02_MR/harmonization/s0045_02_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0045_02_MR/harmonization/s0045_02_EdEp_bse-multi_BrainMask.nii.gz
 s3://nda-enclave-c3371/HCP/PDC/s0046_01_MR/harmonization/s0046_01_EdEp.nii.gz,s3://nda-enclave-c3371/HCP/PDC/s0046_01_MR/harmonization/s0046_01_EdEp_bse-multi_BrainMask.nii.gz
