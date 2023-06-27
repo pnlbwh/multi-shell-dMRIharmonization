@@ -48,14 +48,19 @@ def run_bash_script(config, verbose, create, process, debug):
     :param debug: Boolean indicating whether to print debug messages in the terminal.
     """
     command = f"""    
-    /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
-    --ref_list "{config['ref_list']}" \
-    --tar_list "{config['tar_list']}" \
-    --ref_name "{config['ref_name']}" \
-    --tar_name "{config['tar_name']}" \
-    --template "{config['template']}" \
-    --nproc "{config['nproc']}" """
-
+    /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py """
+    if config["ref_list"] != "":
+        command += f'--ref_list "{config["ref_list"]}" '
+    if config["tar_list"] != "":
+        command += f'--tar_list "{config["tar_list"]}" '
+    if config["ref_name"] != "":
+        command += f'--ref_name "{config["ref_name"]}" '
+    if config["tar_name"] != "":
+        command += f'--tar_name "{config["tar_name"]}" '
+    if config["template"] != "":
+        command += f'--template "{config["template"]}" '
+    if config["nproc"] != "":
+        command += f'--nproc "{config["nproc"]}" '
     if create:
         command += " --create"
     if process:
