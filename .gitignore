@@ -9,4 +9,4 @@ test_data/
 TEST_DATA/
 
 aws/killme.sh
-aws/records/deviceid_166038/pipeline.log
+aws/pipeline.log
