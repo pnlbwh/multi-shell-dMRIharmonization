@@ -144,6 +144,9 @@ def main(args_):
         os.makedirs(directory, exist_ok=True)
         logging.info(f"Checked and/or created the directory: {directory}")
 
+    ref_dir_flag = False
+    tar_dir_flag = False
+
     # Run the download_from_s3 script
     try:
         # check that reference and target are not empty strings and if not run the download_from_s3 script
@@ -156,6 +159,7 @@ def main(args_):
             logging.info(
                 "Successfully ran the download_from_s3 script for the reference data."
             )
+            ref_dir_flag = True
         if target_dir != "":
             subprocess.run(
                 f"python download_from_s3.py -t {config['s3_download']['target_textfile']} -d {target_dir} -m {config['s3_download']['multithreading']}",
@@ -165,6 +169,7 @@ def main(args_):
             logging.info(
                 "Successfully ran the download_from_s3 script for the target data."
             )
+            tar_dir_flag = True
     except subprocess.CalledProcessError as e:
         logging.error(
             f"An error occurred while running the download_from_s3 script: {e}"
@@ -172,11 +177,7 @@ def main(args_):
         sys.exit(1)
 
     # download the template if it is specified in the config file
-    if (
-        "s3_download" in config
-        and "template_path" in config["s3_download"]
-        and config["s3_download"]["template_path"]
-    ):
+    if config["s3_download"]["template_path"] != "":
         try:
             subprocess.run(
                 f"python download_from_s3.py -p {config['s3_download']['template_path']} -d {template_dir} -m {config['s3_download']['multithreading']}",
@@ -192,17 +193,40 @@ def main(args_):
 
     # Run the write_local_paths script
     try:
-        subprocess.run(
-            f"python write_local_paths.py -d {reference_dir} -o {config['local_paths']['reference_output']}",
-            shell=True,
-            check=True,
-        )
-        subprocess.run(
-            f"python write_local_paths.py -d {target_dir} -o {config['local_paths']['target_output']}",
-            shell=True,
-            check=True,
-        )
-        logging.info("Successfully ran the write_local_paths script.")
+        if not ref_dir_flag:
+            logging.warning(
+                "Reference directory is empty. The write_local_paths script will not be run for the reference data."
+            )
+        else:
+            # make sure that the reference directory is not empty
+            if config["local_paths"]["reference_output"] == "":
+                logging.error(
+                    "The reference_output variable in the config file is empty. Please specify a path to the reference_output file."
+                )
+                sys.exit(1)
+            subprocess.run(
+                f"python write_local_paths.py -d {reference_dir} -o {config['local_paths']['reference_output']}",
+                shell=True,
+                check=True,
+            )
+            logging.info("Successfully ran the write_local_paths script for the reference data.")
+        if not tar_dir_flag:
+            logging.warning(
+                "Target directory is empty. The write_local_paths script will not be run for the target data."
+            )
+        else:
+            # make sure that the target directory is not empty
+            if config["local_paths"]["target_output"] == "":
+                logging.error(
+                    "The target_output variable in the config file is empty. Please specify a path to the target_output file."
+                )
+                sys.exit(1)
+            subprocess.run(
+                f"python write_local_paths.py -d {target_dir} -o {config['local_paths']['target_output']}",
+                shell=True,
+                check=True,
+            )
+            logging.info("Successfully ran the write_local_paths script for the target data.")
     except subprocess.CalledProcessError as e:
         logging.error(
             f"An error occurred while running the write_local_paths script: {e}"
