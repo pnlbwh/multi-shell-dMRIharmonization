@@ -249,7 +249,10 @@ if __name__ == "__main__":
         description="Automated MRI data harmonization pipeline."
     )
     parser.add_argument(
-        "--config", type=str, required=True, help="Path to the configuration file."
+        "--config",
+        type=str,
+        default="config.ini",
+        help="Path to the config file. Default: config.ini"
     )
     parser.add_argument(
         "--verbose", action="store_true", help="Print log messages in the terminal."
