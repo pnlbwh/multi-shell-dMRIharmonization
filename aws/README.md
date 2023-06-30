@@ -121,6 +121,9 @@ ref_name = reference_name
 tar_name = target_name
 template = /path/to/template
 nproc = num_processors
+create = True 
+process = True
+debug = True
 ```
 Please replace the placeholders with your actual values:
 
@@ -137,6 +140,9 @@ Please replace the placeholders with your actual values:
 - `target_name`: Replace with the name of your target.
 - `/path/to/template`: Replace with the path to your template.
 - `num_processors`: Replace with the number of processes you wish to allocate for processing.
+- `True`: Replace with `True` if you are creating a template, else replace with `False`.
+- `True`: Replace with `True` if you are harmonizing, else replace with `False`.
+- `True`: Replace with `True` if you are debugging, else replace with `False`. Must be `False` if `process` is `False`.
 
 
 Remember to save your configuration file with the `.ini` extension.
@@ -145,6 +151,8 @@ Once the configuration file is set, you can run the automated pipeline with the 
 ```sh
 python automate_template_pipeline.py --config config.ini
 ```
+
+The config file can be named anything, and be located anywhere, as long as you specify the path to the config file when running the script. default is `config.ini` in the same directory as the script.
 
 The automated pipeline also logs important events to a log file named pipeline.log. This log file contains both successful events and any errors that might occur.
 
