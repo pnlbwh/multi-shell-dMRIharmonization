@@ -1,0 +1,2 @@
+subject	dicecoeff
+HCD0040113	0.3840198437268811

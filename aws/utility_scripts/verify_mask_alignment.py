@@ -8,7 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 from pathlib import Path
 import logging
-
+import warnings
 
 def calculate_dice(im1, im2):
     im1 = np.greater(im1, 0)
@@ -20,12 +20,14 @@ def calculate_dice(im1, im2):
 
 
 def calculate_ssim_single_slice(im1_slice, im2_slice):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
     return ssim(im1_slice, im2_slice)
 
 
 def calculate_ssim(im1, im2):
-    im1_slices = np.asarray(im1.dataobj)
-    im2_slices = np.asarray(im2.dataobj)
+    im1_slices = im1
+    im2_slices = im2
 
     with Pool() as pool:
         ssims = pool.starmap(calculate_ssim_single_slice, zip(im1_slices, im2_slices))

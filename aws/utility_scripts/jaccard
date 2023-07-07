@@ -1,0 +1,85 @@
+#!/bin/bash
+
+# usage: jaccard filename1 filename2
+# this script uses the fsl toolbox and "bc" to calculate the Jaccard Index
+# and Jaccard distance statistics for two images in the same space.
+# See http://en.wikipedia.org/wiki/Jaccard_index
+# the scale=6 variable sets the number of decimal places to use.
+# Written by Dianne Patterson 11/9/2011
+# Based on a dice_kappa calculation script written by Matt Petoe 11/2/2011
+# Author: Dianne Patterson, Ph.D.
+
+
+: <<COMMENTBLOCK
+
+Function: Jaccard
+Purpose: The Jaccard index measures the similarity between 2 sample sets
+The Jaccard distance measures the dissimilarity between 2 sample
+data sets
+Input: 2 image file names
+Output: jaccard_index and jaccard_distance
+
+COMMENTBLOCK
+
+Jaccard ()
+{
+
+	roi1=$1 # Define the first argument as roi1
+	roi2=$2 # Define the second argument as roi2
+	stem1=$(basename -s .nii.gz ${roi1})
+	stem2=$(basename -s .nii.gz ${roi2})
+	dir1=$(dirname ${roi1})
+	dir2=$(dirname ${roi2})
+
+	# Use fslstats to get the number of voxels in roi1
+	total_voxels1=$(fslstats ${roi1} -V | awk '{printf $1 "\n"}')
+	# Use fslstats to get the number of voxels in roi2
+	total_voxels2=$(fslstats "$2" -V | awk '{printf $1 "\n"}')
+
+	if [ ${total_voxels1} -ne 0 ] && [ ${total_voxels2} -ne 0 ]; then
+		# Use fslstats -k to mask roi2 with roi1, and get the number of voxels in the intersection
+		intersect_voxels=$(fslstats ${roi1} -k ${roi2} -V | awk '{printf $1 "\n"}')
+		# Use fslstats -add to add roi1 and roi2, and get the number of voxels in the union
+		fslmaths ${roi1} -add ${roi2} -bin union
+		union_voxels=$(fslstats union -V | awk '{printf $1 "\n"}')
+		# Use bc to calculate the jaccard index (intersection/union)
+		jaccard_index=$(echo "scale=6; ${intersect_voxels}/${union_voxels}" | bc)
+		# Use bc to calculate the jaccard distance 1-(intersection/union)
+		jaccard_distance=$(echo "scale=6; 1-(${intersect_voxels}/${union_voxels})" | bc)
+		#echo "Jaccard distance is ${jaccard_distance}"
+	else
+		echo "At least one volume is 0"
+	fi
+
+rm union.nii.gz
+
+}
+#==============================================================================
+
+
+roi1=$1 # Define the first argument as roi1
+roi2=$2 # Define the second argument as roi2
+
+Jaccard ${roi1} ${roi2}
+
+if [ ${total_voxels1} -ne 0 ] && [ ${total_voxels2} -ne 0 ]; then
+  echo "Total voxels ${stem1} is ${total_voxels1}"
+  echo "Total voxels ${stem2} is ${total_voxels2}"
+  echo "Intersect voxels are ${intersect_voxels}"
+  echo "Union voxels are ${union_voxels}"
+  echo "Jaccard index is ${jaccard_index}"
+  echo "Jaccard distance is ${jaccard_distance}"
+else
+	echo "At least one volume is empty"
+fi
+
+# echo roi1 roi2 jaccard_index jaccard_distance to the text file.
+# create the header row if jaccard.txt does not exist.
+if [ ! -e jaccard.txt ]; then
+	touch jaccard.txt
+	echo "dir1 roi1 dir2 roi2 total_voxels1 total_voxels2 intersect_voxels union_voxels jaccard_index jaccard_distance" > jaccard.txt
+fi
+
+echo "${dir1} ${stem1} ${dir2} ${stem2} ${total_voxels1} ${total_voxels2} ${intersect_voxels} ${union_voxels}  ${jaccard_index} ${jaccard_distance}" >>jaccard.txt
+
+#==============================================================================

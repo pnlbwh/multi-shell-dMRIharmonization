@@ -1,1 +1,2 @@
-subject	dicecoeff
+subject	ssim
+HCD1103419	0.013269739678678746
