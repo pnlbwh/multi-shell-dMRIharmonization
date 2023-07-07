@@ -1,0 +1,1 @@
+line #, dwi_path, mask_path

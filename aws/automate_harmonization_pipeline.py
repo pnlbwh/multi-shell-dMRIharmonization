@@ -90,7 +90,7 @@ def run_bash_script(config, verbose, create, process, debug):
 
 
 def main(args_):
-    setup_logging("pipeline.log", args_.verbose)
+    setup_logging("pipeline_testing.log", args_.verbose)
 
     # Load the configuration file
     config = configparser.ConfigParser()
@@ -158,6 +158,15 @@ def main(args_):
     try:
         # check that reference and target are not empty strings and if not run the download_from_s3 script
         if reference_dir != "":
+            # call the utility_scripts/verify_path_names.py script to verify that the dwi and mask paths are correct
+            subprocess.run(
+                f"python utility_scripts/verify_path_names.py --csv {config['s3_download']['reference_textfile']} --out {reference_dir}/reference_verification.txt",
+                shell=True,
+                check=True,
+            )
+            logging.info(
+                "Successfully ran the verify_path_names script for the reference data."
+            )
             subprocess.run(
                 f"python download_from_s3.py -t {config['s3_download']['reference_textfile']} -d {reference_dir} -m {config['s3_download']['multithreading']}",
                 shell=True,
@@ -168,6 +177,15 @@ def main(args_):
             )
             ref_dir_flag = True
         if target_dir != "":
+            # call the utility_scripts/verify_path_names.py script to verify that the dwi and mask paths are correct
+            subprocess.run(
+                f"python utility_scripts/verify_path_names.py --csv {config['s3_download']['target_textfile']} --out {target_dir}/target_verification.txt",
+                shell=True,
+                check=True,
+            )
+            logging.info(
+                "Successfully ran the verify_path_names script for the target data."
+            )
             subprocess.run(
                 f"python download_from_s3.py -t {config['s3_download']['target_textfile']} -d {target_dir} -m {config['s3_download']['multithreading']}",
                 shell=True,
