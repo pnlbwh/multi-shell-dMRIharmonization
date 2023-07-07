@@ -10,3 +10,4 @@ TEST_DATA/
 
 aws/killme.sh
 aws/pipeline.log
+/aws/pipe_test.log
