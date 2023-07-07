@@ -90,7 +90,8 @@ def run_bash_script(config, verbose, create, process, debug):
 
 
 def main(args_):
-    setup_logging("pipeline_testing.log", args_.verbose)
+    log_file = args_.log_file
+    setup_logging(log_file, args_.verbose)
 
     # Load the configuration file
     config = configparser.ConfigParser()
@@ -271,6 +272,9 @@ if __name__ == "__main__":
         type=str,
         default="config.ini",
         help="Path to the config file. Default: config.ini"
+    )
+    parser.add_argument(
+        "--log_file", type=str, default="pipeline.log", help="Path to the log file."
     )
     parser.add_argument(
         "--verbose", action="store_true", help="Print log messages in the terminal."
