@@ -27,6 +27,13 @@ def download_from_s3(s3_path, local_path):
     :param local_path: Path to the local directory.
     """
     fs = s3fs.S3FileSystem()
+    local_file_path = os.path.join(local_path, os.path.basename(s3_path))
+
+    # Check if the file exists locally
+    if os.path.exists(local_file_path):
+        print(f"File {local_file_path} already exists locally")
+        return None
+
     try:
         # Check if the file exists in S3
         if fs.exists(s3_path):
@@ -43,7 +50,7 @@ def download_directory_from_s3(s3_directory, local_directory, multithreading):
     fs = s3fs.S3FileSystem()
     try:
         # Get list of all files in the s3 directory
-        files_to_download = fs.glob(s3_directory + "/*")
+        files_to_download = fs.glob(f"{s3_directory}/*")
 
         # Create the local directory if it doesn't exist
         os.makedirs(local_directory, exist_ok=True)
