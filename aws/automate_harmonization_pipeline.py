@@ -47,7 +47,7 @@ def run_bash_script(config, verbose, create, process, debug):
     :param process: Boolean indicating whether to process the harmonized images.
     :param debug: Boolean indicating whether to print debug messages in the terminal.
     """
-    command = f"""    
+    command = """    
     /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py """
     if config["ref_list"] != "":
         command += f'--ref_list "{config["ref_list"]}" '
@@ -105,30 +105,27 @@ def main(args_):
 
     # if the flags create, process and debug are not in args, then look for them in the config file, if they not there
     # then set them to True by default
-    if not args_.create:
-        if "create" in config["bash_script"]:
-            create = config.getboolean("bash_script", "create")
-        else:
-            create = False
-    else:
+    if args_.create:
         create = args_.create
 
-    if not args_.process:
-        if "process" in config["bash_script"]:
-            process = config.getboolean("bash_script", "process")
-        else:
-            process = False
+    elif "create" in config["bash_script"]:
+        create = config.getboolean("bash_script", "create")
     else:
+        create = False
+    if args_.process:
         process = args_.process
 
-    if not args_.debug:
-        if "debug" in config["bash_script"]:
-            debug = config.getboolean("bash_script", "debug")
-        else:
-            debug = False
+    elif "process" in config["bash_script"]:
+        process = config.getboolean("bash_script", "process")
     else:
+        process = False
+    if args_.debug:
         debug = args_.debug
 
+    elif "debug" in config["bash_script"]:
+        debug = config.getboolean("bash_script", "debug")
+    else:
+        debug = False
     # log all the args and config settings that will be used
     logging.info(f"create: {create}")
     logging.info(f"process: {process}")
