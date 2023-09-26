@@ -29,10 +29,10 @@ def write_local_paths(root_dir, output_file):
             # Check if it's a .nii.gz file
             if filename.endswith(".nii.gz") and not filename.endswith(
                 "BrainMask.nii.gz"
-            ):
+            ) and not filename.endswith("mask.nii.gz"):
                 nii_files.append(os.path.abspath(os.path.join(dirpath, filename)))
             # Check if it's a mask file
-            if filename.endswith("BrainMask.nii.gz"):
+            if filename.endswith("BrainMask.nii.gz") or filename.endswith("mask.nii.gz"):
                 mask_files.append(os.path.abspath(os.path.join(dirpath, filename)))
 
     # Write the file paths to the output file
