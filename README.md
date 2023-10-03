@@ -1,598 +1,269 @@
-![](doc/pnl-bwh-hms.png)
+# Harmonization of Multi-shell Diffusion MRI Data
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.3451427.svg)](https://doi.org/10.5281/zenodo.3451427) [![Python](https://img.shields.io/badge/Python-3.6-green.svg)]() [![Platform](https://img.shields.io/badge/Platform-linux--64%20%7C%20osx--64-orange.svg)]()
+## Adapted Multi-shell Diffusion MRI Harmonization Pipeline for AWS
 
-*multi-shell-dMRIharmonization* repository is developed by Tashrif Billah and Yogesh Rathi, Brigham and Women's Hospital (Harvard Medical School).
+![PNL-BWH-HMS Logo](docs/pnl-bwh-hms.png "PNL-BWH-HMS Logo")
 
-*multi-shell-dMRIharmonization* is an extension of [dMRIharmonization](https://github.com/pnlbwh/dMRIharmonization) for single-shell dMRI.
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.3451427.svg)](https://doi.org/10.5281/zenodo.3451427) [![Python](https://img.shields.io/badge/Python-3.7-green.svg)](#prerequisites) [![Platform](https://img.shields.io/badge/Platform-linux--64%20%7C%20osx--64-orange.svg)](#prerequisites)
 
+This repository contains scripts and code that form a part of a harmonization pipeline. This pipeline is aimed at harmonizing multi-shell Diffusion MRI (dMRI) data across various sites and scanner protocols. The original code was primarily developed by Tashrif Billah and Yogesh Rathi at the Brigham and Women's Hospital (Harvard Medical School).
 
-Table of Contents
-=================
+## Table of Contents
 
-   * [Algorithm](#algorithm)
-   * [Citation](#citation)
-   * [Dependencies](#dependencies)
-   * [Installation](#installation)
-      * [1. Install prerequisites](#1-install-prerequisites)
-         * [Check system architecture](#check-system-architecture)
-         * [Python 3](#python-3)
-         * [MATLAB Runtime Compiler](#matlab-runtime-compiler)
-         * [unringing](#unringing)
-      * [2. Install pipeline](#2-install-pipeline)
-      * [3. Download IIT templates](#3-download-iit-templates)
-      * [4. Configure your environment](#4-configure-your-environment)
-   * [Running](#running)
-   * [Consistency checks](#consistency-checks)
-   * [Varying number of gradients](#varying-number-of-gradients)
-   * [Sample commands](#sample-commands)
-      * [Create template](#create-template)
-      * [Harmonize data](#harmonize-data)
-      * [Debug](#debug)
-         * [1. Same target list](#1-same-target-list)
-         * [2. Different target list](#2-different-target-list)
-   * [Tests](#tests)
-      * [1. pipeline](#1-pipeline)
-      * [2. unittest](#2-unittest)
-   * [Preprocessing](#preprocessing)
-      * [1. Denoising](#1-denoising)
-      * [2. Bvalue mapping](#2-bvalue-mapping)
-      * [3. Resampling](#3-resampling)
-   * [Debugging](#debugging)
-      * [1. With the pipeline](#1-with-the-pipeline)
-      * [2. Use separately](#2-use-separately)
-   * [Caveats/Issues](#caveatsissues)
-      * [1. Template path](#1-template-path)
-      * [2. Multi-processing](#2-multi-processing)
-      * [3. X forwarding error](#3-x-forwarding-error)
-      * [4. Tracker](#4-tracker)
-   * [Reference](#reference)
+* [Additional AWS-focused Scripts and Adapted Pipeline Overview](#additional-aws-focused-scripts-and-adapted-pipeline-overview)
+* [Prerequisites](#prerequisites)
+* [Usage](#usage)
+  * [Running the Scripts Separately](#running-the-scripts-separately)
+    * [Downloading the Files](#downloading-the-files)
+    * [Input File Format](#input-file-format)
+    * [Creating a Local Paths Text File](#creating-a-local-paths-text-file)
+    * [Running the Template Script](#running-the-template-script)
+  * [Automating the Harmonization Process](#automating-the-harmonization-process)
+    * [Configuration File (`config.ini`)](#configuration-file-configini)
+      * [Configuration Parameters](#configuration-parameters)
+    * [Running the Automated Pipeline](#running-the-automated-pipeline)
+      * [Command-line Options](#command-line-options)
+        * [Running Directly](#running-directly)
+        * [Running in the Background](#running-in-the-background)
+        * [Using `screen` for Detached Execution](#using-screen-for-detached-execution)
+* [Contributing](#contributing)
+* [License](#license)
 
-Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+## Additional AWS-focused Scripts and Adapted Pipeline Overview
 
+### Overview
 
+The original pipeline was designed to work with local directories. This adaptation of the pipeline extends the original pipeline to work with AWS S3 buckets. The following scripts have been developed to automate the process of downloading the necessary files from an AWS S3 bucket, generating the local paths text files, and running the template script to perform the harmonization process. The scripts are described in detail below.
 
-# Algorithm
+### AWS-focused Scripts
 
-1. Extract b-shells from given data
-2. Check consistency among bshells and spatial resolution
-3. Create ANTs template from highest b-shell
-4. Apply the warps and affines obtained from previous step to compute scale maps for all b-shells
-5. Template creation being complete, harmonize data for each b-shell using scale maps corresponding to that b-shell
-6. Join the harmonized data in the same order of bvalues as that of the given data
+The following Python scripts have been developed by [Ryan Zurrin](mailto:rzurrin@bwh.harvard.edu) and are used to extend the original pipeline to work with AWS S3 buckets. These scripts are located in the `aws` directory of the `hcp_aws` branch of this repository.
 
-Template creation and data harmonization process mentioned in steps 3-5 are described in detail at 
-single shell counterpart of the program:
+1. `download_from_s3.py`: A Python script to download MRI data files from an AWS S3 bucket using multithreading for improved performance. This script needs to be run twice, once for the reference files and once for the target files.
 
-https://github.com/pnlbwh/dMRIharmonization#template-creation
+2. `write_local_paths.py`: A Python script to generate a text file with the local paths of the downloaded .nii.gz and .nii.gz mask files, required for subsequent harmonization steps. Similar to the `download_from_s3.py` script, this script also needs to be run twice.
 
-https://github.com/pnlbwh/dMRIharmonization#data-harmonization
+3. `run_template.sh`: A Bash script to initiate the harmonization process. This script uses the local paths generated by write_local_paths.py to access and process the MRI data.
 
+4. `automate_harmonization_pipeline.py`: A Python script to automate the full process. It reads the necessary parameters from a configuration file and sequentially runs the above three scripts.
 
-# Citation
+## Prerequisites
 
-If this repository is useful in your research, please cite all of the following: 
+### Initial environment setup option 1: Using the prebuilt AMI
 
-* Billah T, Bouix S, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
-https://github.com/pnlbwh/multi-shell-dMRIharmoniziation, 2019, doi: 10.5281/zenodo.3451427
+The adapted pipeline uses a memory optimized EC2 instance, `r5d.4xlarge` which should be used with the prebuilt AMI `Harmonization_v9.27.2023`.
 
+### Initial environment setup option 2: Building the environment from scratch
 
-* Billah T*, Cetin Karayumak S*, Bouix S, Rathi Y. Multi-site Diffusion MRI Harmonization, 
-https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.2584275
+If you are not using the prebuilt AMI, you will need to build the environment from scratch.
+    1. create a `r5d.4xlarge` EC2 instance with any Linux distribution:
+    2. Follow and complete the setup and requirements from the original repo's instructions found in this [README](docs/README.md) file.
+    3. Setup the AWS CLI and configure any instance IAM roles or permissions needed to access the S3 bucket.
+    4. Install additional Python libraries:
+       - [s3fs](https://s3fs.readthedocs.io/en/latest/install.html)
+       - [tqdm](https://tqdm.github.io/)
 
-    \* *denotes equal first authroship*
+These Python libraries can be installed using pip if they are not already installed:
 
+```sh
+pip install s3fs
+pip install tqdm
+```
 
-* Cetin Karayumak S, Bouix S, Ning L, James A, Crow T, Shenton M, Kubicki M, Rathi Y. Retrospective harmonization of multi-site diffusion MRI data 
-acquired with different acquisition parameters. Neuroimage. 2019 Jan 1;184:180-200. 
-doi: 10.1016/j.neuroimage.2018.08.073. Epub 2018 Sep 8. PubMed PMID: 30205206; PubMed Central PMCID: PMC6230479.
+Please make sure that all these requirements are properly installed and configured before proceeding with the scripts in the 'aws' directory. This will ensure that the pipeline runs smoothly without any disruptions.
 
+## Usage
 
-* Mirzaalian H, Ning L, Savadjiev P, Pasternak O, Bouix S, Michailovich O, Karmacharya S, Grant G, Marx CE, Morey RA, Flashman LA, George MS, 
-McAllister TW, Andaluz N, Shutter L, Coimbra R, Zafonte RD, Coleman MJ, Kubicki M, Westin CF, Stein MB, Shenton ME, Rathi Y. 
-Multi-site harmonization of diffusion MRI data in a registration framework. Brain Imaging Behav. 2018 Feb;12(1):284-295. 
-doi:10.1007/s11682-016-9670-y. PubMed PMID: 28176263.
+The adapted pipeline can be ran by running each of the parts separately, or by using the `automate_harmonization_pipeline.py` script to automate the full process.
 
+### Running the Scripts Separately
 
-# Requirements for data
+#### Downloading the Files
 
-1. Two groups of data from- *reference* and *target* sites are required. Control (healthy) subjects should be present 
-in each site.
+To use the `download_from_s3.py` script, you'll need to provide a text file containing the S3 paths to the files you want to download, specify the local directory where the files should be downloaded to, and specify the number of threads to be used for multithreading.
 
-2. The groups between the sites should be very well matched for age, sex, socio-economic status, IQ and any other 
-demographic variable.
+Here's an example of how to run the script:
 
-3. A minimum of 16 subjects is required from each site for proper harmonization (so a minimum of 32 subjects in total).
+```sh
+python download_from_s3.py --textfile <path-to-your-textfile> --directory <path-to-local-directory> --threads <number_of_threads>
+```
 
-4. The data should be curated with the following steps prior to harmonization: 
-    
-    (i) axis alignment and centering
-    
-    (ii) signal dropped gradient removal
-    
-    (iii) eddy current and head motion correction
-    
-5. b-values in each b-shell should have similar b-values (i.e, if one site has b-value 1000, 
-the other one should have in the range [900,1100]).
+Replace `<path-to-your-textfile>` with the path to your text file, `<path-to-local-directory>` with the path to the local directory where you want the files to be downloaded to, and `<number_of_threads>` with the number of threads you want to use for multithreading.
 
+Remember to run this script twice, once for the reference files and once for the target files.
 
-If your data does not satisfy these requirements, please open an issue [here](https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues) or contact -
+#### Input File Format
 
-*skarayumak@bwh.harvard.edu*
+The input text file should contain two S3 paths per line, separated by a comma. The first path should point to a .nii.gz file, and the second path should point to a .nii.gz mask file.
 
-*tbillah@bwh.harvard.edu*
+Here's an example of what the input file format looks like:
 
+```angular2html
+s3://mybucket/path/to/file1.nii.gz,s3://mybucket/path/to/file1_mask.nii.gz
+s3://mybucket/path/to/file2.nii.gz,s3://mybucket/path/to/file2_mask.nii.gz
+...
+```
 
+For each line, the script will download the .nii.gz and .nii.gz mask file, as well as any .bval and .bvec files that are in the same directory.
 
-# Dependencies
+#### Creating a Local Paths Text File
 
-* ANTs = 2.2.0
-* reisert/unring
-* FSL = 5.0.11
-* numpy = 1.16.2
-* scipy = 1.2.1
-* scikit-image = 0.15.0
-* dipy = 0.16.0
-* nibabel = 2.3.0
-* pynrrd = 0.3.6
-* conversion = 2.0
+Once the files are downloaded, you can use the following script to create a new text file that contains the local paths to the .nii.gz and .nii.gz mask files:
 
-**NOTE** The above versions were used for developing the repository. However, *multi-shell-dMRIharmonization* should work on 
-any advanced version. 
+```sh
+python write_local_paths.py --directory <path-to-root-directory> --output <path-to-output-textfile>
+```
 
+Replace `<path-to-root-directory>` with the path to the root directory that contains the downloaded files, and `<path-to-output-textfile>` with the path to the text file where you want the local paths to be written to.
 
-# Installation
+#### Running the Template Script
 
-## 1. Install prerequisites
+After downloading the necessary files and generating the local paths files, you can run the `run_template.sh` script to perform further analysis. This script accepts several command-line arguments to specify paths and processing options. Here's an example of how to run the script:
 
-You may ignore installation instruction for any software module that you have already.
+```sh
+./run_template.sh -r /path/to/reference-list.txt -t /path/to/target-list.txt -n ReferenceName -T TargetName -p /path/to/template/directory -d 4
+```
 
-### Check system architecture
+Please ensure to replace `/path/to/reference-list.txt`, `/path/to/target-list.txt`, `ReferenceName`, `TargetName`, and `/path/to/template/directory` with the actual paths and names on your local machine. The `-d` flag is used to specify the number of processes or threads to use (use -1 for all available), with the default being 4.
 
-    uname -a # check if 32 or 64 bit
+#### Running the Harmonization Script
 
-### Python 3
+After the template script has finished running, you can run the `run_harmonization.sh` script to perform the harmonization process. This script accepts several command-line arguments to specify paths and processing options. Here's an example of how to run the script:
 
-Download [Miniconda Python 3.6 bash installer](https://docs.conda.io/en/latest/miniconda.html) (32/64-bit based on your environment):
-    
-    sh Miniconda3-latest-Linux-x86_64.sh -b # -b flag is for license agreement
+```sh
+./run_harmonization.sh -t /path/to/target-list.txt -n ReferenceName -T TargetName -p /path/to/template/directory -d 4
+```
 
-Activate the conda environment:
+Please ensure to replace `/path/to/target-list.txt`, `ReferenceName`, `TargetName`, and `/path/to/template/directory` with the actual paths and names on your local machine. The `-d` flag is used to specify the number of processes or threads to use (use -1 for all available), with the default being 4.
 
-    source ~/miniconda3/bin/activate # should introduce '(base)' in front of each line
+### Automating the Harmonization Process
 
+The `automate_harmonization_pipeline.py` script provides a way to automate the entire harmonization process. This script requires a configuration file in INI format to specify the parameters for each step of the pipeline.
 
+#### Configuration File (`config.ini`)
 
+Here's a sample configuration file layout:
 
-**NOTE** With the current design, *MATLAB Runtime Compiler* and *unringing* are not used. So, you may pass them.
-    
-### MATLAB Runtime Compiler
+```ini
+[s3_download]
+reference_textfile = /path/to/reference/textfile.txt
+target_textfile = /path/to/target/textfile.txt
+reference_directory = /path/to/reference/directory
+target_directory = /path/to/target/directory
+template_path = /path/to/template
+multithreading = num_threads
 
-In the harmonization process, all volumes have to be resampled to a common spatial resolution. 
-We have chosen bspline as the interpolation method. For better result, bspline order has been chosen to be 7. 
-Since Python and ANTs provide bspline order less than or equal to 5, we have resorted to [spm package](https://github.com/spm/spm12) for this task.
-Using their source codes [bspline.c](https://github.com/spm/spm12/blob/master/src/spm_bsplinc.c) and [bsplins.c](https://github.com/spm/spm12/blob/master/src/spm_bsplins.c), 
-we have made a standalone executable that performs the above interpolation. Execution of the standalone executable 
-requires [MATLAB Runtime Compiler](https://www.mathworks.com/products/compiler/matlab-runtime.html). It is available free of charge.
-Download a suitable version from the above, and install as follows:
+[local_paths]
+reference_output = /path/to/reference/output.txt
+target_output = /path/to/target/output.txt
 
-    unzip MCR_R2017a_glnxa64_installer.zip -d MCR_R2017a_glnxa64/
-    MCR_R2017a_glnxa64/install -mode silent -agreeToLicense yes -destinationFolder `pwd`/MATLAB_Runtime
-    
+[bash_script]
+ref_list = /path/to/reference/list.txt
+tar_list = /path/to/target/list.txt
+ref_name = reference_name
+tar_name = target_name
+template = /path/to/template
+nproc = num_processors
+create = True
+process = True
+debug = True
+```
 
-See details about installation [here](https://www.mathworks.com/help/compiler/install-the-matlab-runtime.html).
+##### Configuration Parameters
 
-After successful installation, you should see a suggestion about editing your LD_LIBRARY_PATH. 
-You should save the suggestion in a file `env.sh`.
+* `reference_textfile`: Path to the text file containing S3 paths for reference files.
+* `target_textfile`: Path to the text file containing S3 paths for target files.
+* `reference_directory`: Local directory where reference files will be downloaded.
+* `target_directory`: Local directory where target files will be downloaded.
+* `template_path`: Path to the template used for harmonization.
+* `num_threads`: Number of threads for multithreading.
+* `reference_output`: Output text file containing local paths for reference files.
+* `target_output`: Output text file containing local paths for target files.
+* `ref_list`: Text file containing a list of reference files.
+* `tar_list`: Text file containing a list of target files.
+* `ref_name`: Name to identify the reference dataset.
+* `tar_name`: Name to identify the target dataset.
+* `template`: Path to the template used for harmonization.
+* `num_processors`: Number of processors to use.
+* `create`: Set to `True` if creating a template, otherwise `False`.
+* `process`: Set to `True` if processing, otherwise `False`.
+* `debug`: Set to `True` for debug mode, otherwise `False`.
 
-    echo "/path/to/v92/runtime/glnxa64:/path/to/v92/bin/glnxa64:/path/to/v92/sys/os/glnxa64:/path/to/v92/opengl/lib/glnxa64:" > env.sh
+The config file can be named anything, and be located anywhere, as long as you specify the path to the config file when running the script. default is `config.ini` in the same directory as the script.
 
-Then, every time you run dMRIharmonization, you can just source the `env.sh` for your LD_LIBRARY_PATH to be updated.
+The automated pipeline also logs important events to a log file named pipeline.log. This log file contains both successful events and any errors that might occur.
 
-**NOTE** If you have MATLAB already installed in your system, replace `/path/to/v92` with `/path/to/Matlab/`
+Replace the placeholders in the `config.ini` example with your actual paths and values. Make sure that the `config.ini` file is located in the same directory as the `automate_template_pipeline.py` script or specify the path to the config file when running the script.
 
+##### Command-line Options
 
-### unringing
+* `--config`: Specifies the path to the configuration file.
+* `--log_file`: Specifies the path to the log file (default is `pipeline.log`).
+* `--verbose`: Enables verbose output (default is `False`).
+* `--create`: Overrides the `create` setting in the configuration file.
+* `--process`: Overrides the `process` setting in the configuration file.
+* `--debug`: Overrides the `debug` setting in the configuration file.
 
-    git clone https://bitbucket.org/reisert/unring.git
-    cd unring/fsl
-    export PATH=$PATH:`pwd`
+Note: The `--create`, `--process`, and `--debug` command-line flags will override their corresponding settings in the `config.ini` file if provided.
 
-You should be able to see the help message now:
+Note: The `--verbose` flag is good to set to allow for detailed logging to be output to the terminal as well as the log file. Or you can monitory the log file with `tail -f pipeline.log` in a separate terminal window.
 
-    unring.a64 --help
+#### Running the Automated Pipeline
 
+Once the `config.ini` file is set up, you can run the automated pipeline in several ways:
 
-**NOTE** FSL unringing executable requires Centos7 operating system.
-    
-    
+##### Running Directly
 
-## 2. Install pipeline
+If you anticipate that the process will not take too long, you can run the script directly from the terminal:
 
-Now that you have installed the prerequisite software, you are ready to install the pipeline:
+```sh
+python automate_harmonization_pipeline.py --config /path/to/config.ini --verbose
+```
 
-    git clone https://github.com/pnlbwh/multi-shell-dMRIharmonization.git && cd multi-shell-dMRIharmonization
-    conda env create -f environment.yml    # you may comment out any existing package from environment.yml
-    conda activate harmonization           # should introduce '(harmonization)' in front of each line
+##### Running in the Background
 
+If you anticipate that the process will take a long time, you can run the script using the nohup and & commands to run the process in the background:
 
-Alternatively, if you already have ANTs, you can continue using your python environment by directly installing 
-the prerequisite libraries:
+```sh
+nohup python automate_harmonization_pipeline.py --config /path/to/config.ini  &
+```
 
-    pip install -r requirements.txt --upgrade
+This will run the process in the background and return the control to the terminal. You can check the status of background jobs by using the `jobs` command.
 
+##### Using `screen` for Detached Execution
 
+If you want to run the script in a way that it remains active even after you've closed your terminal session, you can use `screen`:
 
+1. Start a new screen session:
 
-## 3. Download IIT templates
+    ```sh
+    screen -S harmonization_session
+    ```
 
-dMRIharmonization toolbox is provided with a debugging capability to test how good has been the 
-harmonization. For debug to work and **tests** to run, download the following data from [IIT HUMAN BRAIN ATLAS](http://www.iit.edu/~mri/IITHumanBrainAtlas.html) 
-and place them in `multi-shell-dMRIharmonization/IITAtlas/` directory:
+2. Run the script inside the screen session:
 
-* [IITmean_FA.nii.gz](https://www.nitrc.org/frs/download.php/6898/IITmean_FA.nii.gz) 
-* [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz)
+    ```sh
+    python automate_harmonization_pipeline.py --config /path/to/config.ini --verbose
+    ```
 
+3. Detach from the screen session by pressing `Ctrl + A` followed by `D`.
 
-## 4. Configure your environment
+    To re-attach to the session, use:
 
-Make sure the following executables are in your path:
+    ```sh
+    screen -r harmonization_session
+    ```
 
-    antsMultivariateTemplateConstruction2.sh
-    antsApplyTransforms
-    antsRegistrationSyNQuick.sh
-    unring.a64
-    
-You can check them as follows:
+    Here's an example of how to run the script:
 
-    which dtifit
-    
-If any of them does not exist, add that to your path:
+    ```sh
+    python automate_template_pipeline.py --config /path/to/config.ini --log_file /path/to/logfile.log --verbose
+    ```
 
-    export PATH=$PATH:/directory/of/executable
-    
-`conda activate harmonization` should already put the ANTs scripts in your path. Yet, you should set ANTSPATH as follows:
-    
-    export ANTSPATH=~/miniconda3/envs/harmonization/bin/
+## Contributing
 
-However, if you choose to use pre-installed ANTs scripts, you can define `ANTSPATH` according to [this](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS#set-path-and-antspath) instruction.
+If you have suggestions for how this script could be improved, please fork this repository and create a pull request, or simply open an issue with the tag "enhancement". Thank you!
 
+## License
 
-
-
-# Running
-
-Upon successful installation, you should be able to see the help message:
-
-> lib/multi-shell-harmonization.py --help
-
-
-    Usage:
-        multi-shell-harmonization.py [SWITCHES] 
-    
-    Meta-switches:
-        -h, --help                         Prints this help message and quits
-        --help-all                         Prints help messages of all sub-commands and quits
-        -v, --version                      Prints the program's version and quits
-    
-    Switches:
-        --create                           turn on this flag to create template
-        --debug                            turn on this flag to debug harmonized data (valid only with --process)
-        --force                            turn on this flag to overwrite existing data
-        --nproc VALUE:str                  number of processes/threads to use (-1 for all available, may slow down your system);
-                                           the default is 4
-        --nshm VALUE:str                   spherical harmonic order, by default maximum possible is used; the default is -1
-        --nzero VALUE:str                  number of zero padding for denoising skull region during signal reconstruction; the
-                                           default is 10
-        --process                          turn on this flag to harmonize
-        --ref_list VALUE:ExistingFile      reference csv/txt file with first column for dwi and 2nd column for mask:
-                                           dwi1,mask1\ndwi2,mask2\n...
-        --ref_name VALUE:str               reference site name; required
-        --tar_list VALUE:ExistingFile      target csv/txt file with first column for dwi and 2nd column for mask:
-                                           dwi1,mask1\ndwi2,mask2\n...
-        --tar_name VALUE:str               target site name; required
-        --template VALUE:str               template directory; required
-        --travelHeads                      travelling heads
-        --verbose                          print everything to STDOUT
-
-
-
-For details about the above arguments, see https://github.com/pnlbwh/dMRIharmonization#running
-
-
-
-# Consistency checks
-
-A few consistency checks are run to make sure provided data is eligible for harmonization.
-
-1. First image from the reference site is used as reference for all images in reference and target sites. B-shells and 
-spatial resolution are extracted from the reference image. The b-shells and spatial resolution are compared against all 
-images in reference and target sites. As long as all bvalues of each image falls within +-100 of a b-shell bvalue, the 
-image is considered good for harmonization.
-
-2. Spatial resolution should match exactly. If reference image has 2x2x2 resolution, all other images should also have 
-this resolution.
-
-3. The program can automatically determine [maximum possible spherical harmonic order](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) (`--nshm`) for each b-shell.
-However, if a value is provided with `--nshm`, it is compared against the maximum possible spherical harmonic order to 
-continue.
-
-
-In the event of inconsistency, the program will raise and error and user should remove the case from provided lists 
-and try again. 
-
-
-# Varying number of gradients
-
-A particular strength of the algorithm is its compatiblity with varying number of gradients present in images.
-As long as [the number of gradients satisfies minimum required](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) for the spherical harmonic order, determined (`--nshm -1`) 
-or provided(--nshm 4), data can be harmonized.
-
-
-# Sample commands
-
-## Create template
-
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_list.txt 
-    --ref_name REF --tar_name TAR --template template
-    --create
-
-
-## Harmonize data
-
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
-    --tar_name TAR --template template
-    --process
-    
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
-    --tar_name TAR --template template
-    --process --debug
-
-
-## Debug
-
-### 1. Same target list
-
-Run together with `--create` and `--process`:
-
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_list.txt 
-    --ref_name REF --tar_name TAR --template template
-    --create --process --debug
-
-
-### 2. Different target list
-
-In theory, you want to create a template with small number of data from each sites and then use the template to 
-harmonize all of your data in the target site. Since the data for template creation and harmonization are not same, 
-we don't have luxury of using `--create --process --debug` altogether. Instead, you would use `--debug` with each of 
-`--create` and `--process`. The `--debug` flag creates some files that are used to obtain statistics later.
-The steps are described below:
-
-(i) Create template with `--debug` enabled:
-    
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --ref_list ref_list.txt --tar_list tar_small_list.txt 
-    --ref_name REF --tar_name TAR --template template
-    --create --debug
-
-(ii) Harmonize data with `--debug` enabled:
-
-    multi-shell-dMRIharmonization/lib/multi-shell-harmonization.py --tar_list tar_list.txt 
-    --tar_name TAR --template template
-    --process --debug
-
-(iii) Obtain statistics
-    
-    ## reference site ##
-    
-    # start with highest bvalue shell
-    
-    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
-    -i ref_list_b3000.csv.modified -s REF 
-    -t template/ --bshell_b 3000    
-    
-    # repeat for other non-zero bvalues
-    
-    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
-    -i ref_list_b2000.csv.modified -s REF 
-    -t template/ --bshell_b 2000
-    
-    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
-    -i ref_list_b1000.csv.modified -s REF 
-    -t template/ --bshell_b 1000
-
-    ...
-    ...
-    
-    
-    
-    ## target site before harmonization ##
-    
-    # again, start with highest bvalue shell, notice the absence of ".modified" at the end of -i
-    
-    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
-    -i tar_list_b3000.csv -s TAR 
-    -t template/ --bshell_b 3000
-    
-    # repeat for other non-zero bvalues
-    
-    ...
-    ...
-    
-    
-    
-    ## target site after harmonization ##
-    
-    # once again, start with highest bvalue shell, notice the presence of ".modified.harmonized" at the end of -i
-    
-    multi-shell-dMRIharmonization/lib/tests/fa_skeleton_test.py 
-    -i tar_list_b3000.csv.modified.harmonized -s TAR 
-    -t template/ --bshell_b 3000
-    
-    # repeat for other non-zero bvalues
-    ...
-    ...
-
-
-
-# Tests
-
-A small test data is provided with each [release](https://github.com/pnlbwh/multi-shell-dMRIharmonization/releases). 
-**TBD** Tests are incomplete as of now but will be completed soon.
-
-
-## 1. pipeline
-You may test the whole pipeline as follows:
-    
-    cd multi-shell-dMRIharmonization/lib/tests
-    ./multi_pipeline_test.sh
-    
-**NOTE** Running the above tests might take six hours.
-
-
-\* If there is any problem downloading test data, try manually downloading and unzipping it to `lib/tests/` folder.
-
-
-## 2. unittest
-You may run smaller and faster unittest as follows:
-    
-    python -m unittest discover -v lib/tests/    
-
-
-
-# Preprocessing
-
-Unlike single-shell dMRIharmonization, multi-shell-dMRIharmonization does **NOT** support data preprocessing as of now. 
-This is likely to change in a future release. Hence, the following arguments are present for legacy purpose but you 
-should not use them.
-
-## 1. Denoising
-    
-    --denoise        # turn on this flag to denoise voxel data
-
-## 2. Bvalue mapping
-
-    --bvalMap VALUE  # specify a bmax to scale bvalues into    
-
-## 3. Resampling
-
-    --resample VALUE # voxel size MxNxO to resample into
-
-
-After preprocessing, the image lists are saved with `.modified` extension in the same location of provided lists, 
-and used for further processing.
- 
-
-
-
-# Debugging
-
-multi-shell-dMRIharmonization debugging is an extension of [dMRIharmonization debugging](https://github.com/pnlbwh/dMRIharmonization#debugging). In the former case, debugging is 
-run at each shell separately. So, at each shell you should see nearly matching mean FA over IITmean_FA_skeleton.nii.gz 
-between reference site and target site after harmonization:
-
-    REF mean FA:  0.5217237675408243
-    TAR mean FA before harmonization:  0.5072286796848892
-    REF mean FA after harmonization:  0.5321998242139347
-
-
-## 1. With the pipeline
-
-`--debug` should run together with `--create` and `--process` since information from reference and target sites are used 
-to obtain the above summary. 
-
-
-## 2. Use separately
-
-However, if you would like to debug separately or if your target site has more cases than the ones used in template creation, 
-we provide you a way to debug manually. Firstly, make sure to harmonize data with `--debug` flag enabled. The flag will 
-create diffusion measures that are used in debugging later. Then, `lib/test/fa_skeleton_test.py` script can register 
-each subject FA (reference, target before harmonization, and after harmonization), to template space and then to MNI space.
-
-
-    usage: fa_skeleton_test.py [-h] -i INPUT -s SITE -t TEMPLATE --bshell_b
-                               BSHELL_B [--ncpu NCPU]
-    
-    Warps diffusion measures (FA, MD, GFA) to template space and then to MNI
-    space. Finally, calculates mean FA over IITmean_FA_skeleton.nii.gz
-    
-    optional arguments:
-      -h, --help            show this help message and exit
-      -i INPUT, --input INPUT
-                            a .txt/.csv file that you used in/obtained from
-                            harmonization.py having two columns for (img,mask)
-                            pair. See pnlbwh/dMRIharmonization documentation for
-                            more details
-      -s SITE, --site SITE  site name for locating template FA and mask in
-                            tempalte directory
-      -t TEMPLATE, --template TEMPLATE
-                            template directory where Mean_{site}_FA.nii.gz and
-                            {site}_Mask.nii.gz is located
-      --bshell_b BSHELL_B   bvalue of the bshell
-      --ncpu NCPU           number of cpus to use
-  
-  
-Finally, it should print mean FA statistics like above.
-
-`lib/test/fa_skeleton_test.py` performs two registrations:
-
-(i) Subject to site template space
-
-(ii) Site template to MNI space
-
-Thus, subject data is brought to MNI space for comparison. For reference site, it is a straightforward process.
-However, for target site, there are two kinds of data: given and harmonized. Since given data and harmonized data reside 
-in the same space, registration is performed only once. The script is intelligent enough to exploit relevant registration 
-files if registration was performed before.
-
-In multi-shell-dMRIharmonization approach, registration is performed with highest b-shell. Obtained transform files 
-are used to warp rest of the b-shells. See [Different target list](#2-different-target-list) for details.
-
-
-# Caveats/Issues
-
-## 1. Template path
-
-`antsMultivariateTemplateConstruction2.sh`: all the images need to have unique
-prefix because transform files are created in the same `--template ./template/` directory. The value of `--template` 
-should have `/` at the end. The pipeline appends one if there is not, but it is good to include it when specifying.
-
-## 2. Multi-processing
-
-[Multi threading](#-multi-threading) requires memory and processor availability. If pipeline does not continue past 
-`unringing` or `shm_coeff` computation, your machine likely ran out of memory. Reducing `--nproc` to lower number of processors (i.e. 1-4) 
-or swithcing to a powerful machine should help in this regard.
-
-
-## 3. X forwarding error
-
-Standalone MATLAB executable `bspline` used for resampling in the pipeline, requires X forwarding to be properly set. 
-If it is not properly set, you may notice error like below:
-    
-    X11 proxy: unable to connect to forwarded X server: Network error: Connection refused
-    
-Either of the following should fix that:
-    
-    ssh -X user@remotehost
-
-or
-    
-    ssh user@remotehost
-    unset DISPLAY
-    
-When using the latter option, be mindful that it may cause other programs requiring `$DISPLAY` 
-in that particular terminal to malfunction.
-    
-
-## 4. Tracker
-
-In any case, feel free to submit an issue [here](https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues). We shall get back to you as soon as possible.
-
-# Reference
-
-Zhang S, Arfanakis K. Evaluation of standardized and study-specific diffusion tensor imaging templates 
-of the adult human brain: Template characteristics, spatial normalization accuracy, and detection of small 
-inter-group FA differences. Neuroimage 2018;172:40-50.
-
-Billah, Tashrif; Bouix, Sylvain; Rathi, Yogesh; Various MRI Conversion Tools, 
-https://github.com/pnlbwh/conversion, 2019, DOI: 10.5281/zenodo.2584003.
-
+This project is licensed under the terms of the MIT license.

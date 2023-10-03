@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ------------------------------------------------------------------------------
-# This script runs the MRI data harmonization template creation process.
+# This script runs the MRI data harmonization process.
 #
 # Version: 1.0
 # Updated Date: June 14, 2023,
@@ -10,9 +10,8 @@
 # ------------------------------------------------------------------------------
 
 function usage() {
-    echo "Usage: $0 -r REF_LIST -t TAR_LIST -n REF_NAME -T TAR_NAME -p TEMPLATE -d NPROC"
+    echo "Usage: $0 -t TAR_LIST -n REF_NAME -T TAR_NAME -p TEMPLATE -d NPROC"
     echo "Options:"
-    echo "  -r  Reference list"
     echo "  -t  Target list"
     echo "  -n  Reference name"
     echo "  -T  Target name"
@@ -26,7 +25,6 @@ while getopts r:t:n:T:p:d:h option
 do
     case "${option}"
     in
-    r) REF_LIST=${OPTARG};;
     t) TAR_LIST=${OPTARG};;
     n) REF_NAME=${OPTARG};;
     T) TAR_NAME=${OPTARG};;
@@ -43,10 +41,9 @@ if [[ -z "$REF_LIST" || -z "$TAR_LIST" || -z "$REF_NAME" || -z "$TAR_NAME" || -z
 fi
 
 /home/ec2-user/multi-shell-dMRIharmonization/lib/multi_shell_harmonization.py \
---ref_list "${REF_LIST}" \
 --tar_list "${TAR_LIST}" \
 --ref_name "${REF_NAME}" \
 --tar_name "${TAR_NAME}" \
 --template "${TEMPLATE}" \
 --nproc "${NPROC}" \
---create --process --debug
+--process --debug
