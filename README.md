@@ -74,11 +74,11 @@ https://github.com/pnlbwh/dMRIharmonization#data-harmonization
 If this repository is useful in your research, please cite all of the following: 
 
 * Billah T, Bouix S, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
-https://github.com/pnlbwh/multi-shell-dMRIharmoniziation, 2019, doi: 10.5281/zenodo.3451427
+https://github.com/pnlbwh/multi-shell-dMRIharmonization, 2019, doi: 10.5281/zenodo.3451427
 
 
 * Billah T*, Cetin Karayumak S*, Bouix S, Rathi Y. Multi-site Diffusion MRI Harmonization, 
-https://github.com/pnlbwh/dMRIharmoniziation, 2019, doi: 10.5281/zenodo.2584275
+https://github.com/pnlbwh/dMRIharmonization, 2019, doi: 10.5281/zenodo.2584275
 
     \* *denotes equal first authroship*
 
