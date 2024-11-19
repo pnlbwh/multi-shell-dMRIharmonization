@@ -436,25 +436,19 @@ The steps are described below:
 
 # Tests
 
-A small test data is provided with each [release](https://github.com/pnlbwh/multi-shell-dMRIharmonization/releases). 
 **TBD** Tests are incomplete as of now but will be completed soon.
 
 
 ## 1. pipeline
-You may test the whole pipeline as follows:
-    
-    cd multi-shell-dMRIharmonization/lib/tests
-    ./multi_pipeline_test.sh
-    
-**NOTE** Running the above tests might take six hours.
 
-
-\* If there is any problem downloading test data, try manually downloading and unzipping it to `lib/tests/` folder.
+Clone single-shell dMRIharmonization pipeline and test that:
+https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline
 
 
 ## 2. unittest
-You may run smaller and faster unittest as follows:
-    
+Afterwards, you may run smaller and faster unittest as follows:
+
+    export PYTHONPATH=/path/to/multi-shell-dMRIharmonization/lib/
     python -m unittest discover -v lib/tests/    
 
 
