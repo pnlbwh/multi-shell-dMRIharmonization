@@ -444,13 +444,12 @@ The steps are described below:
 Clone single-shell dMRIharmonization pipeline and test that:
 https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline
 
+Success of this test will confirm that your environment is ready to run multi-shell-dMRIharmozation.
+
 
 ## 2. unittest
-Afterwards, you may run smaller and faster unittest as follows:
 
-    export PYTHONPATH=/path/to/multi-shell-dMRIharmonization/lib/
-    python -m unittest discover -v lib/tests/    
-
+**TBD** 
 
 
 # Preprocessing
