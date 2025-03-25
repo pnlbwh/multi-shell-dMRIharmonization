@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite as below."
+authors:
+- family-names: "Billah"
+  given-names: "T"
+- family-names: "Bouix"
+  given-names: "S"
+- family-names: "Rathi"
+  given-names: "Y"
+title: "Multi-site multi-shell Diffusion MRI Harmonization"
+doi: 10.5281/zenodo.3451427
+date-released: 2019
+url: "https://github.com/pnlbwh/multi-shell-dMRIharmonization"
