@@ -15,14 +15,14 @@
 
 from plumbum import cli
 from distutils.spawn import find_executable
-import multiprocessing, psutil
+import multiprocessing
 import io
 
 from determineNshm import verifyNshmForAll, determineNshm
 from util import *
 from fileUtil import read_caselist, check_dir, check_csv
 
-N_CPU= psutil.cpu_count()
+N_CPU= multiprocessing.cpu_count()
 SCRIPTDIR= dirname(__file__)
 
 
