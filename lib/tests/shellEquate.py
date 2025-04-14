@@ -34,7 +34,7 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
     imgPath= local.path(imgPath)
 
     img= load(imgPath._path)
-    dwi= img.get_data()
+    dwi= img.get_fdata()
     inPrefix= abspath(imgPath).split('.nii')[0]
     bvals= np.array(read_bvals(inPrefix+'.bval'))
     bvecs= np.array(read_bvecs(inPrefix+'.bvec'))
