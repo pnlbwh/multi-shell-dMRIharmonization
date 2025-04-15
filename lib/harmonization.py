@@ -54,13 +54,13 @@ class pipeline(cli.Application):
     target_csv = cli.SwitchAttr(
         ['--tar_list'],
         cli.ExistingFile,
-        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\n...',
+        help='target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\\n...',
         mandatory=False)
 
     harm_csv = cli.SwitchAttr(
         ['--harm_list'],
         cli.ExistingFile,
-        help='harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\n...',
+        help='harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\\n dwi2,mask2\\n...',
         mandatory=False)
 
     templatePath = cli.SwitchAttr(
@@ -110,8 +110,8 @@ class pipeline(cli.Application):
 
     bshell_b = cli.SwitchAttr(
         '--bshell_b',
-        help='bvalue of the bshell',
-        mandatory= True)
+        help='bvalue of the bshell, needed for multi-shell data only',
+        mandatory= False)
 
     create = cli.Flag(
         '--create',
@@ -137,7 +137,7 @@ class pipeline(cli.Application):
         '--tar_name',
         help= 'target site name',
         mandatory= True)
-    
+
     verbose= cli.Flag(
         '--verbose',
         help='print everything to STDOUT',
@@ -152,7 +152,7 @@ class pipeline(cli.Application):
         from buildTemplate import difference_calc, antsMult, warp_bands, \
             dti_stat, rish_stat, template_masking, createAntsCaselist
         from preprocess import common_processing
-        
+
 
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.ref_csv, self.force)
@@ -185,16 +185,16 @@ class pipeline(cli.Application):
         # ATTN: antsMultivariateTemplateConstruction2.sh requires '/' at the end of templatePath
         if not self.templatePath.endswith('/'):
             self.templatePath += '/'
-
-        # check if bmax template was created earlier
-        bmaxTemplateFile= pjoin(self.templatePath, 'bmaxTemplateCompletion')
+        
+        # check if template was created earlier
+        prevTemplateFile= pjoin(self.templatePath, 'prevTemplateCompletion')
         template0= pjoin(self.templatePath, 'template0.nii.gz')
-        if not isfile(bmaxTemplateFile):
+        if not isfile(prevTemplateFile):
             # ATTN: antsMultivariateTemplateConstruction2.sh requires absolute path for caselist
             antsMult(abspath(antsMultCaselist), self.templatePath)
         else:
-            warnings.warn(f'Using {template0} which was created before with bmax shell')
-
+            warnings.warn(f'Using {template0} which was created before')
+            
         # load templateHdr
         templateHdr= load(template0).header
 
@@ -212,9 +212,9 @@ class pipeline(cli.Application):
         # for imgPath, maskPath in zip(imgs, masks):
         #     warp_bands(imgPath, maskPath, self.templatePath)
 
-        print('calculating dti statistics i.e. mean, std calculation for reference site')
+        print('calculating dti statistics i.e. mean, std for reference site')
         refMaskPath= dti_stat(self.reference, refImgs, refMasks, self.templatePath, templateHdr)
-        print('calculating dti statistics i.e. mean, std calculation for target site')
+        print('calculating dti statistics i.e. mean, std for target site')
         targetMaskPath= dti_stat(self.target, targetImgs, targetMasks, self.templatePath, templateHdr)
 
         print('masking dti statistics of reference site')
@@ -235,19 +235,19 @@ class pipeline(cli.Application):
         difference_calc(self.reference, self.target, refImgs, targetImgs, self.templatePath, templateHdr,
                         templateMask, [f'L{i}' for i in range(0, self.N_shm+1, 2)])
 
+        
+        # write a flag in templatePath that can be used to see if template was created earlier
+        if not isfile(prevTemplateFile):
+            with open(prevTemplateFile, 'w'):
+                pass
 
         print('\n\nTemplate creation completed \n\n')
 
 
-        # write a flag in templatePath that can be used to see if bmax template was created earlier
-        if not isfile(bmaxTemplateFile):
-            with open(pjoin(bmaxTemplateFile), 'w'):
-                pass
-
     def harmonizeData(self):
 
         from reconstSignal import reconst, approx
-        from preprocess import dti_harm, preprocessing, common_processing
+        from preprocess import dti_harm, common_processing, preprocessing
 
         # check the templatePath
         if not exists(self.templatePath):
@@ -256,7 +256,6 @@ class pipeline(cli.Application):
             if not listdir(self.templatePath):
                 raise ValueError(f'{self.templatePath} is empty')
 
-        
         # fit spherical harmonics on reference site
         if self.debug and self.ref_csv:
             check_csv(self.ref_unproc_csv, self.force)
@@ -290,6 +289,7 @@ class pipeline(cli.Application):
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.target_csv, self.force)
         targetImgs, targetMasks= common_processing(self.tar_unproc_csv)
+
 
         # reconstSignal steps ------------------------------------------------------------------------------------------
 
@@ -327,7 +327,7 @@ class pipeline(cli.Application):
 
 
         fh.close()
-
+        
         
         if self.debug:
             harmImgs, harmMasks= read_caselist(self.harm_csv)
@@ -357,7 +357,7 @@ class pipeline(cli.Application):
 
         self.showStat()
 
-    
+
     def showStat(self):
 
         from debug_fa import analyzeStat
@@ -378,7 +378,7 @@ class pipeline(cli.Application):
         print(f'{self.target} site after harmonization')
         target_mean_after = analyzeStat(self.harm_csv, self.templatePath)
         generate_csv(self.harm_csv, target_mean_after, pjoin(self.templatePath, self.target)+'_after', self.bshell_b)
-        
+
         
         print('\n\nPrinting statistics:')
         # save statistics for future
@@ -399,9 +399,10 @@ class pipeline(cli.Application):
         
         df.to_csv(statFile, index=False)
         
-        # print statistics on console        
+        # print statistics on console
         with open(statFile) as f:
-            print(f.read())            
+            print(f.read())
+            
         
         # generate graph
         ebar= harm_plot([ref_mean, target_mean_before, target_mean_after],
@@ -410,15 +411,13 @@ class pipeline(cli.Application):
 
         print(f'\nDetailed statistics, summary results, and demonstrative plots are saved in:\n\n{self.templatePath}/*_stat.csv'
               f'\n{statFile}\n{ebar}\n')
-              
-   
 
 
     def sanityCheck(self):
 
         if not (self.create or self.process or self.debug):
             raise AttributeError('No option selected, ' 
-                                'specify one (or many of) creation, harmonization, and debug flags')
+                                 'specify one (or many of) creation, harmonization, and debug flags')
 
         # check ants commands
         external_commands= [
@@ -434,8 +433,9 @@ class pipeline(cli.Application):
 
 
 
-
     def main(self):
+    
+        self.sanityCheck()
 
         self.templatePath= abspath(self.templatePath)
         self.N_shm= int(self.N_shm)
@@ -443,7 +443,6 @@ class pipeline(cli.Application):
         if self.N_proc==-1:
             self.N_proc= N_CPU
 
-    
         if self.ref_csv:
             self.ref_unproc_csv= self.ref_csv.strip('.modified')
         self.tar_unproc_csv= self.target_csv.strip('.modified')
@@ -452,7 +451,6 @@ class pipeline(cli.Application):
         # check appropriateness of N_shm
         if self.N_shm!=-1 and (self.N_shm<2 or self.N_shm>8):
             raise ValueError('2<= --nshm <=8')
-
 
 
         # determine N_shm in default mode during template creation
@@ -479,6 +477,7 @@ class pipeline(cli.Application):
 
 
         # verify validity of provided/determined N_shm for all subjects
+        # single-shell-ness is verified inside verifyNshmForAll
         if self.ref_csv:
             verifyNshmForAll(self.ref_csv, self.N_shm)
         if self.target_csv:
@@ -503,8 +502,6 @@ class pipeline(cli.Application):
             f.write('diffusionMeasures = {}\n'.format((',').join(self.diffusionMeasures)))
 
 
-        self.sanityCheck()
-
         if self.create:
             self.createTemplate()
             import fileinput
@@ -514,7 +511,7 @@ class pipeline(cli.Application):
                 else:
                     print(line)
             self.force= False
-
+            
         if self.process:
             self.harmonizeData()
 
@@ -527,5 +524,4 @@ class pipeline(cli.Application):
 
 if __name__ == '__main__':
     pipeline.run()
-
 
