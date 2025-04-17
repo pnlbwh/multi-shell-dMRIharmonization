@@ -14,7 +14,7 @@
 import multiprocessing
 from conversion import write_bvals
 from util import *
-from fileUtil import read_caselist
+from fileUtil import read_caselist, nrrd2nifti
 from denoising import denoising
 from bvalMap import remapBval
 from resampling import resampling
@@ -43,15 +43,15 @@ def dti_harm(imgPath, maskPath):
 
     directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
-    prefix = basename(inPrefix)
+    prefix = psplit(inPrefix)[-1]
 
     outPrefix = pjoin(directory, 'dti', prefix)
     if not isfile(outPrefix+'_FA.nii.gz'):
-       dti(imgPath, maskPath, inPrefix, outPrefix)
+        dti(imgPath, maskPath, inPrefix, outPrefix)
 
     outPrefix = pjoin(directory, 'harm', prefix)
     if not isfile(outPrefix+'_L0.nii.gz'):
-       rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
+        rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
 
 def preprocessing(imgPath, maskPath):
