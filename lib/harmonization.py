@@ -364,7 +364,7 @@ class pipeline(cli.Application):
         from datetime import datetime
         from harm_plot import generate_csv, harm_plot
         import pandas as pd
-
+        
         print('\n\nComputing statistics:')
         
         print(f'{self.reference} site')
@@ -373,11 +373,11 @@ class pipeline(cli.Application):
 
         print(f'{self.target} site before harmonization')
         target_mean_before = analyzeStat(self.tar_unproc_csv, self.templatePath)
-        generate_csv(self.tar_unproc_csv, target_mean_before, pjoin(self.templatePath, self.target)+'_before', self.bshell_b)
+        generate_csv(self.tar_unproc_csv, target_mean_before, pjoin(self.templatePath, self.target+'_before'), self.bshell_b)
 
         print(f'{self.target} site after harmonization')
         target_mean_after = analyzeStat(self.harm_csv, self.templatePath)
-        generate_csv(self.harm_csv, target_mean_after, pjoin(self.templatePath, self.target)+'_after', self.bshell_b)
+        generate_csv(self.harm_csv, target_mean_after, pjoin(self.templatePath, self.target+'_after'), self.bshell_b)
 
         
         print('\n\nPrinting statistics:')
@@ -389,16 +389,13 @@ class pipeline(cli.Application):
             timestamp= datetime.now().strftime('%m/%d/%y %H:%M')
             sites= [f'{self.reference}',f'{self.target}_before',f'{self.target}_after']
             df= pd.DataFrame({timestamp:sites})
-        
+
         header= f'mean meanFA b{self.bshell_b}'
         value= [np.mean(x) for x in [ref_mean, target_mean_before, target_mean_after]]
         df= df.assign(**{header:value})
-        
-        # print an empty line so future results, if appended, are visually separate
-        # df=df.append(pd.Series(),ignore_index=True)
-        
         df.to_csv(statFile, index=False)
         
+
         # print statistics on console
         with open(statFile) as f:
             print(f.read())
@@ -485,7 +482,7 @@ class pipeline(cli.Application):
 
 
         # write config file to temporary directory
-        configFile= f'/tmp/harm_config_{getpid()}.ini'
+        configFile= pjoin(gettempdir(),f'harm_config_{getpid()}.ini')
         with open(configFile,'w') as f:
             f.write('[DEFAULT]\n')
             f.write(f'N_shm = {self.N_shm}\n')
