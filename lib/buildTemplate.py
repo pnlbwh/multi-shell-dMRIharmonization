@@ -54,7 +54,7 @@ def warp_bands(imgPath, maskPath, templatePath):
     applyXform(maskPath,
                pjoin(templatePath, 'template0.nii.gz'),
                warp, trans,
-               pjoin(templatePath, basename(maskPath).split('.nii')[0] + 'Warped.nii.gz'))
+               pjoin(templatePath, basename(maskPath).split('.nii')[0]+ 'Warped.nii.gz'))
 
 
     # warping the rish features
@@ -158,10 +158,10 @@ def rish_stat(siteName, imgs, templatePath, templateHdr):
 
 def template_masking(refMaskPath, targetMaskPath, templatePath, siteName):
 
-    ref = load(refMaskPath)
-    target = load(targetMaskPath)
+    ref= load(refMaskPath)
+    target= load(targetMaskPath)
 
-    templateMask = applymask(ref.get_fdata(), target.get_fdata())
+    templateMask= applymask(ref.get_fdata(), target.get_fdata())
 
     if not isfile(pjoin(templatePath, 'templateMask.nii.gz')):
         save_nifti(pjoin(templatePath, 'templateMask.nii.gz'), templateMask.astype('uint8'), ref.affine, ref.header)
