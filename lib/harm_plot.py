@@ -46,6 +46,7 @@ def harm_plot(ydata, labels, outPrefix, bshell_b):
     plt.savefig(outPrefix+'_ebarplot.png')
     # plt.show()
 
+
     # box plot
     # plt.figure(2)
     # plt.grid(True)
@@ -67,6 +68,7 @@ def harm_plot(ydata, labels, outPrefix, bshell_b):
     # plt.show()
     # return (outPrefix+'_ebarplot.png', outPrefix+'_boxplot.png')
 
+
     return outPrefix+'_ebarplot.png'
 
 
@@ -78,7 +80,7 @@ def generate_csv(imgs, site_means, outPrefix, bshell_b):
         pass
 
     statFile = outPrefix + '_stat.csv'
-    
+
     if isfile(statFile):
         df= pd.read_csv(statFile)
         df= df.assign(**{f'meanFA b{bshell_b}':site_means})
