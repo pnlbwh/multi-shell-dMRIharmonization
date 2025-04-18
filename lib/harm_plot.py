@@ -24,7 +24,7 @@ def harm_plot(ydata, labels, outPrefix, bshell_b):
     outPrefix += f'_b{bshell_b}'
     labels= list(labels)
 
-    num_series, num_sub= np.shape(ydata)
+    num_series= len(ydata)
 
     iter_obj= [i for i in range(num_series)]
 
@@ -32,6 +32,7 @@ def harm_plot(ydata, labels, outPrefix, bshell_b):
     plt.figure(1)
     plt.grid(True)
     for i in iter_obj:
+        num_sub= len(ydata[i])
         x= list(i*np.ones((num_sub,)))
         y= ydata[i]
         plt.plot(x, y, 'r*')
@@ -49,6 +50,7 @@ def harm_plot(ydata, labels, outPrefix, bshell_b):
     # plt.figure(2)
     # plt.grid(True)
     # for i in iter_obj:
+    #     num_sub= len(ydata[i])
     #     x = list(i * np.ones((num_sub,)))
     #     y = ydata[i]
     #     plt.plot(x, y, 'r*')
