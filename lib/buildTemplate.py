@@ -94,6 +94,13 @@ def antsMult(caselist, outPrefix):
         f= open(logFile, 'w')
         print(f'See {logFile} for details of template construction')
 
+    # for reasons whatsoever, N_proc is not available here though it is defined globally
+    # hence, re-read it
+    N_proc = config['DEFAULT']['N_proc']
+    if N_proc=='1':
+        # at least 2 cores are required for template construction
+        N_proc=2
+
 
     N_core=getenv('TEMPLATE_CONSTRUCT_CORES')
     check_call((' ').join([pjoin(SCRIPTDIR, 'antsMultivariateTemplateConstruction2_fixed_random_seed.sh'),
