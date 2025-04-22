@@ -134,11 +134,16 @@ def common_processing(caselist):
     imgs, masks = read_caselist(caselist)
     
     # compute dti_harm of unprocessed data
-    pool = multiprocessing.Pool(N_proc)
-    for imgPath,maskPath in zip(imgs,masks):
-        pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
-    pool.close()
-    pool.join()
+    if N_proc==1:
+        for imgPath,maskPath in zip(imgs,masks):
+            dti_harm(imgPath,maskPath)
+
+    elif N_proc>1:
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
+        pool.close()
+        pool.join()
     
     
     try:
@@ -172,11 +177,12 @@ def common_processing(caselist):
     #     pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
     # pool.close()
     # pool.join()
-    #
-    #
-    # if debug:
-    #     #TODO compute dti_harm for all intermediate data _denoised, _denoised_bmapped, _bmapped
-    #     pass
+
+
+    if debug:
+        #TODO compute dti_harm for all intermediate data _denoised, _denoised_bmapped, _bmapped
+        pass
+    
 
     return (imgs, masks)
 
