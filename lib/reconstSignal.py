@@ -39,7 +39,7 @@ def antsReg(img, mask, mov, outPrefix):
     if verbose:
         f= sys.stdout
     else:
-        logFile= pjoin(outPrefix+ 'ANTs.log')
+        logFile= pjoin(outPrefix+ '_ANTs.log')
         f= open(logFile, 'w')
         print(f'See {logFile} for details of registration')
 
