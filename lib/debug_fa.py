@@ -61,7 +61,7 @@ def register_target(imgPath, templatePath):
     prefix = basename(inPrefix)
 
     dmImg = pjoin(directory, 'dti', prefix + f'_FA.nii.gz')
-    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
+    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI_')
     warp2mni = outPrefix + '1Warp.nii.gz'
     trans2mni = outPrefix + '0GenericAffine.mat'
     # unprocessed target data is given, so in case multiple debug is needed, pass the registration
@@ -141,30 +141,30 @@ def sub2tmp2mni(templatePath, siteName, caselist, ref= False, tar_unproc= False,
         antsReg(mniTmp, None, moving, outPrefix)
 
     imgs, _= read_caselist(caselist)
+    
+    if N_proc==1:
+        for imgPath in imgs:
 
-    pool= multiprocessing.Pool(N_proc)
-    for imgPath in imgs:
+            if ref:
+                register_reference(imgPath, warp2mni, trans2mni, templatePath)
+            elif tar_unproc:
+                register_target(imgPath, templatePath)
+            elif tar_harm:
+                register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName)
 
-        if ref:
-            pool.apply_async(func= register_reference, args= (imgPath, warp2mni, trans2mni, templatePath, ))
-        elif tar_unproc:
-            pool.apply_async(func= register_target, args= (imgPath, templatePath, ))
-        elif tar_harm:
-            pool.apply_async(func= register_harmonized, args= (imgPath, warp2mni, trans2mni, templatePath, siteName, ))
+    elif N_proc>1:
+        pool= multiprocessing.Pool(N_proc)
+        for imgPath in imgs:
 
-    pool.close()
-    pool.join()
+            if ref:
+                pool.apply_async(func= register_reference, args= (imgPath, warp2mni, trans2mni, templatePath, ))
+            elif tar_unproc:
+                pool.apply_async(func= register_target, args= (imgPath, templatePath, ))
+            elif tar_harm:
+                pool.apply_async(func= register_harmonized, args= (imgPath, warp2mni, trans2mni, templatePath, siteName, ))
 
-
-    # loop for debugging
-    # for imgPath in imgs:
-    #
-    #     if ref:
-    #         register_reference(imgPath, warp2mni, trans2mni, templatePath)
-    #     elif tar_unproc:
-    #         register_target(imgPath, templatePath)
-    #     elif tar_harm:
-    #         register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName)
+        pool.close()
+        pool.join()
 
 
 def analyzeStat(file, templatePath):
