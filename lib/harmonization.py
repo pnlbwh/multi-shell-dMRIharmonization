@@ -153,6 +153,8 @@ class pipeline(cli.Application):
             dti_stat, rish_stat, template_masking, createAntsCaselist
         from preprocess import common_processing
 
+        # check directory existence
+        check_dir(self.templatePath, self.force)
 
         # go through each file listed in csv, check their existence, create dti and harm directories
         check_csv(self.ref_csv, self.force)
@@ -200,17 +202,17 @@ class pipeline(cli.Application):
 
 
         # warp mask, dti, and rish bands
-        pool = multiprocessing.Pool(self.N_proc)
-        for imgPath, maskPath in zip(imgs, masks):
-            pool.apply_async(func= warp_bands, args= (imgPath, maskPath, self.templatePath, ))
+        if self.N_proc==1:
+            for imgPath, maskPath in zip(imgs, masks):
+                warp_bands(imgPath, maskPath, self.templatePath)
         
-        pool.close()
-        pool.join()
+        elif self.N_proc>1:
+            pool = multiprocessing.Pool(self.N_proc)
+            for imgPath, maskPath in zip(imgs, masks):
+                pool.apply_async(func= warp_bands, args= (imgPath, maskPath, self.templatePath,))
 
-        
-        # loop for debugging
-        # for imgPath, maskPath in zip(imgs, masks):
-        #     warp_bands(imgPath, maskPath, self.templatePath)
+            pool.close()
+            pool.join()
 
         print('calculating dti statistics i.e. mean, std for reference site')
         refMaskPath= dti_stat(self.reference, refImgs, refMasks, self.templatePath, templateHdr)
@@ -276,13 +278,18 @@ class pipeline(cli.Application):
             # for i in range(len(refImgs)):
             #     refImgs[i] = attributes[i][0]
             #     refMasks[i] = attributes[i][1]
+            
+            if self.N_proc==1:
+                for imgPath, maskPath in zip(refImgs, refMasks):
+                    approx(imgPath,maskPath)
 
-            pool = multiprocessing.Pool(self.N_proc)
-            for imgPath, maskPath in zip(refImgs, refMasks):
-                pool.apply_async(func= approx, args=(imgPath,maskPath,))
+            elif self.N_proc>1:
+                pool = multiprocessing.Pool(self.N_proc)
+                for imgPath, maskPath in zip(refImgs, refMasks):
+                    pool.apply_async(func= approx, args=(imgPath,maskPath,))
 
-            pool.close()
-            pool.join()
+                pool.close()
+                pool.join()
 
 
 
@@ -302,42 +309,46 @@ class pipeline(cli.Application):
 
         self.harm_csv= self.target_csv+'.harmonized'
         fh= open(self.harm_csv, 'w')
-        pool = multiprocessing.Pool(self.N_proc)
-        res= []
-        for imgPath, maskPath in zip(targetImgs, targetMasks):
-            res.append(pool.apply_async(func= reconst, args= (imgPath, maskPath, moving, self.templatePath,)))
+        if self.N_proc==1:
+            res=[]
+            for imgPath, maskPath in zip(targetImgs, targetMasks):
+                res.append(reconst(imgPath, maskPath, moving, self.templatePath))
 
-        for r in res:
-            harmImg, harmMask= r.get()
-            fh.write(harmImg + ',' + harmMask + '\n')
+            for r in res:
+                harmImg, harmMask= r
+                fh.write(harmImg + ',' + harmMask + '\n')
+
+        elif self.N_proc>1:
+            pool = multiprocessing.Pool(self.N_proc)
+            res= []
+            for imgPath, maskPath in zip(targetImgs, targetMasks):
+                res.append(pool.apply_async(func= reconst, args= (imgPath, maskPath, moving, self.templatePath,)))
+
+            for r in res:
+                harmImg, harmMask= r.get()
+                fh.write(harmImg + ',' + harmMask + '\n')
 
 
-        pool.close()
-        pool.join()
-
-       
-        # loop for debugging
-        # res= []
-        # for imgPath, maskPath in zip(imgs, masks):
-        #     res.append(reconst(imgPath, maskPath, moving, self.templatePath))
-        #
-        # for r in res:
-        #     harmImg, harmMask= r
-        #     fh.write(harmImg + ',' + harmMask + '\n')
-
+            pool.close()
+            pool.join()
 
         fh.close()
         
         
         if self.debug:
             harmImgs, harmMasks= read_caselist(self.harm_csv)
-            pool = multiprocessing.Pool(self.N_proc)
-            for imgPath,maskPath in zip(harmImgs,harmMasks):
-                pool.apply_async(func= dti_harm, args= (imgPath,maskPath,))
-            pool.close()
-            pool.join()
 
+            if self.N_proc==1:
+                for imgPath,maskPath in zip(harmImgs,harmMasks):
+                    dti_harm(imgPath,maskPath)
 
+            elif self.N_proc>=1:
+                pool = multiprocessing.Pool(self.N_proc)
+                for imgPath,maskPath in zip(harmImgs,harmMasks):
+                    pool.apply_async(func= dti_harm, args= (imgPath,maskPath,))
+                pool.close()
+                pool.join()
+            
         print('\n\nHarmonization completed\n\n')
 
 
