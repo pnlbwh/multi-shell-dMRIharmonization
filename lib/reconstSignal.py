@@ -25,6 +25,7 @@ eps= 2.2204e-16
 SCRIPTDIR= dirname(__file__)
 config = ConfigParser()
 config.read(pjoin(gettempdir(),f'harm_config_{getpid()}.ini'))
+
 N_shm = int(config['DEFAULT']['N_shm'])
 N_proc = int(config['DEFAULT']['N_proc'])
 bshell_b = int(config['DEFAULT']['bshell_b'])
@@ -38,7 +39,7 @@ def antsReg(img, mask, mov, outPrefix):
     if verbose:
         f= sys.stdout
     else:
-        logFile= pjoin(outPrefix+ '_ANTs.log')
+        logFile= pjoin(outPrefix+ 'ANTs.log')
         f= open(logFile, 'w')
         print(f'See {logFile} for details of registration')
 
@@ -62,6 +63,7 @@ def antsReg(img, mask, mov, outPrefix):
 
     if f.name!='<sys.stdout>':
         f.close()
+
 
 def antsApply(templatePath, directory, prefix):
 
@@ -194,7 +196,7 @@ def ring_masking(directory, prefix, maskPath, shm_coeff, b0, qb_model, hdr):
             mapped_cs.append(denoisedImg * shm_coeff[ :,:,:,level])
 
     S_hat= np.dot(np.moveaxis(mapped_cs, 0, -1), B.T)
-    # keep only upper half of the reconstruction signal
+    # keep only upper half of the reconstructed signal
     S_hat= S_hat[..., :int(S_hat.shape[3]/2)]
     np.nan_to_num(S_hat).clip(min= 0., max= 1., out= S_hat)
 
@@ -219,7 +221,7 @@ def ring_masking(directory, prefix, maskPath, shm_coeff, b0, qb_model, hdr):
 
 
 def reconst(imgPath, maskPath, moving, templatePath):
-    
+
     img = load(imgPath)
 
     directory = dirname(imgPath)
@@ -246,8 +248,8 @@ def reconst(imgPath, maskPath, moving, templatePath):
     copyfile(inPrefix + '.bvec', harmImg.split('.nii')[0] + '.bvec')
     copyfile(inPrefix + '.bval', harmImg.split('.nii')[0] + '.bval')
 
-
     return (harmImg, harmMask)
+
 
 def stack_b0(b0s_mask, dwi, b0):
 
@@ -264,5 +266,3 @@ def stack_b0(b0s_mask, dwi, b0):
             j+=1
 
     return np.moveaxis(np.array(S_hat_final), 0, -1)
-
-
