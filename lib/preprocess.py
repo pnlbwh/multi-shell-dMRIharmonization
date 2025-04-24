@@ -146,37 +146,50 @@ def common_processing(caselist):
         pool.join()
     
     
-    try:
-        copyfile(caselist, caselist + '.modified')
-    except SameFileError:
-        pass
+    # try:
+    #     copyfile(caselist, caselist + '.modified')
+    # except SameFileError:
+    #     pass
 
     # data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
     # this block may be uncommented in a future design
     # preprocess data
-    # res=[]
-    # pool = multiprocessing.Pool(N_proc)
-    # for imgPath,maskPath in zip(imgs,masks):
-    #     res.append(pool.apply_async(func= preprocessing, args= (imgPath,maskPath)))
-    #
-    # attributes= [r.get() for r in res]
-    #
-    # pool.close()
-    # pool.join()
-    #
-    # f = open(caselist + '.modified', 'w')
-    # for i in range(len(imgs)):
-    #     imgs[i] = attributes[i][0]
-    #     masks[i] = attributes[i][1]
-    # f.close()
-    #
-    #
-    # # compute dti_harm of preprocessed data
-    # pool = multiprocessing.Pool(N_proc)
-    # for imgPath,maskPath in zip(imgs,masks):
-    #     pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
-    # pool.close()
-    # pool.join()
+    if N_proc==1:
+        attributes=[]
+        for imgPath,maskPath in zip(imgs,masks):
+            attributes.append(preprocessing(imgPath,maskPath))
+
+    elif N_proc>1:
+        res=[]
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            res.append(pool.apply_async(func= preprocessing, args= (imgPath,maskPath)))
+        
+        attributes= [r.get() for r in res]
+        
+        pool.close()
+        pool.join()
+
+
+    f = open(caselist + '.modified', 'w')
+    for i in range(len(imgs)):
+        imgs[i] = attributes[i][0]
+        masks[i] = attributes[i][1]
+        f.write(f'{imgs[i]},{masks[i]}\n')
+    f.close()
+
+
+    # compute dti_harm of preprocessed data
+    if N_proc==1:
+        for imgPath,maskPath in zip(imgs,masks):
+            dti_harm(imgPath,maskPath)
+
+    elif N_proc>1:
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
+        pool.close()
+        pool.join()
 
 
     if debug:
