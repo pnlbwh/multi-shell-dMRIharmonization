@@ -144,12 +144,6 @@ def common_processing(caselist):
             pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
         pool.close()
         pool.join()
-    
-    
-    # try:
-    #     copyfile(caselist, caselist + '.modified')
-    # except SameFileError:
-    #     pass
 
     # data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
     # this block may be uncommented in a future design
