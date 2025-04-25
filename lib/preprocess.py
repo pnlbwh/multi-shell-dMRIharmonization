@@ -145,8 +145,13 @@ def common_processing(caselist):
         pool.close()
         pool.join()
 
-    # data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
-    # this block may be uncommented in a future design
+    # For multi-shell-dMRIharmonization, the rest of this function is ineffectual.
+    # Because, --bvalMap, --resample, --denoise flags are not supported for multi-shell-harmonization.py.
+    # Since the beginning of multi-shell-dMRIharmonization development,
+    # it is expected that multi-shell DWIs are matched by bvalues and resolution.
+    # However, the three flags are supported for (single-shell) harmonization.py.
+    # In which case, the rest of this function is effectual.
+
     # preprocess data
     if N_proc==1:
         attributes=[]
