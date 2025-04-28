@@ -263,22 +263,33 @@ class pipeline(cli.Application):
             check_csv(self.ref_unproc_csv, self.force)
             refImgs, refMasks= read_caselist(self.ref_unproc_csv)
 
-            # reference data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
-            # this block may be uncommented in a future design
-            # res= []
-            # pool = multiprocessing.Pool(self.N_proc)
-            # for imgPath, maskPath in zip(refImgs, refMasks):
-            #     res.append(pool.apply_async(func=preprocessing, args=(imgPath, maskPath)))
-            #
-            # attributes = [r.get() for r in res]
-            #
-            # pool.close()
-            # pool.join()
-            #
-            # for i in range(len(refImgs)):
-            #     refImgs[i] = attributes[i][0]
-            #     refMasks[i] = attributes[i][1]
+            # For multi-shell-dMRIharmonization, lines 273-287 are ineffectual.
+            # Because, --bvalMap, --resample, --denoise flags are not supported for multi-shell-harmonization.py.
+            # Since the beginning of multi-shell-dMRIharmonization development,
+            # it is expected that multi-shell DWIs are matched by bvalues and resolution.
+            # However, the three flags are supported for (single-shell) harmonization.py.
+            # In which case, the aforementioned lines are effectual.
+
+            if self.N_proc==1:
+                attributes=[]
+                for imgPath, maskPath in zip(refImgs, refMasks):
+                    attributes.append(preprocessing(imgPath, maskPath))
             
+            elif self.N_proc>1:
+                res= []
+                pool = multiprocessing.Pool(self.N_proc)
+                for imgPath, maskPath in zip(refImgs, refMasks):
+                    res.append(pool.apply_async(func=preprocessing, args=(imgPath, maskPath)))
+
+                attributes = [r.get() for r in res]
+
+                pool.close()
+                pool.join()
+
+            for i in range(len(refImgs)):
+                refImgs[i] = attributes[i][0]
+                refMasks[i] = attributes[i][1]
+
             if self.N_proc==1:
                 for imgPath, maskPath in zip(refImgs, refMasks):
                     approx(imgPath,maskPath)
