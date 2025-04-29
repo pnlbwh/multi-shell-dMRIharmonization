@@ -14,8 +14,8 @@
 # ===============================================================================
 
 from plumbum import cli
-import psutil
-N_CPU= str(psutil.cpu_count())
+import multiprocessing
+N_CPU= str(multiprocessing.cpu_count())
 from conversion import read_bvals
 from util import dirname, basename, pjoin, SCRIPTDIR, remove, isfile
 from subprocess import check_call

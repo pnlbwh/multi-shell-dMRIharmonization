@@ -14,15 +14,15 @@
 # ===============================================================================
 
 from plumbum import cli
-from distutils.spawn import find_executable
-import multiprocessing, psutil
+from shutil import which
+import multiprocessing
 import io
 
 from determineNshm import verifyNshmForAll, determineNshm
 from util import *
 from fileUtil import read_caselist, check_dir, check_csv
 
-N_CPU= psutil.cpu_count()
+N_CPU= multiprocessing.cpu_count()
 SCRIPTDIR= dirname(__file__)
 
 
@@ -428,7 +428,7 @@ class pipeline(cli.Application):
             'unring.a64']
 
         for cmd in external_commands:
-            exe= find_executable(cmd)
+            exe= which(cmd)
             if not exe:
                 raise EnvironmentError(f'{cmd} not found')
 
