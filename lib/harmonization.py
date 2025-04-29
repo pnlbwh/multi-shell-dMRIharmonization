@@ -14,15 +14,15 @@
 # ===============================================================================
 
 from plumbum import cli
-from distutils.spawn import find_executable
-import multiprocessing, psutil
+from shutil import which
+import multiprocessing
 import io
 
 from determineNshm import verifyNshmForAll, determineNshm
 from util import *
 from fileUtil import read_caselist, check_dir, check_csv
 
-N_CPU= psutil.cpu_count()
+N_CPU= multiprocessing.cpu_count()
 SCRIPTDIR= dirname(__file__)
 
 
@@ -365,22 +365,22 @@ class pipeline(cli.Application):
         from harm_plot import generate_csv, harm_plot
         import pandas as pd
 
-        print('\n\nComputing statistics\n\n')
+        print('\n\nComputing statistics:')
         
-        print(f'{self.reference} site: ')
+        print(f'{self.reference} site')
         ref_mean = analyzeStat(self.ref_csv, self.templatePath)
         generate_csv(self.ref_csv, ref_mean, pjoin(self.templatePath, self.reference), self.bshell_b)
 
-        print(f'{self.target} site before harmonization: ')
+        print(f'{self.target} site before harmonization')
         target_mean_before = analyzeStat(self.tar_unproc_csv, self.templatePath)
         generate_csv(self.tar_unproc_csv, target_mean_before, pjoin(self.templatePath, self.target)+'_before', self.bshell_b)
 
-        print(f'{self.target} site after harmonization: ')
+        print(f'{self.target} site after harmonization')
         target_mean_after = analyzeStat(self.harm_csv, self.templatePath)
         generate_csv(self.harm_csv, target_mean_after, pjoin(self.templatePath, self.target)+'_after', self.bshell_b)
         
         
-        print('\n\nPrinting statistics\n\n')
+        print('\n\nPrinting statistics:')
         # save statistics for future
         statFile= pjoin(self.templatePath, 'meanFAstat.csv')
         if isfile(statFile):
@@ -428,7 +428,7 @@ class pipeline(cli.Application):
             'unring.a64']
 
         for cmd in external_commands:
-            exe= find_executable(cmd)
+            exe= which(cmd)
             if not exe:
                 raise EnvironmentError(f'{cmd} not found')
 

@@ -63,12 +63,12 @@ def joinBshells(imgPath, ref_bvals_file=None, ref_bvals=None, sep_prefix=None):
 
         if bval==0.:
             b0Img = load(inPrefix+'_b0.nii.gz')
-            b0 = b0Img.get_data()
+            b0 = b0Img.get_fdata()
             for i in ind:
                 joinedDwi[:,:,:,i]= b0
 
         else:
-            b0_bshell= load(harmPrefix+f'_b{int(bval)}.nii.gz').get_data()
+            b0_bshell= load(harmPrefix+f'_b{int(bval)}.nii.gz').get_fdata()
 
             joinedDwi[:,:,:,ind] = b0_bshell[:,:,:,1:]
 

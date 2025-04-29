@@ -18,6 +18,7 @@ from scipy.ndimage import binary_opening, generate_binary_structure
 from scipy.io import loadmat, savemat
 from normalize import normalize_data, find_b0
 from util import *
+from os import getenv
 
 
 def resize_spm(lowResImg, inPrefix):
@@ -27,7 +28,7 @@ def resize_spm(lowResImg, inPrefix):
     savemat(dataFile, {'lowResImg': lowResImg})
 
     # call MATLAB_Runtime based spm bspline interpolation
-    p= Popen((' ').join([pjoin(SCRIPTDIR,'spm_bspline_exec', 'bspline'), inPrefix]), shell= True)
+    p= Popen((' ').join([pjoin(SCRIPTDIR,'spm_bspline_exec', 'run_bspline.sh'), getenv('MCRROOT'), inPrefix]), shell= True)
     p.wait()
     highResImg= np.nan_to_num(loadmat(inPrefix+'_resampled.mat')['highResImg'])
 
@@ -139,7 +140,7 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
     p= Popen((' ').join(['unring.a64', highResB0PathTmp, highResB0Path]), shell=True)
     p.wait()
     check_call(['rm', highResB0PathTmp])
-    b0_gibs = load(highResB0Path).get_data()
+    b0_gibs = load(highResB0Path).get_fdata()
     np.nan_to_num(b0_gibs).clip(min= 0., out= b0_gibs) # using min= 1. is unnecessary
 
     # defining lh_max and lh_min separately to deal with memory error
