@@ -14,14 +14,6 @@ Table of Contents
    * [Citation](#citation)
    * [Dependencies](#dependencies)
    * [Installation](#installation)
-      * [1. Install prerequisites](#1-install-prerequisites)
-         * [Check system architecture](#check-system-architecture)
-         * [Python 3](#python-3)
-         * [MATLAB Runtime Compiler](#matlab-runtime-compiler)
-         * [unringing](#unringing)
-      * [2. Install pipeline](#2-install-pipeline)
-      * [3. Download IIT templates](#3-download-iit-templates)
-      * [4. Configure your environment](#4-configure-your-environment)
    * [Running](#running)
    * [Consistency checks](#consistency-checks)
    * [Varying number of gradients](#varying-number-of-gradients)
@@ -118,140 +110,25 @@ If your data does not satisfy these requirements, please open an issue [here](ht
 
 
 
-# Dependencies
-
-* ANTs = 2.2.0
-* reisert/unring
-* FSL = 5.0.11
-* numpy = 1.16.2
-* scipy = 1.2.1
-* scikit-image = 0.15.0
-* dipy = 0.16.0
-* nibabel = 2.3.0
-* pynrrd = 0.3.6
-* conversion = 2.0
-
-**NOTE** The above versions were used for developing the repository. However, *multi-shell-dMRIharmonization* should work on 
-any advanced version. 
-
-
 # Installation
 
-## 1. Install prerequisites
+Step-by-step installation instruction can be found [here](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md).
+But for ease of use, we provide a [Singularity](Singularity) container. Download it as:
 
-You may ignore installation instruction for any software module that you have already.
+    wget https://www.dropbox.com/scl/fi/onkvy3gdvw99m05v0c52q/dMRIharmonization.sif?rlkey=qptch5779p0h9y3vkz55v0s9g&st=inlduybh&dl=0
 
-### Check system architecture
+You should bind your data and shell into the container to use it:
 
-    uname -a # check if 32 or 64 bit
-
-### Python 3
-
-Download [Miniconda Python 3.6 bash installer](https://docs.conda.io/en/latest/miniconda.html) (32/64-bit based on your environment):
-    
-    sh Miniconda3-latest-Linux-x86_64.sh -b # -b flag is for license agreement
-
-Activate the conda environment:
-
-    source ~/miniconda3/bin/activate # should introduce '(base)' in front of each line
+    singularity shell -B /path/to/data:/path/to/data dMRIharmonization.sif
+    cd /home/pnlbwh/multi-shell-dMRIharmonization/lib
+    ./multi-shell-harmonization.py --help
+    ./harmonization.py --help
 
 
+(Optional) For running tests and debugging, [download IIT templates](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md#3-download-iit-templates)
+and bind them into the container:
 
-
-**NOTE** With the current design, *MATLAB Runtime Compiler* and *unringing* are not used. So, you may pass them.
-    
-### MATLAB Runtime Compiler
-
-In the harmonization process, all volumes have to be resampled to a common spatial resolution. 
-We have chosen bspline as the interpolation method. For better result, bspline order has been chosen to be 7. 
-Since Python and ANTs provide bspline order less than or equal to 5, we have resorted to [spm package](https://github.com/spm/spm12) for this task.
-Using their source codes [bspline.c](https://github.com/spm/spm12/blob/master/src/spm_bsplinc.c) and [bsplins.c](https://github.com/spm/spm12/blob/master/src/spm_bsplins.c), 
-we have made a standalone executable that performs the above interpolation. Execution of the standalone executable 
-requires [MATLAB Runtime Compiler](https://www.mathworks.com/products/compiler/matlab-runtime.html). It is available free of charge.
-Download a suitable version from the above, and install as follows:
-
-    unzip MCR_R2017a_glnxa64_installer.zip -d MCR_R2017a_glnxa64/
-    MCR_R2017a_glnxa64/install -mode silent -agreeToLicense yes -destinationFolder `pwd`/MATLAB_Runtime
-    
-
-See details about installation [here](https://www.mathworks.com/help/compiler/install-the-matlab-runtime.html).
-
-After successful installation, you should see a suggestion about editing your LD_LIBRARY_PATH. 
-You should save the suggestion in a file `env.sh`.
-
-    echo "/path/to/v92/runtime/glnxa64:/path/to/v92/bin/glnxa64:/path/to/v92/sys/os/glnxa64:/path/to/v92/opengl/lib/glnxa64:" > env.sh
-
-Then, every time you run dMRIharmonization, you can just source the `env.sh` for your LD_LIBRARY_PATH to be updated.
-
-**NOTE** If you have MATLAB already installed in your system, replace `/path/to/v92` with `/path/to/Matlab/`
-
-
-### unringing
-
-    git clone https://bitbucket.org/reisert/unring.git
-    cd unring/fsl
-    export PATH=$PATH:`pwd`
-
-You should be able to see the help message now:
-
-    unring.a64 --help
-
-
-**NOTE** FSL unringing executable requires Centos7 operating system.
-    
-    
-
-## 2. Install pipeline
-
-Now that you have installed the prerequisite software, you are ready to install the pipeline:
-
-    git clone https://github.com/pnlbwh/multi-shell-dMRIharmonization.git && cd multi-shell-dMRIharmonization
-    conda env create -f environment.yml    # you may comment out any existing package from environment.yml
-    conda activate harmonization           # should introduce '(harmonization)' in front of each line
-
-
-Alternatively, if you already have ANTs, you can continue using your python environment by directly installing 
-the prerequisite libraries:
-
-    pip install -r requirements.txt --upgrade
-
-
-
-
-## 3. Download IIT templates
-
-dMRIharmonization toolbox is provided with a debugging capability to test how good has been the 
-harmonization. For debug to work and **tests** to run, download the following data from [IIT HUMAN BRAIN ATLAS](http://www.iit.edu/~mri/IITHumanBrainAtlas.html) 
-and place them in `multi-shell-dMRIharmonization/IITAtlas/` directory:
-
-* [IITmean_FA.nii.gz](https://www.nitrc.org/frs/download.php/6898/IITmean_FA.nii.gz) 
-* [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz)
-
-
-## 4. Configure your environment
-
-Make sure the following executables are in your path:
-
-    antsMultivariateTemplateConstruction2.sh
-    antsApplyTransforms
-    antsRegistrationSyNQuick.sh
-    unring.a64
-    
-You can check them as follows:
-
-    which dtifit
-    
-If any of them does not exist, add that to your path:
-
-    export PATH=$PATH:/directory/of/executable
-    
-`conda activate harmonization` should already put the ANTs scripts in your path. Yet, you should set ANTSPATH as follows:
-    
-    export ANTSPATH=~/miniconda3/envs/harmonization/bin/
-
-However, if you choose to use pre-installed ANTs scripts, you can define `ANTSPATH` according to [this](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS#set-path-and-antspath) instruction.
-
-
+    singularity shell -B /path/to/IITAtlas:/home/pnlbwh/multi-shell-dMRIharmonization/IITAtlas/ -B /path/to/data:/path/to/data dMRIharmonization.sif
 
 
 # Running
