@@ -128,7 +128,8 @@ You should bind your data and shell into the container to use it:
 (Optional) For running tests and debugging, [download IIT templates](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md#3-download-iit-templates)
 and bind them into the container:
 
-    singularity shell -B /path/to/IITAtlas:/home/pnlbwh/multi-shell-dMRIharmonization/IITAtlas/ -B /path/to/data:/path/to/data dMRIharmonization.sif
+    singularity shell -B /path/to/data:/path/to/data \
+    -B /path/to/IITAtlas:/home/pnlbwh/multi-shell-dMRIharmonization/IITAtlas/ dMRIharmonization.sif
 
 
 # Running
