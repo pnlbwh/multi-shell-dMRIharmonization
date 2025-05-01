@@ -4,7 +4,7 @@
 
 *multi-shell-dMRIharmonization* repository is developed by Tashrif Billah and Yogesh Rathi, Brigham and Women's Hospital (Harvard Medical School).
 
-*multi-shell-dMRIharmonization* is an extension of [dMRIharmonization](https://github.com/pnlbwh/dMRIharmonization) for single-shell dMRI.
+*multi-shell-dMRIharmonization* is an extension of single-shell dMRIharmonization.
 
 
 Table of Contents
