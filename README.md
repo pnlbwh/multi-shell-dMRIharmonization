@@ -12,7 +12,7 @@ Table of Contents
 
    * [Algorithm](#algorithm)
    * [Citation](#citation)
-   * [Dependencies](#dependencies)
+   * [Requirements for data](#requirements-for-data)
    * [Installation](#installation)
    * [Running](#running)
    * [Consistency checks](#consistency-checks)
