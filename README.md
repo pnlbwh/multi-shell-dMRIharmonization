@@ -27,9 +27,6 @@ Table of Contents
       * [1. pipeline](#1-pipeline)
       * [2. unittest](#2-unittest)
    * [Preprocessing](#preprocessing)
-      * [1. Denoising](#1-denoising)
-      * [2. Bvalue mapping](#2-bvalue-mapping)
-      * [3. Resampling](#3-resampling)
    * [Debugging](#debugging)
       * [1. With the pipeline](#1-with-the-pipeline)
       * [2. Use separately](#2-use-separately)
@@ -360,27 +357,13 @@ Success of this test will confirm that your environment is properly set up to ru
 
 # Preprocessing
 
-Unlike single-shell dMRIharmonization, multi-shell-dMRIharmonization does **NOT** support data preprocessing as of now. 
-This is likely to change in a future release. Hence, the following arguments are present for legacy purpose but you 
-should not use them.
+Since the beginning of multi-shell-dMRIharmonization development,
+it is expected that multi-shell DWIs are matched by bvalues and resolution.
+Hence, `--bvalMap`, `--resample`, `--denoise` flags are not supported for `multi-shell-harmonization.py`.
+This is likely to change in a future release.
 
-## 1. Denoising
-    
-    --denoise        # turn on this flag to denoise voxel data
-
-## 2. Bvalue mapping
-
-    --bvalMap VALUE  # specify a bmax to scale bvalues into    
-
-## 3. Resampling
-
-    --resample VALUE # voxel size MxNxO to resample into
-
-
-After preprocessing, the image lists are saved with `.modified` extension in the same location of provided lists, 
-and used for further processing.
- 
-
+However, you can use these options with `harmonization.py`.
+See [here](https://github.com/pnlbwh/dMRIharmonization/tree/master?tab=readme-ov-file#preprocessing) for details.
 
 
 # Debugging
