@@ -308,13 +308,10 @@ The steps are described below:
 
 # Tests
 
-**TBD** Tests are incomplete as of now but will be completed soon.
-
-
 ## 1. pipeline
 
-Clone single-shell dMRIharmonization pipeline and test that:
-https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline
+A small test data is provided with each [release](https://github.com/pnlbwh/dMRIharmonization/releases).
+Instruction for running tests can be found [here](https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline).
 
 Success of this test will confirm that your environment is properly set up to run multi-shell-dMRIharmonization.
 
