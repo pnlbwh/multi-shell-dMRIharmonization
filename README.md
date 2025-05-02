@@ -175,8 +175,8 @@ Though the link uses `lib/harmonization.py`, the details are applicable to `mult
 However, you may use `lib/harmonization.py` for single-shell data. The former supports
 `--bvalMap`, `--resample`, and `--denoise`.
 
-<summary>lib/harmonization.py --help</summary>
 <details>
+<summary>lib/harmonization.py --help</summary>
 
     Usage:
     harmonization.py [SWITCHES] 
