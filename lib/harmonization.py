@@ -111,7 +111,7 @@ class pipeline(cli.Application):
     bshell_b = cli.SwitchAttr(
         '--bshell_b',
         help='bvalue of the bshell, needed for multi-shell data only',
-        default= 1)
+        default= 'X')
 
     create = cli.Flag(
         '--create',
@@ -425,7 +425,7 @@ class pipeline(cli.Application):
                          labels=[self.reference, self.target+'_before', self.target+'_after'],
                          outPrefix=pjoin(self.templatePath,'meanFAstat'), bshell_b=self.bshell_b)
 
-        print(f'\nDetailed statistics, summary results, and demonstrative plots are saved in:\n\n{self.templatePath}/*_stat.csv'
+        print(f'\nDetailed statistics, summary results, and demonstrative plots are saved in:\n\n{self.templatePath}*_stat.csv'
               f'\n{statFile}\n{ebar}\n')
 
 
