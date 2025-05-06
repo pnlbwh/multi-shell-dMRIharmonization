@@ -150,14 +150,14 @@ def main():
                         help='site name for locating template FA and mask in template directory')
     parser.add_argument('-t', '--template', type=str, required=True,
                         help='template directory where Mean_{site}_FA.nii.gz and {site}_Mask.nii.gz is located')
-    parser.add_argument('--bshell_b', required=True, help='bvalue of the bshell')
+    parser.add_argument('--bshell_b', help='bvalue of the bshell', default='X')
     parser.add_argument('--ncpu', help='number of cpus to use', default= '4')
 
     args = parser.parse_args()
     imgList=abspath(args.input)
     siteName=args.site
     templatePath=abspath(args.template)
-    bshell_b= int(args.bshell_b)
+    bshell_b= args.bshell_b
     N_proc= int(args.ncpu)
 
     # read FA image list

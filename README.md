@@ -4,7 +4,7 @@
 
 *multi-shell-dMRIharmonization* repository is developed by Tashrif Billah and Yogesh Rathi, Brigham and Women's Hospital (Harvard Medical School).
 
-*multi-shell-dMRIharmonization* is an extension of [dMRIharmonization](https://github.com/pnlbwh/dMRIharmonization) for single-shell dMRI.
+*multi-shell-dMRIharmonization* is an extension of single-shell dMRIharmonization.
 
 
 Table of Contents
@@ -12,16 +12,8 @@ Table of Contents
 
    * [Algorithm](#algorithm)
    * [Citation](#citation)
-   * [Dependencies](#dependencies)
+   * [Requirements for data](#requirements-for-data)
    * [Installation](#installation)
-      * [1. Install prerequisites](#1-install-prerequisites)
-         * [Check system architecture](#check-system-architecture)
-         * [Python 3](#python-3)
-         * [MATLAB Runtime Compiler](#matlab-runtime-compiler)
-         * [unringing](#unringing)
-      * [2. Install pipeline](#2-install-pipeline)
-      * [3. Download IIT templates](#3-download-iit-templates)
-      * [4. Configure your environment](#4-configure-your-environment)
    * [Running](#running)
    * [Consistency checks](#consistency-checks)
    * [Varying number of gradients](#varying-number-of-gradients)
@@ -35,9 +27,6 @@ Table of Contents
       * [1. pipeline](#1-pipeline)
       * [2. unittest](#2-unittest)
    * [Preprocessing](#preprocessing)
-      * [1. Denoising](#1-denoising)
-      * [2. Bvalue mapping](#2-bvalue-mapping)
-      * [3. Resampling](#3-resampling)
    * [Debugging](#debugging)
       * [1. With the pipeline](#1-with-the-pipeline)
       * [2. Use separately](#2-use-separately)
@@ -73,14 +62,8 @@ https://github.com/pnlbwh/dMRIharmonization#data-harmonization
 
 If this repository is useful in your research, please cite all of the following: 
 
-* Billah T, Bouix S, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
+* Billah T, Cetin Karayumak S, Bouix S, Rathi Y. Multi-site multi-shell Diffusion MRI Harmonization,
 https://github.com/pnlbwh/multi-shell-dMRIharmonization, 2019, doi: 10.5281/zenodo.3451427
-
-
-* Billah T*, Cetin Karayumak S*, Bouix S, Rathi Y. Multi-site Diffusion MRI Harmonization, 
-https://github.com/pnlbwh/dMRIharmonization, 2019, doi: 10.5281/zenodo.2584275
-
-    \* *denotes equal first authroship*
 
 
 * Cetin Karayumak S, Bouix S, Ning L, James A, Crow T, Shenton M, Kubicki M, Rathi Y. Retrospective harmonization of multi-site diffusion MRI data 
@@ -118,146 +101,32 @@ the other one should have in the range [900,1100]).
 
 If your data does not satisfy these requirements, please open an issue [here](https://github.com/pnlbwh/multi-shell-dMRIharmonization/issues) or contact -
 
-*skarayumak@bwh.harvard.edu*
+*skarayumak[at]bwh[dot]harvard[dot]edu*
 
-*tbillah@bwh.harvard.edu*
+*tbillah[at]bwh[dot]harvard[dot]edu*
 
-
-
-# Dependencies
-
-* ANTs = 2.2.0
-* reisert/unring
-* FSL = 5.0.11
-* numpy = 1.16.2
-* scipy = 1.2.1
-* scikit-image = 0.15.0
-* dipy = 0.16.0
-* nibabel = 2.3.0
-* pynrrd = 0.3.6
-* conversion = 2.0
-
-**NOTE** The above versions were used for developing the repository. However, *multi-shell-dMRIharmonization* should work on 
-any advanced version. 
 
 
 # Installation
 
-## 1. Install prerequisites
+Step-by-step installation instruction can be found [here](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md).
+But for ease of use, we provide a [Singularity](Singularity) container. Download it as:
 
-You may ignore installation instruction for any software module that you have already.
+    wget https://www.dropbox.com/scl/fi/onkvy3gdvw99m05v0c52q/dMRIharmonization.sif?rlkey=qptch5779p0h9y3vkz55v0s9g&st=inlduybh&dl=0
 
-### Check system architecture
+You should bind your data and shell into the container to use it:
 
-    uname -a # check if 32 or 64 bit
-
-### Python 3
-
-Download [Miniconda Python 3.6 bash installer](https://docs.conda.io/en/latest/miniconda.html) (32/64-bit based on your environment):
-    
-    sh Miniconda3-latest-Linux-x86_64.sh -b # -b flag is for license agreement
-
-Activate the conda environment:
-
-    source ~/miniconda3/bin/activate # should introduce '(base)' in front of each line
+    singularity shell -B /path/to/data:/path/to/data dMRIharmonization.sif
+    cd /home/pnlbwh/multi-shell-dMRIharmonization/lib
+    ./multi-shell-harmonization.py --help
+    ./harmonization.py --help
 
 
+(Optional) For running tests and debugging, [download IIT templates](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md#3-download-iit-templates)
+and bind them into the container:
 
-
-**NOTE** With the current design, *MATLAB Runtime Compiler* and *unringing* are not used. So, you may pass them.
-    
-### MATLAB Runtime Compiler
-
-In the harmonization process, all volumes have to be resampled to a common spatial resolution. 
-We have chosen bspline as the interpolation method. For better result, bspline order has been chosen to be 7. 
-Since Python and ANTs provide bspline order less than or equal to 5, we have resorted to [spm package](https://github.com/spm/spm12) for this task.
-Using their source codes [bspline.c](https://github.com/spm/spm12/blob/master/src/spm_bsplinc.c) and [bsplins.c](https://github.com/spm/spm12/blob/master/src/spm_bsplins.c), 
-we have made a standalone executable that performs the above interpolation. Execution of the standalone executable 
-requires [MATLAB Runtime Compiler](https://www.mathworks.com/products/compiler/matlab-runtime.html). It is available free of charge.
-Download a suitable version from the above, and install as follows:
-
-    unzip MCR_R2017a_glnxa64_installer.zip -d MCR_R2017a_glnxa64/
-    MCR_R2017a_glnxa64/install -mode silent -agreeToLicense yes -destinationFolder `pwd`/MATLAB_Runtime
-    
-
-See details about installation [here](https://www.mathworks.com/help/compiler/install-the-matlab-runtime.html).
-
-After successful installation, you should see a suggestion about editing your LD_LIBRARY_PATH. 
-You should save the suggestion in a file `env.sh`.
-
-    echo "/path/to/v92/runtime/glnxa64:/path/to/v92/bin/glnxa64:/path/to/v92/sys/os/glnxa64:/path/to/v92/opengl/lib/glnxa64:" > env.sh
-
-Then, every time you run dMRIharmonization, you can just source the `env.sh` for your LD_LIBRARY_PATH to be updated.
-
-**NOTE** If you have MATLAB already installed in your system, replace `/path/to/v92` with `/path/to/Matlab/`
-
-
-### unringing
-
-    git clone https://bitbucket.org/reisert/unring.git
-    cd unring/fsl
-    export PATH=$PATH:`pwd`
-
-You should be able to see the help message now:
-
-    unring.a64 --help
-
-
-**NOTE** FSL unringing executable requires Centos7 operating system.
-    
-    
-
-## 2. Install pipeline
-
-Now that you have installed the prerequisite software, you are ready to install the pipeline:
-
-    git clone https://github.com/pnlbwh/multi-shell-dMRIharmonization.git && cd multi-shell-dMRIharmonization
-    conda env create -f environment.yml    # you may comment out any existing package from environment.yml
-    conda activate harmonization           # should introduce '(harmonization)' in front of each line
-
-
-Alternatively, if you already have ANTs, you can continue using your python environment by directly installing 
-the prerequisite libraries:
-
-    pip install -r requirements.txt --upgrade
-
-
-
-
-## 3. Download IIT templates
-
-dMRIharmonization toolbox is provided with a debugging capability to test how good has been the 
-harmonization. For debug to work and **tests** to run, download the following data from [IIT HUMAN BRAIN ATLAS](http://www.iit.edu/~mri/IITHumanBrainAtlas.html) 
-and place them in `multi-shell-dMRIharmonization/IITAtlas/` directory:
-
-* [IITmean_FA.nii.gz](https://www.nitrc.org/frs/download.php/6898/IITmean_FA.nii.gz) 
-* [IITmean_FA_skeleton.nii.gz](https://www.nitrc.org/frs/download.php/6897/IITmean_FA_skeleton.nii.gz)
-
-
-## 4. Configure your environment
-
-Make sure the following executables are in your path:
-
-    antsMultivariateTemplateConstruction2.sh
-    antsApplyTransforms
-    antsRegistrationSyNQuick.sh
-    unring.a64
-    
-You can check them as follows:
-
-    which dtifit
-    
-If any of them does not exist, add that to your path:
-
-    export PATH=$PATH:/directory/of/executable
-    
-`conda activate harmonization` should already put the ANTs scripts in your path. Yet, you should set ANTSPATH as follows:
-    
-    export ANTSPATH=~/miniconda3/envs/harmonization/bin/
-
-However, if you choose to use pre-installed ANTs scripts, you can define `ANTSPATH` according to [this](https://github.com/ANTsX/ANTs/wiki/Compiling-ANTs-on-Linux-and-Mac-OS#set-path-and-antspath) instruction.
-
-
+    singularity shell -B /path/to/data:/path/to/data \
+    -B /path/to/IITAtlas:/home/pnlbwh/multi-shell-dMRIharmonization/IITAtlas/ dMRIharmonization.sif
 
 
 # Running
@@ -297,8 +166,45 @@ Upon successful installation, you should be able to see the help message:
 
 
 
-For details about the above arguments, see https://github.com/pnlbwh/dMRIharmonization#running
+`multi-shell-harmonization.py` is the one single executable for both multi-shell and single-shell data.
+For details about the above arguments, see https://github.com/pnlbwh/dMRIharmonization#running.
+Though the link uses `lib/harmonization.py`, the details are applicable to `multi-shell-harmonization.py` too.
+However, you may use `lib/harmonization.py` for single-shell data. The former supports
+`--bvalMap`, `--resample`, and `--denoise`.
 
+<details>
+<summary>lib/harmonization.py --help</summary>
+
+    Usage:
+    harmonization.py [SWITCHES] 
+
+    Meta-switches:
+        -h, --help                          Prints this help message and quits
+        --help-all                          Prints help messages of all sub-commands and quits
+        -v, --version                       Prints the program's version and quits
+
+    Switches:
+        --bshell_b VALUE:str                bvalue of the bshell, needed for multi-shell data only; the default is X
+        --bvalMap VALUE:str                 specify a bmax to scale bvalues into
+        --create                            turn on this flag to create template
+        --debug                             turn on this flag to debug harmonized data (valid only with --process)
+        --denoise                           turn on this flag to denoise voxel data
+        --force                             turn on this flag to overwrite existing data
+        --harm_list VALUE:ExistingFile      harmonized csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\n dwi2,mask2\n...
+        --nproc VALUE:str                   number of processes/threads to use (-1 for all available, may slow down your system); the default is 4
+        --nshm VALUE:str                    spherical harmonic order, by default maximum possible is used; the default is -1
+        --nzero VALUE:str                   number of zero padding for denoising skull region during signal reconstruction; the default is 10
+        --process                           turn on this flag to harmonize
+        --ref_list VALUE:ExistingFile       reference csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\n dwi2,mask2\n...
+        --ref_name VALUE:str                reference site name
+        --resample VALUE:str                voxel size MxNxO to resample into
+        --tar_list VALUE:ExistingFile       target csv/txt file with first column for dwi and 2nd column for mask: dwi1,mask1\n dwi2,mask2\n...
+        --tar_name VALUE:str                target site name; required
+        --template VALUE:str                template directory; required
+        --travelHeads                       travelling heads
+        --verbose                           print everything to STDOUT
+
+</details>
 
 
 # Consistency checks
@@ -436,13 +342,10 @@ The steps are described below:
 
 # Tests
 
-**TBD** Tests are incomplete as of now but will be completed soon.
-
-
 ## 1. pipeline
 
-Clone single-shell dMRIharmonization pipeline and test that:
-https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline
+A small test data is provided with each [release](https://github.com/pnlbwh/dMRIharmonization/releases).
+Instruction for running tests can be found [here](https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline).
 
 Success of this test will confirm that your environment is properly set up to run multi-shell-dMRIharmonization.
 
@@ -454,27 +357,13 @@ Success of this test will confirm that your environment is properly set up to ru
 
 # Preprocessing
 
-Unlike single-shell dMRIharmonization, multi-shell-dMRIharmonization does **NOT** support data preprocessing as of now. 
-This is likely to change in a future release. Hence, the following arguments are present for legacy purpose but you 
-should not use them.
+Since the beginning of multi-shell-dMRIharmonization development,
+it is expected that multi-shell DWIs are matched by bvalues and resolution.
+Hence, `--bvalMap`, `--resample`, `--denoise` flags are not supported for `multi-shell-harmonization.py`.
+This is likely to change in a future release.
 
-## 1. Denoising
-    
-    --denoise        # turn on this flag to denoise voxel data
-
-## 2. Bvalue mapping
-
-    --bvalMap VALUE  # specify a bmax to scale bvalues into    
-
-## 3. Resampling
-
-    --resample VALUE # voxel size MxNxO to resample into
-
-
-After preprocessing, the image lists are saved with `.modified` extension in the same location of provided lists, 
-and used for further processing.
- 
-
+However, you can use these options with `harmonization.py`.
+See [here](https://github.com/pnlbwh/dMRIharmonization/tree/master?tab=readme-ov-file#preprocessing) for details.
 
 
 # Debugging
