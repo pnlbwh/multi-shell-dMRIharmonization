@@ -109,7 +109,7 @@ If your data does not satisfy these requirements, please open an issue [here](ht
 
 # Installation
 
-Step-by-step installation instruction can be found [here](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md).
+Step-by-step installation instruction can be found [here](https://github.com/pnlbwh/dMRIharmonization/blob/9266b1c753ca0270562e57ee4450ac21c98ce8be/README.md).
 But for ease of use, we provide a [Singularity](Singularity) container. Download it as:
 
     wget "https://www.dropbox.com/scl/fi/onkvy3gdvw99m05v0c52q/dMRIharmonization.sif?rlkey=qptch5779p0h9y3vkz55v0s9g&st=inlduybh&dl=0" -O dMRIharmonization.sif
@@ -122,7 +122,7 @@ You should bind your data and shell into the container to use it:
     ./harmonization.py --help
 
 
-(Optional) For running tests and debugging, [download IIT templates](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md#3-download-iit-templates)
+(Optional) For running tests and debugging, [download IIT templates](https://github.com/pnlbwh/dMRIharmonization/blob/9266b1c753ca0270562e57ee4450ac21c98ce8be/README.md#3-download-iit-templates)
 and bind them into the container:
 
     singularity shell -B /path/to/data:/path/to/data \
