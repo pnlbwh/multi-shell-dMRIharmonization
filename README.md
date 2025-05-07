@@ -112,7 +112,7 @@ If your data does not satisfy these requirements, please open an issue [here](ht
 Step-by-step installation instruction can be found [here](https://github.com/pnlbwh/dMRIharmonization/blob/c5bc02149d9e0f96402b3fabc90c2d7bb0e87fe5/README.md).
 But for ease of use, we provide a [Singularity](Singularity) container. Download it as:
 
-    wget https://www.dropbox.com/scl/fi/onkvy3gdvw99m05v0c52q/dMRIharmonization.sif?rlkey=qptch5779p0h9y3vkz55v0s9g&st=inlduybh&dl=0
+    wget "https://www.dropbox.com/scl/fi/onkvy3gdvw99m05v0c52q/dMRIharmonization.sif?rlkey=qptch5779p0h9y3vkz55v0s9g&st=inlduybh&dl=0" -O dMRIharmonization.sif
 
 You should bind your data and shell into the container to use it:
 
