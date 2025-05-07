@@ -31,7 +31,6 @@ N_proc = int(config['DEFAULT']['N_proc'])
 denoise= int(config['DEFAULT']['denoise'])
 bvalMap= float(config['DEFAULT']['bvalMap'])
 resample= config['DEFAULT']['resample']
-bshell_b= float(config['DEFAULT']['bshell_b'])
 if resample=='0':
     resample = 0
 debug = int(config['DEFAULT']['debug'])
@@ -43,15 +42,15 @@ def dti_harm(imgPath, maskPath):
 
     directory = dirname(imgPath)
     inPrefix = imgPath.split('.nii')[0]
-    prefix = basename(inPrefix)
+    prefix = psplit(inPrefix)[-1]
 
     outPrefix = pjoin(directory, 'dti', prefix)
     if not isfile(outPrefix+'_FA.nii.gz'):
-       dti(imgPath, maskPath, inPrefix, outPrefix)
+        dti(imgPath, maskPath, inPrefix, outPrefix)
 
     outPrefix = pjoin(directory, 'harm', prefix)
     if not isfile(outPrefix+'_L0.nii.gz'):
-       rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
+        rish(imgPath, maskPath, inPrefix, outPrefix, N_shm)
 
 
 def preprocessing(imgPath, maskPath):
@@ -134,49 +133,67 @@ def common_processing(caselist):
     imgs, masks = read_caselist(caselist)
     
     # compute dti_harm of unprocessed data
-    pool = multiprocessing.Pool(N_proc)
-    for imgPath,maskPath in zip(imgs,masks):
-        pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
-    pool.close()
-    pool.join()
-    
-    
-    try:
-        copyfile(caselist, caselist + '.modified')
-    except SameFileError:
-        pass
+    if N_proc==1:
+        for imgPath,maskPath in zip(imgs,masks):
+            dti_harm(imgPath,maskPath)
 
-    # data is not manipulated in multi-shell-dMRIharmonization i.e. bvalMapped, resampled, nor denoised
-    # this block may be uncommented in a future design
+    elif N_proc>1:
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
+        pool.close()
+        pool.join()
+
+    # For multi-shell-dMRIharmonization, the rest of this function is ineffectual.
+    # Because, --bvalMap, --resample, --denoise flags are not supported for multi-shell-harmonization.py.
+    # Since the beginning of multi-shell-dMRIharmonization development,
+    # it is expected that multi-shell DWIs are matched by bvalues and resolution.
+    # However, the three flags are supported for (single-shell) harmonization.py.
+    # In which case, the rest of this function is effectual.
+
     # preprocess data
-    # res=[]
-    # pool = multiprocessing.Pool(N_proc)
-    # for imgPath,maskPath in zip(imgs,masks):
-    #     res.append(pool.apply_async(func= preprocessing, args= (imgPath,maskPath)))
-    #
-    # attributes= [r.get() for r in res]
-    #
-    # pool.close()
-    # pool.join()
-    #
-    # f = open(caselist + '.modified', 'w')
-    # for i in range(len(imgs)):
-    #     imgs[i] = attributes[i][0]
-    #     masks[i] = attributes[i][1]
-    # f.close()
-    #
-    #
-    # # compute dti_harm of preprocessed data
-    # pool = multiprocessing.Pool(N_proc)
-    # for imgPath,maskPath in zip(imgs,masks):
-    #     pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
-    # pool.close()
-    # pool.join()
-    #
-    #
-    # if debug:
-    #     #TODO compute dti_harm for all intermediate data _denoised, _denoised_bmapped, _bmapped
-    #     pass
+    if N_proc==1:
+        attributes=[]
+        for imgPath,maskPath in zip(imgs,masks):
+            attributes.append(preprocessing(imgPath,maskPath))
+
+    elif N_proc>1:
+        res=[]
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            res.append(pool.apply_async(func= preprocessing, args= (imgPath,maskPath)))
+        
+        attributes= [r.get() for r in res]
+        
+        pool.close()
+        pool.join()
+
+
+    f = open(caselist + '.modified', 'w')
+    for i in range(len(imgs)):
+        imgs[i] = attributes[i][0]
+        masks[i] = attributes[i][1]
+        f.write(f'{imgs[i]},{masks[i]}\n')
+    f.close()
+
+
+    # compute dti_harm of preprocessed data
+    if N_proc==1:
+        for imgPath,maskPath in zip(imgs,masks):
+            dti_harm(imgPath,maskPath)
+
+    elif N_proc>1:
+        pool = multiprocessing.Pool(N_proc)
+        for imgPath,maskPath in zip(imgs,masks):
+            pool.apply_async(func= dti_harm, args= (imgPath,maskPath))
+        pool.close()
+        pool.join()
+
+
+    if debug:
+        #TODO compute dti_harm for all intermediate data _denoised, _denoised_bmapped, _bmapped
+        pass
+    
 
     return (imgs, masks)
 

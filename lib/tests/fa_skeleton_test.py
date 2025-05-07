@@ -20,31 +20,14 @@ import numpy as np
 from test_util import *
 import argparse
 from conversion import read_imgs, read_imgs_masks
-import pandas as pd
 from harm_plot import harm_plot, generate_csv
+import pandas as pd
 from datetime import datetime
 
 ROOTDIR= abspath(pjoin(LIBDIR, '..'))
 mniTmp = pjoin(ROOTDIR, 'IITAtlas', 'IITmean_FA.nii.gz')
 
 diffusionMeasures = ['MD', 'FA', 'GFA']
-
-def read_caselist(file):
-
-    with open(file) as f:
-
-        imgs = []
-        content= f.read()
-        for line, row in enumerate(content.split()):
-            temp= [element for element in row.split(',') if element] # handling w/space
-
-            for img in temp:
-                if not isfile(img):
-                    raise FileNotFoundError(f'{img} does not exist: check line {line} in {file}')
-
-            imgs.append(temp[0])
-
-    return imgs
 
 def antsReg(img, mask, mov, outPrefix, n_thread=1):
 
@@ -71,9 +54,7 @@ def register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshel
 
     print(f'Warping {imgPath} diffusion measures to standard space')
     directory = dirname(imgPath)
-
-    # should have _FA at the end already
-    basePrefix= psplit(imgPath)[-1].split('.nii')[0]
+    basePrefix= psplit(imgPath)[-1].split('.nii')[0] # should have _FA at the end
     prefix = basePrefix.replace('_FA', '')
 
     # given data and harmonized data are in the same space
@@ -100,7 +81,7 @@ def register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshel
             '-r', mniTmp,
             '-t', warp2mni, trans2mni, warp2tmp, trans2tmp
         ] & FG
-
+    
     return pjoin(templatePath, prefix + f'_InMNI_FA.nii.gz')
 
 
@@ -118,24 +99,23 @@ def sub2tmp2mni(templatePath, siteName, faImgs, bshell_b, N_proc):
         antsReg(mniTmp, None, moving, outPrefix, N_proc)
 
     
-    pool= multiprocessing.Pool(N_proc)
-    res=[]
-    for imgPath in faImgs:
-        res.append(pool.apply_async(func= register_subject,
-                   args= (imgPath, warp2mni, trans2mni, templatePath, siteName, bshell_b, )))
+    if N_proc==1:
+        mniFAimgs= []
+        for imgPath in faImgs:
+            mniFAimgs.append(register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshell_b))
 
-    mniFAimgs= [r.get() for r in res]
+    else:
+        pool= multiprocessing.Pool(N_proc)
+        res=[]
+        for imgPath in faImgs:
+            res.append(pool.apply_async(func= register_subject,
+                       args= (imgPath, warp2mni, trans2mni, templatePath, siteName, bshell_b, )))
 
-    pool.close()
-    pool.join()
+        mniFAimgs= [r.get() for r in res]
+
+        pool.close()
+        pool.join()
     
-    
-    ''' 
-    # loop for debugging
-    mniFAimgs= []
-    for imgPath in faImgs:
-        mniFAimgs.append(register_subject(imgPath, warp2mni, trans2mni, templatePath, siteName, bshell_b))
-    '''
 
     return mniFAimgs
 
@@ -163,21 +143,21 @@ def main():
 
     parser = argparse.ArgumentParser(description='''Warps diffusion measures (FA, MD, GFA) to template space 
     and then to MNI space. Finally, calculates mean FA over IITmean_FA_skeleton.nii.gz''')
-    parser.add_argument('-i', '--input', type=str, required=True, 
+    parser.add_argument('-i', '--input', type=str, required=True,
         help='a .txt/.csv file that you used in/obtained from harmonization.py having two columns for (img,mask) pair. '
-             'See pnlbwh/dMRIharmonization documentation for more details')
+             'See documentation for more details')
     parser.add_argument('-s', '--site', type= str, required=True,
-                        help='site name for locating template FA and mask in tempalte directory')
+                        help='site name for locating template FA and mask in template directory')
     parser.add_argument('-t', '--template', type=str, required=True,
                         help='template directory where Mean_{site}_FA.nii.gz and {site}_Mask.nii.gz is located')
-    parser.add_argument('--bshell_b', required=True, help='bvalue of the bshell')
+    parser.add_argument('--bshell_b', help='bvalue of the bshell', default='X')
     parser.add_argument('--ncpu', help='number of cpus to use', default= '4')
 
     args = parser.parse_args()
     imgList=abspath(args.input)
     siteName=args.site
     templatePath=abspath(args.template)
-    bshell_b= int(args.bshell_b)
+    bshell_b= args.bshell_b
     N_proc= int(args.ncpu)
 
     # read FA image list
@@ -199,7 +179,7 @@ def main():
     except:
         faImgs= read_imgs(imgList)
         print('FA image list is provided.')
-    
+
 
     # register and obtain *_InMNI_FA.nii.gz
     mniFAimgs= sub2tmp2mni(templatePath, siteName, faImgs, bshell_b, N_proc)
@@ -220,9 +200,9 @@ def main():
     # reference should use {siteName} while harmonized target should use {siteName+'_after'}
     # impact of this discrepancy is minor since we deprecated use of FA image list
     
-    outPrefix= pjoin(templatePath, header) # siteName+ f'_b{bshell_b}'+ header.split(siteName)[-1])
+    outPrefix= pjoin(templatePath, header)
     
-    print('\n\nComputing statistics\n\n')    
+    print('\n\nComputing statistics\n\n')
     print(f'{siteName} site: ')
     site_means= analyzeStat(mniFAimgs)
     generate_csv(faImgs, site_means, outPrefix, bshell_b)
@@ -245,13 +225,12 @@ def main():
     # print statistics on console
     with open(statFile) as f:
         print(f.read())
-        
+
     # generate demonstrative plots
     ebar = harm_plot([site_means], [header], outPrefix, bshell_b)
 
     print(f'\nDetailed statistics, summary results, and demonstrative plots are saved in:\n\n{outPrefix}_stat.csv'
           f'\n{statFile}\n{ebar}\n')
-
 
 
 if __name__ == '__main__':

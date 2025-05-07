@@ -3,6 +3,8 @@ message: "If you use this software, please cite as below."
 authors:
 - family-names: "Billah"
   given-names: "T"
+- family-names: "Cetin Karayumak"
+  given-names: "S"
 - family-names: "Bouix"
   given-names: "S"
 - family-names: "Rathi"

@@ -26,7 +26,7 @@ config = ConfigParser()
 config.read(pjoin(gettempdir(),f'harm_config_{getpid()}.ini'))
 N_shm = int(config['DEFAULT']['N_shm'])
 N_proc = int(config['DEFAULT']['N_proc'])
-bshell_b = int(config['DEFAULT']['bshell_b'])
+bshell_b = config['DEFAULT']['bshell_b']
 diffusionMeasures= [x for x in config['DEFAULT']['diffusionMeasures'].split(',')]
 travelHeads= int(config['DEFAULT']['travelHeads'])
 verbose = int(config['DEFAULT']['verbose'])
@@ -54,7 +54,7 @@ def warp_bands(imgPath, maskPath, templatePath):
     applyXform(maskPath,
                pjoin(templatePath, 'template0.nii.gz'),
                warp, trans,
-               pjoin(templatePath, basename(maskPath).split('.nii')[0] + 'Warped.nii.gz'))
+               pjoin(templatePath, basename(maskPath).split('.nii')[0]+ 'Warped.nii.gz'))
 
 
     # warping the rish features
@@ -93,6 +93,13 @@ def antsMult(caselist, outPrefix):
         logFile= pjoin(dirname(outPrefix), 'template_construct.log')
         f= open(logFile, 'w')
         print(f'See {logFile} for details of template construction')
+
+    # for reasons whatsoever, N_proc is not available here though it is defined globally
+    # hence, re-read it
+    N_proc = config['DEFAULT']['N_proc']
+    if N_proc=='1':
+        # at least 2 cores are required for template construction
+        N_proc=2
 
 
     N_core=getenv('TEMPLATE_CONSTRUCT_CORES')
@@ -158,10 +165,10 @@ def rish_stat(siteName, imgs, templatePath, templateHdr):
 
 def template_masking(refMaskPath, targetMaskPath, templatePath, siteName):
 
-    ref = load(refMaskPath)
-    target = load(targetMaskPath)
+    ref= load(refMaskPath)
+    target= load(targetMaskPath)
 
-    templateMask = applymask(ref.get_fdata(), target.get_fdata())
+    templateMask= applymask(ref.get_fdata(), target.get_fdata())
 
     if not isfile(pjoin(templatePath, 'templateMask.nii.gz')):
         save_nifti(pjoin(templatePath, 'templateMask.nii.gz'), templateMask.astype('uint8'), ref.affine, ref.header)
