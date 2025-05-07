@@ -24,11 +24,11 @@ From: redhat/ubi9:9.5-1738643550
     rm -rf /var/cache/yum
 
     REPO=multi-shell-dMRIharmonization
-    git clone --single-branch --branch containers https://github.com/pnlbwh/$REPO.git
+    git clone --single-branch --branch master https://github.com/pnlbwh/$REPO.git
 
     # conda environment
-    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    bash Miniconda3-latest-Linux-x86_64.sh -b -p miniconda3
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash Miniforge3-Linux-x86_64.sh -b -p miniconda3
     source miniconda3/bin/activate
     conda create -y -n harmonization -c conda-forge --override-channels python=3.8
     conda activate harmonization
