@@ -407,7 +407,14 @@ class pipeline(cli.Application):
         statFile= pjoin(self.templatePath, 'meanFAstat.csv')
         timestamp= datetime.now().strftime('%m/%d/%y %H:%M')
         sites= [f'{self.reference}',f'{self.target}_before',f'{self.target}_after']
-        df= pd.DataFrame({timestamp:sites})
+
+        if isfile(statFile):
+            df= pd.read_csv(statFile)
+            # replace the timestamp
+            df.rename(columns={df.columns[0]:timestamp}, inplace=True)
+
+        else:
+            df= pd.DataFrame({timestamp:sites})
 
         header= f'mean meanFA b{self.bshell_b}'
         value= [np.mean(x) for x in [ref_mean, target_mean_before, target_mean_after]]
