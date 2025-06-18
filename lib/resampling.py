@@ -28,8 +28,9 @@ def resize_spm(lowResImg, inPrefix):
     savemat(dataFile, {'lowResImg': lowResImg})
 
     # call MATLAB_Runtime based spm bspline interpolation
-    p= Popen((' ').join([pjoin(SCRIPTDIR,'spm_bspline_exec', 'run_bspline.sh'), getenv('MCRROOT'), inPrefix]), shell= True)
+    p= Popen((' ').join([pjoin(SCRIPTDIR,'spm_bspline_exec', 'run_bspline.sh'), getenv('MCRROOT'), inPrefix]), shell=True)
     p.wait()
+
     highResImg= np.nan_to_num(loadmat(inPrefix+'_resampled.mat')['highResImg'])
 
     return highResImg
@@ -42,7 +43,7 @@ def save_high_res(fileName, sp_high, lowResImgHdr, highResImg):
 
     imgHdrOut['dim'][1:4] = highResImg.shape[:3]
     scale= np.diag((sp_high/sp_low).tolist()+[1.])
-    
+
     sform= imgHdrOut.get_sform()
     if sform[:3,:3].sum():
         imgHdrOut.set_sform(sform @ scale)
@@ -50,7 +51,7 @@ def save_high_res(fileName, sp_high, lowResImgHdr, highResImg):
     qform= imgHdrOut.get_qform()
     if qform[:3,:3].sum():
         imgHdrOut.set_qform(qform @ scale)
-    
+
     imgHdrOut['pixdim'][1:4] = sp_high
     save_nifti(fileName, highResImg, affine= imgHdrOut.get_best_affine(), hdr=imgHdrOut)
 
@@ -67,10 +68,11 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
 
     sp_low= lowResImgHdr['pixdim'][1:4]
 
+
     if interp_toolbox=='scipy':
         spatial_factor = sp_low / sp_high
         sx, sy, sz = [int(x) for x in lowResImg.shape[:3] * spatial_factor]
-    
+
         # resample the dwi ----------------------------------------------------------------
         highResImg= np.zeros((sx, sy, sz, lowResImg.shape[3]), dtype='float')
         for i in np.where(bvals > B0_THRESH)[0]:
@@ -78,10 +80,12 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
             highResImg[:,:,:,i]= resize(lowResImg[:,:,:,i], (sx, sy, sz), order= sOrder, mode= 'symmetric')
 
         # resample the b0 -----------------------------------------------------------------
-        b0HighRes = resize(b0, (sx, sy, sz), order=sOrder, mode='symmetric')
-
+        b0HighRes = resize(b0, (sx, sy, sz), order=sOrder, mode= 'symmetric')
+        
+        
         # resample the mask
         highResMask= resize(lowResMask.astype('float'), (sx, sy, sz), order= 1, mode= 'symmetric') # order 1 for linear interpolation
+        
 
     elif interp_toolbox=='spm':
         step = sp_high / sp_low
@@ -106,15 +110,14 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
         remove(inPrefix+'_sp.mat')
         remove(inPrefix+'_data.mat')
         remove(inPrefix+'_resampled.mat')
-        
+
 
         # resample the mask
         inPrefix= lowResMaskPath.split('.nii')[0]
         savemat(inPrefix+'_sp.mat', {'sp_high':sp_high,'sp_low':sp_low, 'imgDim':lowResImg.shape[:3], 'sOrder':1})
         highResMask= resize_spm(lowResMask, lowResMaskPath.split('.nii')[0])
 
-
-
+        
         # clean up the mat files
         remove(inPrefix+'_sp.mat')
         remove(inPrefix+'_data.mat')
@@ -122,6 +125,7 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
 
     else:
         raise ValueError('Undefined interp_toolbox')
+
 
     # process the resampled mask --------------------------------------------------------------
     highResMaskPath = lowResMaskPath.split('.nii')[0] + '_resampled.nii.gz'
@@ -137,8 +141,9 @@ def resampling(lowResImgPath, lowResMaskPath, lowResImg, lowResImgHdr, lowResMas
 
     # unring the b0
     highResB0Path = lowResImgPath.split('.nii')[0] + '_resampled_bse.nii.gz'
-    p= Popen((' ').join(['unring.a64', highResB0PathTmp, highResB0Path]), shell=True)
+    p= Popen((' ').join(['unring.a64', highResB0PathTmp, highResB0Path]), shell= True)
     p.wait()
+
     check_call(['rm', highResB0PathTmp])
     b0_gibs = load(highResB0Path).get_fdata()
     np.nan_to_num(b0_gibs).clip(min= 0., out= b0_gibs) # using min= 1. is unnecessary
