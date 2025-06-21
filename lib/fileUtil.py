@@ -47,7 +47,8 @@ def check_dir(path, force):
     elif not exists(path):
         makedirs(path)
     else:
-        warnings.warn(f'{path} exists, --force not specified, continuing with existing directory')
+        pass
+        # warnings.warn(f'{path} exists, --force not specified, continuing with existing directory')
 
 
 def read_caselist(file):
