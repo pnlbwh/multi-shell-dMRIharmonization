@@ -61,7 +61,7 @@ def register_target(imgPath, templatePath):
     prefix = basename(inPrefix)
 
     dmImg = pjoin(directory, 'dti', prefix + f'_FA.nii.gz')
-    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI_')
+    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI')
     warp2mni = outPrefix + '1Warp.nii.gz'
     trans2mni = outPrefix + '0GenericAffine.mat'
     # unprocessed target data is given, so in case multiple debug is needed, pass the registration
@@ -92,7 +92,7 @@ def register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName):
     dmImg = pjoin(directory, 'dti', prefix + f'_FA.nii.gz')
     dmTmp = pjoin(templatePath, f'Mean_{siteName}_FA_b{bshell_b}.nii.gz')
     maskTmp = pjoin(templatePath, f'{siteName}_Mask.nii.gz')
-    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA_ToMNI_')
+    outPrefix = pjoin(templatePath, prefix.replace(f'_b{bshell_b}','') + '_FA')
     warp2tmp = outPrefix + '1Warp.nii.gz'
     trans2tmp = outPrefix + '0GenericAffine.mat'
 
