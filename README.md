@@ -24,8 +24,8 @@ Table of Contents
          * [1. Same target list](#1-same-target-list)
          * [2. Different target list](#2-different-target-list)
    * [Tests](#tests)
-      * [1. pipeline](#1-pipeline)
-      * [2. unittest](#2-unittest)
+      * [1. Single shell](#1-single-shell)
+      * [2. Multi shell](#2-multi-shell)
    * [Preprocessing](#preprocessing)
    * [Debugging](#debugging)
       * [1. With the pipeline](#1-with-the-pipeline)
@@ -342,17 +342,18 @@ The steps are described below:
 
 # Tests
 
-## 1. pipeline
+## 1. Single shell
 
 A small test data is provided with each [release](https://github.com/pnlbwh/dMRIharmonization/releases).
 Instruction for running tests can be found [here](https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline).
 
+## 2. Multi shell
+
+A small test data is provided via [Dropbox](https://www.dropbox.com/scl/fi/lx4d6vslyzs64rehbki45/multi-harm-test.zip?rlkey=0ox9pmg3gu04xs6hzl6jvctgt&st=o2qlfxn0).
+Instruction for running tests can be found [here](lib/tests/README.md).
+
 Success of this test will confirm that your environment is properly set up to run multi-shell-dMRIharmonization.
 
-
-## 2. unittest
-
-**TBD** 
 
 
 # Preprocessing
