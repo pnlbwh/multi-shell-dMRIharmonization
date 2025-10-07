@@ -58,7 +58,7 @@ write_list prisma.txt
 ### Run pipeline and obtain statistics when same number of matched reference and target images are used in
 ### tempalate creation and harmonization
 # run test
-../../multi-shell-harmonization.py \
+../../harmonization.py \
 --template ./template-multi/ \
 --ref_list connectom.txt \
 --tar_list prisma.txt \
