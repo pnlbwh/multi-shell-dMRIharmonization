@@ -356,7 +356,7 @@ But you can use the same bash environment that you have set up for multi-shell s
 A small test data is provided with each [release](https://github.com/pnlbwh/dMRIharmonization/releases).
 Instruction for running tests can be found [here](https://github.com/pnlbwh/dMRIharmonization?tab=readme-ov-file#1-pipeline).
 
-<sup>~</sup> This wiki explains why multi-shell software will not produce good results for single-shell test.
+<sup>~</sup> This [wiki](https://github.com/pnlbwh/multi-shell-dMRIharmonization/wiki/Use-single%E2%80%90shell-software-for-single%E2%80%90shell-test) explains why multi-shell software will not produce good results for single-shell test.
 
 # Preprocessing
 
