@@ -4,7 +4,7 @@
 test_data=multi-harm-test # change this value if test data name is changed
 if [ ! -f ${test_data}.zip ]
 then
-    wget wget "https://www.dropbox.com/scl/fi/lx4d6vslyzs64rehbki45/multi-harm-test.zip?rlkey=0ox9pmg3gu04xs6hzl6jvctgt&st=o2qlfxn0" -O ${test_data}.zip
+    wget "https://www.dropbox.com/scl/fi/lx4d6vslyzs64rehbki45/multi-harm-test.zip?rlkey=0ox9pmg3gu04xs6hzl6jvctgt&st=o2qlfxn0" -O ${test_data}.zip
 fi
 
 unzip ${test_data}.zip
