@@ -65,7 +65,7 @@ write_list prisma.txt
 --ref_name CONNECTOM \
 --tar_name PRISMA \
 --nproc -1 \
---create --process --debug || EXIT 'multi-shell-harmonization.py with --create --process --debug failed'
+--create --process --debug || EXIT 'harmonization.py with --create --process --debug failed'
 
 ../../harmonization.py \
 --bvalMap 1000 \
