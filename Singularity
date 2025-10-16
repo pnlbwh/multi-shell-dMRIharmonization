@@ -10,6 +10,9 @@ From: redhat/ubi9:9.5-1738643550
 
     Please report issues on GitHub.
 
+%files
+    .condarc /opt/
+    fslinstaller.py.mgb /opt/
 
 %post
     # set up user and working directory
@@ -27,13 +30,14 @@ From: redhat/ubi9:9.5-1738643550
     git clone --single-branch --branch master https://github.com/pnlbwh/$REPO.git
 
     # conda environment
+    mv /opt/.condarc $HOME/
     wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
     bash Miniforge3-Linux-x86_64.sh -b -p miniconda3
     source miniconda3/bin/activate
     conda create -y -n harmonization -c conda-forge --override-channels python=3.8
     conda activate harmonization
     pip install -r $REPO/requirements.txt
-    conda install -y pnlbwh::ants
+    conda install -y -c pnlbwh --override-channels ants
 
     # MCR 2017a
     MCR=MCR_R2017a_glnxa64_installer
@@ -50,7 +54,7 @@ From: redhat/ubi9:9.5-1738643550
     # fsl-6.0.7
     wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py -O fslinstaller.py > /dev/null 2>&1
     VERSION=6.0.7
-    python fslinstaller.py -V $VERSION -d $HOME/fsl-$VERSION > /dev/null 2>&1
+    python /opt/fslinstaller.py.mgb -V 6.0.7.18 -d $HOME/fsl-$VERSION --miniconda Miniforge3-Linux-x86_64.sh --cuda none --skip_ssl_verify --no_env > /dev/null 2>&1
     FSLDIR=$HOME/fsl-$VERSION
     . $FSLDIR/etc/fslconf/fsl.sh
     
