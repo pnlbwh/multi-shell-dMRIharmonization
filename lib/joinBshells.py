@@ -16,7 +16,7 @@
 from plumbum import cli, local
 from conversion import read_bvals, read_imgs, read_imgs_masks
 from nibabel import load
-from util import abspath, pjoin, save_nifti, copyfile, RAISE, basename, dirname, isfile
+from util import abspath, pjoin, save_nifti, copyfile, basename, dirname, isfile
 import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
@@ -86,12 +86,15 @@ def joinAllBshells(tar_csv, ref_bvals_file, separatedPrefix=None, ncpu=4):
             imgs = read_imgs(tar_csv)
 
         pool = Pool(int(ncpu))
+        results = []
         for imgPath in imgs:
-            pool.apply_async(joinBshells, kwds=({'imgPath': imgPath, 'ref_bvals': ref_bvals, 'sep_prefix': separatedPrefix}),
-                             error_callback=RAISE)
+            results.append(pool.apply_async(joinBshells, kwds=({'imgPath': imgPath, 'ref_bvals': ref_bvals, 'sep_prefix': separatedPrefix})))
 
         pool.close()
         pool.join()
+
+        for r in results:
+            r.get()
 
 
 
