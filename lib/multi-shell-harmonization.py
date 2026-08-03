@@ -188,7 +188,7 @@ class multi_shell_pipeline(cli.Application):
 
         ref_bvals_ordered = sorted(
             ref_bvals,
-            key=lambda b: (abs(b - target_bval) > threshold, b == 0)
+            key=lambda b: (b == 0, abs(b - target_bval), -b)
         )
 
         for bval in ref_bvals_reodered:
