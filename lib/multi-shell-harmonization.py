@@ -179,8 +179,21 @@ class multi_shell_pipeline(cli.Application):
         
 
         # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
+        # because L0 maps from high b-shells would look too similar to FA, the b-shell bvalues are reordered to perform
+        # the template construction with B=1000
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
-        for bval in ref_bvals[ :-1]: # pass the last bval which is 0.
+
+        target_bval = 1000
+        threshold = 50
+
+        ref_bvals_ordered = sorted(
+            ref_bvals,
+            key=lambda b: (abs(b - target_bval) > threshold, b == 0)
+        )
+
+        for bval in ref_bvals_reodered:
+            if bval == 0:
+                continue
 
             if self.create and not self.process:
                 print('## template creation ##')
