@@ -191,7 +191,7 @@ class multi_shell_pipeline(cli.Application):
             key=lambda b: (b == 0, abs(b - target_bval), -b)
         )
 
-        for bval in ref_bvals_reodered:
+        for bval in ref_bvals_ordered:
             if bval == 0:
                 continue
 
