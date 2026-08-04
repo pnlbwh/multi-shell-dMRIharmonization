@@ -56,14 +56,9 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
         bvec_file = bPrefix + '.bvec'
 
         if bval==0.:
-            if isfile(nii_file):
-                continue
-            save_nifti(nii_file, b0, img.affine, img.header)
+            save_nifti(bPrefix + '.nii.gz', b0, img.affine, img.header)
 
         else:
-            if isfile(nii_file) and isfile(bval_file) and isfile(bvec_file):
-                continue
-
             b0_bshell = np.zeros((dwi.shape[0],dwi.shape[1],dwi.shape[2],N_b+1), dtype='float32')
             b0_bshell[:,:,:,0]= b0
             b0_bshell[:,:,:,1:]= dwi[:,:,:,ind]
@@ -73,13 +68,9 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
             b0_bvecs= np.zeros((N_b+1,3), dtype='float32')
             b0_bvecs[1:,]= bvecs[ind,: ]
 
-            if not isfile(nii_file):
-                save_nifti(nii_file, b0_bshell, img.affine, img.header)
-            if not isfile(bval_file):
-                write_bvals(bval_file, b0_bvals)
-            if not isfile(bvec_file):
-                write_bvecs(bvec_file, b0_bvecs)
-
+            save_nifti(bPrefix+'.nii.gz', b0_bshell, img.affine, img.header)
+            write_bvals(bPrefix+'.bval', b0_bvals)
+            write_bvecs(bPrefix+'.bvec', b0_bvecs)
 
 
 def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
