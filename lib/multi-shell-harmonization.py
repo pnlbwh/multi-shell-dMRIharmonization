@@ -184,7 +184,6 @@ class multi_shell_pipeline(cli.Application):
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
 
         target_bval = 1000
-        threshold = 50
 
         ref_bvals_ordered = sorted(
             ref_bvals,
