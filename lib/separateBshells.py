@@ -51,6 +51,9 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
         if bval==0.:
             b0 = find_b0(dwi, ind)
 
+        if isfile(bPrefix + '.nii.gz'):
+            continue
+        
         if bval==0.:
             save_nifti(bPrefix + '.nii.gz', b0, img.affine, img.header)
 
