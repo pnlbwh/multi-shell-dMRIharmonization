@@ -74,6 +74,11 @@ class multi_shell_pipeline(cli.Application):
         help= 'number of zero padding for denoising skull region during signal reconstruction',
         default= '10')
 
+    bshell_for_template_construction = cli.SwitchAttr(
+        '--bshell_for_template_construction',
+        help= 'b-shell bvalue to use for template construction (default: 1000)',
+        default= '1000')
+    
     force = cli.Flag(
         ['--force'],
         help='turn on this flag to overwrite existing data',
@@ -177,13 +182,10 @@ class multi_shell_pipeline(cli.Application):
         if self.verbose:
             pipeline_vars.append('--verbose')
         
-
-        # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
-        # because L0 maps from high b-shells would look too similar to FA, the b-shell bvalues are reordered to perform
-        # the template construction with B=1000
+        # b=0 is skipped; non-zero shells are ordered with target_bval first, then by proximity to target_bval, then descending
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
 
-        target_bval = 1000
+        target_bval = int(self.bshell_for_template_construction)
 
         ref_bvals_ordered = sorted(
             ref_bvals,
