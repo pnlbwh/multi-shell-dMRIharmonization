@@ -185,6 +185,9 @@ class multi_shell_pipeline(cli.Application):
         # b=0 is skipped; non-zero shells are ordered with target_bval first, then by proximity to target_bval, then descending
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
 
+        if int(self.bshell_for_template_construction) not in ref_bvals:
+            raise ValueError(f"bshell_for_template_construction value {self.bshell_for_template_construction} is not in the reference b-shells: {ref_bvals}")
+        
         target_bval = int(self.bshell_for_template_construction)
 
         ref_bvals_ordered = sorted(
