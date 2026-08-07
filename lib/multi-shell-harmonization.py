@@ -27,6 +27,7 @@ from separateBshells import separateAllBshells
 from joinBshells import joinAllBshells
 
 from fileUtil import check_dir
+from _version import __version__
 
 
 def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
@@ -40,7 +41,7 @@ def separateShellsWrapper(csvFile, ref_bshell_file, N_proc):
 
 class multi_shell_pipeline(cli.Application):
 
-    VERSION = 1.7
+    VERSION = __version__
 
     ref_csv = cli.SwitchAttr(
         ['--ref_list'],
