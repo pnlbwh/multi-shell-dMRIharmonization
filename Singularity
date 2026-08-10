@@ -80,7 +80,7 @@ From: redhat/ubi9:9.5-1738643550
     . ${FSLDIR}/etc/fslconf/fsl.sh
     
     MCRROOT=$HOME/MATLAB_Runtime/v92
-    PATH=$HOME/unring/fsl/:${FSLDIR}/share/fsl/bin:$PATH
+    PATH=$HOME/unring/fsl/:${FSLDIR}/bin:$PATH
     CONDA_PREFIX=$HOME/miniconda3/envs/harmonization
     ANTSPATH=${CONDA_PREFIX}/bin
 
