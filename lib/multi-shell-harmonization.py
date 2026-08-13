@@ -74,8 +74,8 @@ class multi_shell_pipeline(cli.Application):
         help= 'number of zero padding for denoising skull region during signal reconstruction',
         default= '10')
 
-    bshell_for_template_construction = cli.SwitchAttr(
-        '--bshell_for_template_construction',
+    bshell_template = cli.SwitchAttr(
+        '--bshell_template',
         help= 'b-shell bvalue to use for template construction',
         default= '1000')
     
@@ -185,10 +185,10 @@ class multi_shell_pipeline(cli.Application):
         # b=0 is skipped; non-zero shells are ordered with target_bval first, then by proximity to target_bval, then descending
         ref_bvals= read_bvals(ref_bvals_file)[::-1]
 
-        if int(self.bshell_for_template_construction) not in ref_bvals:
-            raise ValueError(f"bshell_for_template_construction value {self.bshell_for_template_construction} is not in the reference b-shells: {ref_bvals}")
+        if int(self.bshell_template) not in ref_bvals:
+            raise ValueError(f"bshell_template value {self.bshell_template} is not in the reference b-shells: {ref_bvals}")
         
-        target_bval = int(self.bshell_for_template_construction)
+        target_bval = int(self.bshell_template)
 
         ref_bvals_ordered = sorted(
             ref_bvals,
