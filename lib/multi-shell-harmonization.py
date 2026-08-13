@@ -76,7 +76,7 @@ class multi_shell_pipeline(cli.Application):
 
     bshell_for_template_construction = cli.SwitchAttr(
         '--bshell_for_template_construction',
-        help= 'b-shell bvalue to use for template construction (default: 1000)',
+        help= 'b-shell bvalue to use for template construction',
         default= '1000')
     
     force = cli.Flag(
