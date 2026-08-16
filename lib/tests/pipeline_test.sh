@@ -59,7 +59,9 @@ write_list prisma.txt
 ### tempalate creation and harmonization
 # run test
 ../../harmonization.py \
---template ./template-multi/ \
+--bvalMap 1000 \
+--resample 1.5x1.5x1.5 \
+--template ./template/ \
 --ref_list connectom.txt \
 --tar_list prisma.txt \
 --ref_name CONNECTOM \
@@ -67,10 +69,8 @@ write_list prisma.txt
 --nproc -1 \
 --create --process --debug || EXIT 'harmonization.py with --create --process --debug failed'
 
-../../harmonization.py \
---bvalMap 1000 \
---resample 1.5x1.5x1.5 \
---template ./template/ \
+../../multi-shell-harmonization.py \
+--template ./template-multi/ \
 --ref_list connectom.txt \
 --tar_list prisma.txt \
 --ref_name CONNECTOM \
