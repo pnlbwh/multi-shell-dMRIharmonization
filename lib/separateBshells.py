@@ -17,7 +17,7 @@ from normalize import find_b0
 from plumbum import cli, local
 from conversion import read_bvals, read_bvecs, write_bvals, write_bvecs, read_imgs, read_imgs_masks
 from nibabel import load
-from util import abspath, pjoin, save_nifti, isfile
+from util import abspath, pjoin, save_nifti, RAISE, isfile
 import numpy as np
 from multiprocessing import Pool
 from findBshells import BSHELL_MIN_DIST
@@ -72,6 +72,7 @@ def separateBshells(imgPath, ref_bvals_file=None, ref_bvals=None):
             write_bvecs(bPrefix+'.bvec', b0_bvecs)
 
 
+
 def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
 
     ref_bvals = read_bvals(ref_bvals_file)
@@ -83,16 +84,12 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
         masks = None
 
     pool = Pool(int(ncpu))
-    results = []
     for imgPath in imgs:
-        results.append(pool.apply_async(separateBshells,
-                         kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}))
+        pool.apply_async(separateBshells,
+                         kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}, error_callback=RAISE)
 
     pool.close()
     pool.join()
-
-    for r in results:
-        r.get()
 
 
     if outPrefix:

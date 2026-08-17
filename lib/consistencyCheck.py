@@ -66,7 +66,7 @@ def check_resolution(ref_imgs, ref_res):
 
         res= load(imgPath._path).header['pixdim'][1:4]
 
-        if (res-ref_res).sum()<=0.001:
+        if (res-ref_res).sum()<=10e-6:
             print('spatial resolution matched for', imgPath.name)
 
         else:

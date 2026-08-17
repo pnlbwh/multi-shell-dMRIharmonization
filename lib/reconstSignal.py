@@ -61,7 +61,7 @@ def antsReg(img, mask, mov, outPrefix):
                                '-e', '123456']), shell= True, stdout= f, stderr= sys.stdout)
         p.wait()
 
-    if f is not sys.stdout:
+    if f.name!='<sys.stdout>':
         f.close()
 
 
