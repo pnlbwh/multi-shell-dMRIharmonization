@@ -115,7 +115,7 @@ def antsMult(caselist, outPrefix):
                            '-o', outPrefix,
                            caselist]), shell= True, stdout= f, stderr= sys.stdout)
 
-    if f is not sys.stdout:
+    if f.name!='<sys.stdout>':
         f.close()
 
 def dti_stat(siteName, imgs, masks, templatePath, templateHdr):
