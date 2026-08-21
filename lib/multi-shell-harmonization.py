@@ -75,6 +75,11 @@ class multi_shell_pipeline(cli.Application):
         help= 'number of zero padding for denoising skull region during signal reconstruction',
         default= '10')
 
+    bshell_template = cli.SwitchAttr(
+        '--bshell_template',
+        help= 'b-shell bvalue to use for template construction',
+        default= '1000')
+
     force = cli.Flag(
         ['--force'],
         help='turn on this flag to overwrite existing data',
@@ -179,8 +184,21 @@ class multi_shell_pipeline(cli.Application):
             pipeline_vars.append('--verbose')
         
 
-        # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
-        ref_bvals= read_bvals(ref_bvals_file)[::-1]
+        ref_bvals= sorted(read_bvals(ref_bvals_file), reverse=True)
+        bshell_template= float(self.bshell_template)
+        if bshell_template in ref_bvals:
+            ref_bvals.remove(bshell_template)
+            ref_bvals.insert(0,bshell_template)
+        else:
+            # prefer the b-shell bvalue closest to bshell_template and higher
+            min=10e6
+            for b in ref_bvals:
+                diff=abs(b-bshell_template)
+                if diff<min:
+                    min=diff
+                    ref_bvals.remove(b)
+                    ref_bvals.insert(0,b)
+        
         for bval in ref_bvals[ :-1]: # pass the last bval which is 0.
 
             if self.create and not self.process:
