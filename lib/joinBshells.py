@@ -85,13 +85,19 @@ def joinAllBshells(tar_csv, ref_bvals_file, separatedPrefix=None, ncpu=4):
         except:
             imgs = read_imgs(tar_csv)
 
-        pool = Pool(int(ncpu))
-        for imgPath in imgs:
-            pool.apply_async(joinBshells, kwds=({'imgPath': imgPath, 'ref_bvals': ref_bvals, 'sep_prefix': separatedPrefix}),
-                             error_callback=RAISE)
+        ncpu = int(ncpu)
+        if ncpu==1:
+            for imgPath in imgs:
+                joinBshells(imgPath= imgPath, ref_bvals= ref_bvals, sep_prefix= separatedPrefix)
 
-        pool.close()
-        pool.join()
+        elif ncpu>1:
+            pool = Pool(int(ncpu))
+            for imgPath in imgs:
+                pool.apply_async(joinBshells, kwds=({'imgPath': imgPath, 'ref_bvals': ref_bvals, 'sep_prefix': separatedPrefix}),
+                                 error_callback=RAISE)
+
+            pool.close()
+            pool.join()
 
 
 

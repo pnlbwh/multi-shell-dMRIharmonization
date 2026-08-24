@@ -181,31 +181,29 @@ def sub2tmp2mni(templatePath, siteName, caselist, ref= False, tar_unproc= False,
 
     imgs, _= read_caselist(caselist)
 
-    pool= multiprocessing.Pool(N_proc)
-    for imgPath in imgs:
+    if N_proc==1:
+        for imgPath in imgs:
+        
+            if ref:
+                register_reference(imgPath, warp2mni, trans2mni, templatePath)
+            elif tar_unproc:
+                register_target(imgPath, templatePath)
+            elif tar_harm:
+                register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName)
 
-        if ref:
-            pool.apply_async(func= register_reference, args= (imgPath, warp2mni, trans2mni, templatePath, ))
-        elif tar_unproc:
-            pool.apply_async(func= register_target, args= (imgPath, templatePath, ))
-        elif tar_harm:
-            pool.apply_async(func= register_harmonized, args= (imgPath, warp2mni, trans2mni, templatePath, siteName, ))
+    elif N_proc>1:
+        pool= multiprocessing.Pool(N_proc)
+        for imgPath in imgs:
 
-    pool.close()
-    pool.join()
+            if ref:
+                pool.apply_async(func= register_reference, args= (imgPath, warp2mni, trans2mni, templatePath, ))
+            elif tar_unproc:
+                pool.apply_async(func= register_target, args= (imgPath, templatePath, ))
+            elif tar_harm:
+                pool.apply_async(func= register_harmonized, args= (imgPath, warp2mni, trans2mni, templatePath, siteName, ))
 
-
-    # loop for debugging
-    # for imgPath in imgs:
-    #
-    #     if ref:
-    #         register_reference(imgPath, warp2mni, trans2mni, templatePath)
-    #     elif tar_unproc:
-    #         register_target(imgPath, templatePath)
-    #     elif tar_harm:
-    #         register_harmonized(imgPath, warp2mni, trans2mni, templatePath, siteName)
-
-
+        pool.close()
+        pool.join()
 
 
 if __name__=='__main__':
