@@ -82,13 +82,19 @@ def separateAllBshells(ref_csv, ref_bvals_file, ncpu=4, outPrefix= None):
         imgs = read_imgs(ref_csv)
         masks = None
 
-    pool = Pool(int(ncpu))
-    for imgPath in imgs:
-        pool.apply_async(separateBshells,
-                         kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}, error_callback=RAISE)
+    ncpu = int(ncpu)
+    if ncpu==1:
+        for imgPath in imgs:
+            separateBshells(imgPath= imgPath, ref_bvals= ref_bvals, error_callback=RAISE)
 
-    pool.close()
-    pool.join()
+    elif ncpu>1:
+        pool = Pool(int(ncpu))
+        for imgPath in imgs:
+            pool.apply_async(separateBshells,
+                             kwds={'imgPath': imgPath, 'ref_bvals': ref_bvals}, error_callback=RAISE)
+
+        pool.close()
+        pool.join()
     
     
     if outPrefix:
