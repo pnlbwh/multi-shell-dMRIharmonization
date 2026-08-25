@@ -17,7 +17,7 @@ from plumbum import cli
 import multiprocessing
 N_CPU= str(multiprocessing.cpu_count())
 from conversion import read_bvals
-from util import dirname, basename, pjoin, SCRIPTDIR, remove, isfile
+from util import dirname, basename, pjoin, SCRIPTDIR, remove, isfile, warnings
 from subprocess import check_call
 
 from consistencyCheck import consistencyCheck
@@ -74,6 +74,10 @@ class multi_shell_pipeline(cli.Application):
         '--nzero',
         help= 'number of zero padding for denoising skull region during signal reconstruction',
         default= '10')
+
+    bshell_template = cli.SwitchAttr(
+        '--bshell_template',
+        help= 'b-shell bvalue to use for template construction')
 
     force = cli.Flag(
         ['--force'],
@@ -179,9 +183,30 @@ class multi_shell_pipeline(cli.Application):
             pipeline_vars.append('--verbose')
         
 
-        # the b-shell bvalues are sorted in descending order because we want to perform registration with highest bval
-        ref_bvals= read_bvals(ref_bvals_file)[::-1]
-        for bval in ref_bvals[ :-1]: # pass the last bval which is 0.
+        ref_bvals= sorted(read_bvals(ref_bvals_file), reverse=True)
+        if self.bshell_template:
+            bshell_template= float(self.bshell_template)
+            if bshell_template in ref_bvals:
+                ref_bvals.remove(bshell_template)
+                ref_bvals.insert(0,bshell_template)
+            else:
+                raise ValueError(f'bshell_template value {self.bshell_template} is not in reference b-shells: {ref_bvals}')
+            
+        else:
+            PREFER= 1000.0
+            warnings.warn(f'--bshell_template was not provided, so creating template with b-shell closest to {PREFER} and higher')
+            min=10e6
+            for b in ref_bvals:
+                diff=abs(b-PREFER)
+                if diff<min:
+                    min=diff
+                    ref_bvals.remove(b)
+                    ref_bvals.insert(0,b)
+
+        
+        # bval=0 shell is not used for template creation, so skip it
+        ref_bvals.remove(0.0)
+        for bval in ref_bvals:
 
             if self.create and not self.process:
                 print('## template creation ##')

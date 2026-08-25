@@ -45,7 +45,7 @@ Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-mark
 
 1. Extract b-shells from given data
 2. Check consistency among bshells and spatial resolution
-3. Create ANTs template from highest b-shell
+3. Create ANTs template from specified b-shell
 4. Apply the warps and affines obtained from previous step to compute scale maps for all b-shells
 5. Template creation being complete, harmonize data for each b-shell using scale maps corresponding to that b-shell
 6. Join the harmonized data in the same order of bvalues as that of the given data
@@ -145,6 +145,7 @@ Upon successful installation, you should be able to see the help message:
         -v, --version                      Prints the program's version and quits
     
     Switches:
+        --bshell_template VALUE:str        b-shell bvalue to use for template construction
         --create                           turn on this flag to create template
         --debug                            turn on this flag to debug harmonized data (valid only with --process)
         --force                            turn on this flag to overwrite existing data
@@ -233,6 +234,15 @@ and try again.
 A particular strength of the algorithm is its compatiblity with varying number of gradients present in images.
 As long as [the number of gradients satisfies minimum required](https://github.com/pnlbwh/dMRIharmonization#order-of-spherical-harmonics) for the spherical harmonic order, determined (`--nshm -1`) 
 or provided(--nshm 4), data can be harmonized.
+
+
+# B-shell Template
+
+In August 2026, it was found that ANTs template construction strategy with the highest b-value shell is not
+always successful. Hence, we introduced the `--bshell_template` flag that allows the user to specify a
+b-value shell to use for template construction. If it is not provided, the algorithm chooses a b-value shell
+closest to b=1000 and higher. Example: if b=500 and b=1500 both shells are present with adequate number of gradients,
+b=1500 will be used for ANTs template construction.
 
 
 # Sample commands
