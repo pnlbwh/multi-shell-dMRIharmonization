@@ -45,7 +45,7 @@ Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-mark
 
 1. Extract b-shells from given data
 2. Check consistency among bshells and spatial resolution
-3. Create ANTs template from highest b-shell
+3. Create ANTs template from specified b-shell
 4. Apply the warps and affines obtained from previous step to compute scale maps for all b-shells
 5. Template creation being complete, harmonize data for each b-shell using scale maps corresponding to that b-shell
 6. Join the harmonized data in the same order of bvalues as that of the given data
@@ -145,6 +145,7 @@ Upon successful installation, you should be able to see the help message:
         -v, --version                      Prints the program's version and quits
     
     Switches:
+        --bshell_template VALUE:str        b-shell bvalue to use for template construction
         --create                           turn on this flag to create template
         --debug                            turn on this flag to debug harmonized data (valid only with --process)
         --force                            turn on this flag to overwrite existing data
