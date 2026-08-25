@@ -236,6 +236,15 @@ As long as [the number of gradients satisfies minimum required](https://github.c
 or provided(--nshm 4), data can be harmonized.
 
 
+# B-shell Template
+
+In August 2026, it was found that ANTs template construction strategy with the highest b-value shell is not
+always successful. Hence, we introduced the `--bshell_template` flag that allows the user to specify a
+b-value shell to use for template construction. If it is not provided, the algorithm chooses a b-value shell
+closest to b=1000 and higher. Example: if b=500 and b=1500 both shells are present with adequate number of gradients,
+b=1500 will be used for ANTs template construction.
+
+
 # Sample commands
 
 ## Create template
